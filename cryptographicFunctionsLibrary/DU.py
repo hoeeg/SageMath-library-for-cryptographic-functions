@@ -26,7 +26,7 @@ def differential_uniformity(poly, F):
 
 
 # Example usage instructions:
-# from mycrypto import differential_uniformity
+# from cryptographicFunctionsLibrary import differential_uniformity
 # F.<a> = GF(2^8)                                               # Define the finite field GF(2^8) with generator 'a'
 # R.<y> = PolynomialRing(F) OR R.<x> = PolynomialRing(F)        # Define the polynomial ring over the finite field
 # poly = ...                                                    # Define your polynomial here
