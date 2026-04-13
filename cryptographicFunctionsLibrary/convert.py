@@ -1,5 +1,3 @@
-from math import gcd
-
 from sage.all import *
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.matrix.constructor import Matrix
