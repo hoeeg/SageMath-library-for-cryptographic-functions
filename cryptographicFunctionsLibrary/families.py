@@ -1,3 +1,5 @@
+from math import gcd
+
 from sage.all import *
 from sage.crypto.sbox import SBox
 
@@ -29,9 +31,6 @@ def _family1_2(n, p, s, u):
         u = F.primitive_element()
     
     def _poly(s_val):
-        if gcd(s_val, 3*k) != 1:
-            raise TypeError("gcd(s, 3*k) must be 1")
-    
         i = (s_val * k) % p
         m = p - i
         e = (2**(i * k) + 2**(m * k + s_val)) % (2**n - 1)
@@ -40,6 +39,8 @@ def _family1_2(n, p, s, u):
     if s is None:
         return [_poly(s_val) for s_val in range(1, n) if gcd(s_val, 3 * k) == 1]
     
+    if gcd(s, 3*k) != 1:
+        raise TypeError("gcd(s, 3*k) must be 1")
     return _poly(s)
 
 
@@ -153,9 +154,6 @@ def family3(n, i=None, s=None, c=None):
         raise TypeError("s must not be in GF(2^m)")
     
     def _poly(i_val):
-        if gcd(i_val, m) != 1:
-            raise TypeError("gcd(i, m) must be 1")
-
         P = x**(2**i_val + 1) + c * x**(2**i_val) + c**q * x + 1
         K_gen = F.gen()**(q - 1)
         v = F(1)
@@ -169,6 +167,8 @@ def family3(n, i=None, s=None, c=None):
     if i is None:
         return [_poly(i_val) for i_val in range(1, m) if gcd(i_val, m) == 1]
     
+    if gcd(i, m) != 1:
+        raise TypeError("gcd(i, m) must be 1")
     return _poly(i)
 
 
@@ -373,14 +373,13 @@ def family7(n, s=None, u=None, v=None, w=None):
             raise TypeError("vw must not be 1")
     
     def _poly(s_val):
-        if gcd(s_val, 3*k) != 1 or (k + s_val) % 3 != 0:
-            raise TypeError("s must satisfy gcd(s, 3k) = 1 and 3|(k+s)")
-        
         return (u * x**(2**s_val + 1) + u**(2**k) * x**(2**(n - k) + 2**(k + s_val)) + v * x**(2**(n - k) + 1) + w * u**(2**k + 1) * x**(2**s_val + 2**(k + s_val))).mod(x**(2**n) - x)
 
     if s is None:
         return [_poly(s_val) for s_val in range(1, n) if gcd(s_val, 3 * k) == 1 and (k + s_val) % 3 == 0]
     
+    if gcd(s, 3*k) != 1 or (k + s) % 3 != 0:
+        raise TypeError("s must satisfy gcd(s, 3k) = 1 and 3|(k+s)")
     return _poly(s)
      
 
@@ -396,6 +395,7 @@ def family11(n, k, i=None, a=None):
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``k`` -- positive integer with gcd(k, n) = 1
     - ``ì`` -- (optional) positive integer
+                If None, returns a list for all valid i
     - ``a`` -- (optional) primitive element of GF(2^2)
 
     EXAMPLE USAGE::
@@ -431,9 +431,8 @@ def family11(n, k, i=None, a=None):
         b = a**2
         c = K(1)
 
-    def f(i):
-        poly = x**3 + F(a)*(x**(2**i+1))**(2**k) + F(b)*x**(3*2**m) + F(c)*(x**(2**(i+m)+2**m))**(2**k)
-        return poly.mod(x**(2**n) - x)
+    def _poly(i):
+        return (x**3 + F(a)*(x**(2**i+1))**(2**k) + F(b)*x**(3*2**m) + F(c)*(x**(2**(i+m)+2**m))**(2**k)).mod(x**(2**n) - x)
     
     if i is not None:
         if k % 2 == 0:
@@ -443,14 +442,14 @@ def family11(n, k, i=None, a=None):
             if i not in {m+2, m} and (i * (m + 2)) % n != 1:
                 raise TypeError("i is not valid")
     
-        return f(i)
+        return _poly(i)
     
     if k % 2 == 0:
         candidates = {m-2, m, n-1} | {i for i in range(1, n) if (i * (m - 2)) % n == 1}
     else:
         candidates = {m+2, m} | {i for i in range(1, n) if (i * (m + 2)) % n == 1}
     
-    return [f(i) for i in candidates]
+    return [_poly(i) for i in candidates]
 
 
 def _is_cube(x, F):
@@ -478,8 +477,7 @@ def family12(n, i=None, a=None, b=None, c=None):
     - ``c`` -- (optional) nonzero element of GF(2^n);
                If None, all nonzero c are tried
     
-    NOTE: When all four parameters are given, returns a single polynomial (or raises an error if no case of Theorem 2 is satisfied).
-    When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all four parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     EXAMPLE USAGE::
         sage: from cryptographicFunctionsLibrary import family12
@@ -558,13 +556,100 @@ def family12(n, i=None, a=None, b=None, c=None):
                 for c_val in c_list:
                    for s_val in _conditions(i_val, b_val, c_val):
                         res.append(_poly(i_val, a_val, b_val, c_val, s_val))
-                        print(res)
                     
     if not res:
         raise TypeError("No valid polynomials found")
     
     return res
 
-def family13():
-    pass
 
+def family13(n, s=None, v=None, mu=None):
+    """
+    Return the Li-Zhou-Li-Qu construction from 2022
+
+    INPUT:
+    - ``n`` -- the degree of the finite field extension GF(2^n)
+    - ``s`` -- (optional) integer with gcd(s, n/3) = 1;
+               If None, returns a list for all valid s in {1, ... , m}
+    - ``v`` -- (optional) nonzero element of GF(2^(n/3));
+               Randomised if None
+    - ``mu`` -- (optional) nonzero element of GF(2^n) satisfying mu^(2^(2*(n/3)) + 2^(n/3) + 1) != 1;
+               Randomised if None
+    
+    EXAMPLE USAGE::
+        sage: from cryptographicFunctionsLibrary import family13
+        sage: F = GF(2^9)
+        sage: a = F.gen()
+        sage: Fm = GF(2^3)
+        sage: family13(9, 1, Fm(1), a^7 + a^5 + a^3 + a + 1)
+        x^144 + (z9^7 + z9^5 + z9^3 + z9 + 1)*x^130 + x^129 + (z9^8 + z9^7 + z9^5 + z9^2 + 1)*x^32 + x^24 + (z9^7 + z9^6 + z9^5)*x^18 + (z9^8 + z9^7 + z9^5 + z9^2 + 1)*x^17 + (z9^7 + z9^5 + z9^3 + z9 + 1)*x^10
+
+        sage: Fm = GF(2^3)
+        sage: family13(9, 1, Fm(1))
+        x^144 + (z9^8 + z9^7 + z9^6 + z9^5 + z9^2 + 1)*x^130 + x^129 + (z9^8 + z9^7 + z9^6 + z9^5 + z9^3 + 1)*x^32 + x^24 + (z9^7 + z9^5 + z9^4 + z9^2 + z9)*x^18 + (z9^8 + z9^7 + z9^6 + z9^5 + z9^3 + 1)*x^17 + (z9^8 + z9^7 + z9^6 + z9^5 + z9^2 + 1)*x^10
+
+        sage: family13(9, 1, None, a^7 + a^5 + a^3 + a + 1)
+        x^144 + (z9^7 + z9^5 + z9^3 + z9 + 1)*x^130 + x^129 + (z9^8 + z9^7 + z9^5 + z9^2 + 1)*x^32 + x^24 + (z9^7 + z9^6 + z9^5)*x^18 + (z9^8 + z9^7 + z9^5 + z9^2 + 1)*x^17 + (z9^7 + z9^5 + z9^3 + z9 + 1)*x^10 + (z9^8 + z9^6 + z9^4 + 1)*x^9
+
+        sage: family13(9, 1)
+        x^144 + (z9^8 + z9^7 + z9^2 + 1)*x^130 + x^129 + (z9^6 + z9^5 + z9^4 + z9^2)*x^32 + x^24 + (z9^8 + z9^7 + z9^6 + z9^5 + z9)*x^18 + (z9^6 + z9^5 + z9^4 + z9^2)*x^17 + (z9^8 + z9^7 + z9^2 + 1)*x^10 + (z9^8 + z9^6 + z9^4)*x^9
+
+        sage: family13(9)
+        [x^144 + (z9^6 + z9^5 + 1)*x^130 + x^129 + (z9^8 + z9^7 + z9^4 + z9^3 + z9^2)*x^32 + x^24 + (z9^8 + z9^7 + z9^2 + z9 + 1)*x^18 + (z9^8 + z9^7 + z9^4 + z9^3 + z9^2)*x^17 + (z9^6 + z9^5 + 1)*x^10 + (z9^8 + z9^6 + z9^4 + 1)*x^9,
+        x^288 + (z9^6 + z9^5 + 1)*x^260 + x^257 + (z9^8 + z9^7 + z9^4 + z9^3 + z9^2)*x^64 + x^40 + (z9^8 + z9^7 + z9^2 + z9 + 1)*x^36 + (z9^8 + z9^7 + z9^4 + z9^3 + z9^2)*x^33 + (z9^6 + z9^5 + 1)*x^12 + (z9^8 + z9^6 + z9^4 + 1)*x^9]
+
+        sage: family13(12)
+        [x^544 + (z12^10 + z12^9 + z12^8 + z12^7 + z12^5 + z12^3 + z12^2 + z12 + 1)*x^514 + x^513 + (z12^11 + z12^10 + z12^8 + z12^6 + z12^5 + z12^4)*x^64 + x^48 + (z12^10 + z12^9 + z12^5 + z12^4 + z12)*x^34 + (z12^11 + z12^10 + z12^8 + z12^6 + z12^5 + z12^4)*x^33 + (z12^10 + z12^9 + z12^8 + z12^7 + z12^5 + z12^3 + z12^2 + z12 + 1)*x^18 + (z12^10 + z12^9 + z12^6 + z12^5 + z12^3 + 1)*x^17,
+        x^2176 + (z12^10 + z12^9 + z12^8 + z12^7 + z12^5 + z12^3 + z12^2 + z12 + 1)*x^2056 + x^2049 + (z12^11 + z12^10 + z12^8 + z12^6 + z12^5 + z12^4)*x^256 + x^144 + (z12^10 + z12^9 + z12^5 + z12^4 + z12)*x^136 + (z12^11 + z12^10 + z12^8 + z12^6 + z12^5 + z12^4)*x^129 + (z12^10 + z12^9 + z12^8 + z12^7 + z12^5 + z12^3 + z12^2 + z12 + 1)*x^24 + (z12^10 + z12^9 + z12^6 + z12^5 + z12^3 + 1)*x^17]
+    """
+    def _permutes(s_val, mu_val):
+        L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
+        return all(L(a) != 0 for a in F if a != 0)
+        
+    if n % 3 != 0:
+        raise TypeError("n must be divisible by 3")
+
+    m = n // 3
+    F = GF(2**n)
+    R = PolynomialRing(F, 'x')
+    x = R.gen()
+    Fm = GF(2**m)
+
+    if v is None:
+        while True:
+            v = Fm.random_element() 
+            if v != 0:
+                break
+    elif v == 0 or v**(2**m - 1) != 1:
+        raise TypeError("v must be a nonzero element of GF(2^m)")
+
+    if s is not None:
+        if gcd(s, m) != 1:
+            raise TypeError("gcd(s, m) must be 1")
+    
+    s = [s_val for s_val in range(1, m + 1) if gcd(s_val, m) == 1] if s is None else [s]
+    
+    if mu is None:
+        while True:
+            mu = F.random_element()
+            if mu == 0 or mu**(2**(2*m) + 2**m + 1) == 1:
+                continue
+            if all(_permutes(s_val, mu) for s_val in s):
+                break
+    else:
+        if mu not in F or mu == 0:
+            raise TypeError("mu must be a nonzero element of GF(2^n)")
+        if mu**(2**(2*m) + 2**m + 1) == 1:
+            raise TypeError("mu must satisfy mu^(2^(2*m)+2^m+1) != 1")
+        for s_val in s:
+            if not _permutes(s_val, mu):
+                raise TypeError("L does not permute GF(2^n) for s and the given mu")
+
+    def _poly(s_val):
+        L = x**(2**(m + s_val)) + mu*x**(2**s_val) + x
+        return (L**(2**m + 1) + v*x**(2**m + 1)).mod(x**(2**n) - x)
+
+    if len(s) > 1:
+        return [_poly(s_val) for s_val in s]
+    
+    return _poly(s[0])
