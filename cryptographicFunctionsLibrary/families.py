@@ -4,7 +4,7 @@ from helpers import is_primitive_element
 
 def _family1_2(n, p, s, u):
     """
-    Shared implementation for family1 (p=3) and family2 (p=4)
+    Shared implementation for family1 (p=3) and family2 (p=4).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -60,19 +60,22 @@ def _family1_2(n, p, s, u):
 
 
 def family1(n, s=None, u=None):
-    """
-    Return the Budaghyan-Carlet-Leander construction from 2008 for p = 3.
-    If ``s`` is None every valid s in {1,...,n-1} is tried and the list of resulting polynomials is returned. Otherwise the single polynomial for the given s is returned.
+    r"""
+    Return the Budaghyan-Carlet-Leander construction from 2008 for `p = 3`.
+    Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
-    - ``n`` -- the degree of the finite field extension GF(2^n);
-               Must satisfy n = 3k, gcd(k,3)=1
-    - ``s`` -- (optional) integer with gcd(s, 3k) = 1;
-               If None, returns a list for all valid s in {1, ... , n - 1}
-    - ``u`` -- (optional) primitive element of GF(2^n);
-               If None, returns a list for all primitive elements of GF(2^n)
 
-    EXAMPLE USAGE::
+    - ``n`` -- the degree of the finite field extension GF(2^n); must satisfy n = 3k, gcd(k, 3) = 1
+
+    - ``s`` -- (optional) integer with gcd(s, 3k) = 1; if None, returns a list for all valid s in {1, ... , n - 1}
+
+    - ``u`` -- (optional) primitive element of GF(2^n); if None, returns a list for all primitive elements of GF(2^n)
+
+    EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import family1
         sage: F.<a> = GF(2^12)
         sage: family1(12, 5, a^2)
@@ -104,15 +107,18 @@ def family1(n, s=None, u=None):
 
 def family2(n, s=None, u=None):
     """
-    Return the Budaghyan-Carlet-Leander construction from 2008 for p = 4
-    If ``s`` is None every valid s in {1,...,n-1} is tried and the list of resulting polynomials is returned. Otherwise the single polynomial for the given s is returned
+    Return the Budaghyan-Carlet-Leander construction from 2008 for p = 4.
+    Defined by f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s)).
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n);
-               Must satisfy n = 3k, gcd(k,3)=1
+               Must satisfy n = 3k, gcd(k, 3) = 1
     - ``s`` -- (optional) integer with gcd(s, 3k) = 1;
                If None, returns a list for all valid s in {1, ... , n - 1}
-    - ``u`` -- (optional) primitive element of GF(2^n)
+    - ``u`` -- (optional) primitive element of GF(2^n);
+               If None, returns a list for all primitive elements of GF(2^n)
 
     EXAMPLE USAGE::
         sage: from cryptographicFunctionsLibrary import family2
@@ -147,7 +153,10 @@ def family2(n, s=None, u=None):
 
 def family3(n, i=None, s=None, c=None):
     """
-    Return the Budaghyan-Carlet construction from 2008
+    Return the Budaghyan-Carlet construction from 2008.
+    Defined by f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q)).
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n);
@@ -244,8 +253,10 @@ def family3(n, i=None, s=None, c=None):
 
 def family4(n, a=None):
     """
-    Return the Budaghyan-Carlet-Leander construction from 2009
-    Defined by f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9)
+    Return the Budaghyan-Carlet-Leander construction from 2009.
+    Defined by f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9).
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n)
@@ -286,8 +297,10 @@ def family4(n, a=None):
 
 def family5(n, a=None):
     """
-    Return the Budaghyan-Carlet-Leander construction from 2009
-    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18)
+    Return the Budaghyan-Carlet-Leander construction from 2009.
+    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18).
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n);
@@ -336,8 +349,10 @@ def family5(n, a=None):
 
 def family6(n, a=None):
     """
-    Return the Budaghyan-Carlet-Leander construction from 2009
-    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36)
+    Return the Budaghyan-Carlet-Leander construction from 2009.
+    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36).
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n);
@@ -386,26 +401,28 @@ def family6(n, a=None):
 
 def family7_9(n, s=None, u=None, v=None, w=None):
     """
-    Return the Bracken-Byrne-Markin-McGuire construction from 2011
-    Defined by f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s))
+    Return the Bracken-Byrne-Markin-McGuire construction from 2011.
+    Defined by f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s)).
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n);
-               Must satisfy n = 3k, gcd(k,3) = 1
-    - ``s`` -- (optional) integer with gcd(s,3k)=1 and 3|(k+s);
+               Must satisfy n = 3k, gcd(k, 3) = 1
+    - ``s`` -- (optional) integer with gcd(s, 3k) = 1 and 3|(k + s);
                If None, returns a list for all valid s in {1, ... , n - 1}
     - ``u`` -- (optional) primitive element of GF(2^n)
     - ``v`` -- (optional) element of GF(2^n) with v*w != 1
-               Randomised if None
+               If None, returns a list for all valid v in GF(2^n)
     - ``w`` -- (optional) element of GF(2^n) with v*w != 1
-               Randomised if None
+               If None, returns a list for all valid w in GF(2^n)
 
     NOTE: v and w must be supplied together or not at all
 
     EXAMPLE USAGE::
         sage: from cryptographicFunctionsLibrary import family7_9
         sage: F.<a> = GF(2^12)
-        u, v, w = a, a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1, a^10 + a^9 + a^8 + a^4 + a^3 + a^2
+        sage: u, v, w = a, a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1, a^10 + a^9 + a^8 + a^4 + a^3 + a^2
         sage: family7_9(12, 5, u, v, w)
         (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^9 + a^6 + a^4 + a^2 + a)*x^544 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257 + a*x^33
         
@@ -445,20 +462,17 @@ def family7_9(n, s=None, u=None, v=None, w=None):
 
     if u is None: 
         u = [u_val for u_val in F if  u_val != 0 and is_primitive_element(F, u_val)]
-    elif not is_primitive_element(F, u):
+    elif not is_primitive_element(F, u) or u == 0:
         raise TypeError("u must be a primitive element of GF(2^n)")
     else:
         u = [u]
-    
+
+    # TODO: can have just one of them
     if (v is None) != (w is None):
         raise TypeError("Supply both v and w, or neither")
     
     if v is None and w is None:
-        pair = set()
-        for v_val in K:
-            for w_val in K:
-                if v_val * w_val != K(1):
-                    pair.add((v_val, w_val))
+        pair = set((v_val, w_val) for v_val in K for w_val in K if v_val * w_val != K(1))
     elif v not in K or w not in K:
         raise TypeError("v and w must be elements of GF(2^k)")
     elif v*w == K(1):
@@ -492,28 +506,46 @@ def family10():
     pass
 
 
-def family11(n, k, i=None, a=None):
+def family11(n, k=None, i=None, a=None):
     """
-    Return the Budaghyan-Helleseth-Kaleyski construction from 2020
-    Defined by f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k
+    Return the Budaghyan-Helleseth-Kaleyski construction from 2020.
+    Defined by f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k.
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n)
-    - ``k`` -- positive integer with gcd(k, n) = 1
+    - ``k`` -- (optional) positive integer;
+               If None, returns a list for all valid k in {0, ... , n - 1}
     - ``ì`` -- (optional) positive integer
-                If None, returns a list for all valid i
-    - ``a`` -- (optional) primitive element of GF(2^2)
+               If None, returns a list for all valid i in {1, ... , n - 1}
+    - ``a`` -- (optional) primitive element of GF(2^2);
+               If None, returns a list for all primitive elements of GF(2^2)
 
     EXAMPLE USAGE::
         sage: from cryptographicFunctionsLibrary import family11
-        sage: family11(10, 2, 3)
-        (z10^5 + z10^3 + z10)*x^36 + x^3
+        sage: F.<a> = GF(2^10)
+        sage: K = F.subfield(2)
+        sage: a = K.gen(); a
+        a2
+        sage: family11(10, 2, 3, a)
+        x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3
 
-        sage: family11(10, 2)
-        [x^192 + (z10^5 + z10^3 + z10 + 1)*x^96 + (z10^5 + z10^3 + z10)*x^6 + x^3,
-        x^129 + (z10^5 + z10^3 + z10 + 1)*x^96 + (z10^5 + z10^3 + z10)*x^36 + x^3,
-        (z10^5 + z10^3 + z10 + 1)*x^132 + (z10^5 + z10^3 + z10 + 1)*x^96 + x^3,
-        (z10^5 + z10^3 + z10)*x^516 + x^144 + (z10^5 + z10^3 + z10 + 1)*x^96 + x^3]
+        sage: family11(10, 2, None, a)
+        [(a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3,
+        x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3,
+        x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3,
+        (a^5 + a^3 + a + 1)*x^132 + (a^5 + a^3 + a + 1)*x^96 + x^3]
+
+        sage: family11(10, 2, 5)
+        [(a^5 + a^3 + a)*x^132 + (a^5 + a^3 + a)*x^96 + x^3,
+        (a^5 + a^3 + a + 1)*x^132 + (a^5 + a^3 + a + 1)*x^96 + x^3]
+
+        sage: result = family11(10); result
+        [(a^5 + a^3 + a + 1)*x^576 + (a^5 + a^3 + a)*x^96 + x^18 + x^3,
+        (a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3,
+        ...
+        x^576 + (a^5 + a^3 + a)*x^96 + (a^5 + a^3 + a + 1)*x^18 + x^3]
     """
     if n % 2 != 0:
         raise TypeError("n must be even")
@@ -522,40 +554,55 @@ def family11(n, k, i=None, a=None):
     if m % 2 == 0 or m % 3 == 0:
         raise TypeError("m must be odd and not divisible by 3")
     
-    F = GF(2**n)
+    F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()
-    K = GF(2**2)
+    K = F.subfield(2)
 
+    if k is None:
+        k = list(range(0, n))
+    else:
+        k = [k]
+    
     if a is None:
-        a = K.primitive_element()
+        a = [a_val for a_val in K if a_val != 0 and is_primitive_element(K, a_val)]
+    elif a == 0 or not is_primitive_element(K, a) or a not in K:
+        raise TypeError("a must be a primitive element of GF(2)")
+    else:
+        a = [a]
    
-    if n == 10 and i == 3 and k == 2:
-        b = K(0)
-        c = K(0)
-    else:
-        b = a**2
-        c = K(1)
-
-    def _poly(i):
-        return (x**3 + F(a)*(x**(2**i+1))**(2**k) + F(b)*x**(3*2**m) + F(c)*(x**(2**(i+m)+2**m))**(2**k)).mod(x**(2**n) - x)
-    
-    if i is not None:
-        if k % 2 == 0:
-            if i not in {m-2,m,n-1} and (i * (m - 2)) % n != 1:
-                raise TypeError("i is not valid")
+    def find_i(i_arg, k_val):
+        if i_arg is not None:
+            if k_val % 2 == 0:
+                if i_arg not in {m-2,m,n-1} and (i_arg * (m - 2)) % n != 1:
+                    raise TypeError("i is not valid")
+            else:
+                if i_arg not in {m+2, m} and (i_arg * (m + 2)) % n != 1:
+                    raise TypeError("i is not valid")
+            return [i_arg]
+        
+        if k_val % 2 == 0:
+            return list({m-2, m, n-1} | {j for j in range(1, n) if (j*(m-2)) % n == 1})
         else:
-            if i not in {m+2, m} and (i * (m + 2)) % n != 1:
-                raise TypeError("i is not valid")
-    
-        return _poly(i)
-    
-    if k % 2 == 0:
-        candidates = {m-2, m, n-1} | {i for i in range(1, n) if (i * (m - 2)) % n == 1}
-    else:
-        candidates = {m+2, m} | {i for i in range(1, n) if (i * (m + 2)) % n == 1}
-    
-    return [_poly(i) for i in candidates]
+            return list({m+2, m} | {j for j in range(1, n) if (j*(m+2)) % n == 1})
+
+    def _poly(k_val, i_val, a_val, b_val, c_val):
+        e_a = (2**i_val + 1) * 2**k_val % (2**n - 1)
+        e_b = 3 * 2**m
+        e_c = ((2**(i_val + m) + 2**m) * 2**k_val) % (2**n - 1)
+        return (x**3 + a_val*x**e_a + b_val*x**e_b + c_val*x**e_c).mod(x**(2**n) - x)
+
+    res = set()
+    for a_val in a:
+        b_val, c_val = a_val**2, K(1)
+        for k_val in k:
+            for i_val in find_i(i, k_val):
+                res.add(_poly(k_val, i_val, a_val, b_val, c_val))
+
+    if not res:
+        raise TypeError("No valid polynomials found")
+
+    return list(res) if len(res) > 1 else list(res)[0]
 
 
 def _is_cube(x, F):
@@ -570,20 +617,22 @@ def _is_cube(x, F):
 
 def family12(n, i=None, a=None, b=None, c=None):
     """
-    Return the Zheng-Kan-Li-Peng-Tang construction from 2022
-    Defined by f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1)
+    Return the Zheng-Kan-Li-Peng-Tang construction from 2022.
+    Defined by f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1)).
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``i`` -- (optional) integer with gcd(i, n) = 1;
-               If None, all valid i in {1,...,n-1} are tried
+               If None, returns a list for all valid i in {1, ... , n - 1}
     - ``a`` -- (optional) element of GF(2^n) not in GF(q) with a + a^q != 0;
-               If None, all valid a in GF(2^n) are tried
+               If None, returns a list for all valid a in GF(2^n)
     - ``b`` -- (optional) nonzero element of GF(2^n);
-               If None, all nonzero b are tried
+               If None, returns a list for all nonzero b in GF(2^n)
     - ``c`` -- (optional) nonzero element of GF(2^n);
-               If None, all nonzero c are tried
-    
+               If None, returns a list for all nonzero c in GF(2^n)
+
     NOTE: When all four parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     EXAMPLE USAGE::
@@ -672,8 +721,10 @@ def family12(n, i=None, a=None, b=None, c=None):
 
 def family13(n, s=None, v=None, mu=None):
     """
-    Return the Li-Zhou-Li-Qu construction from 2022
-    Defined by f(x) = L(z)^(2^m + 1) + cz^(2^m + 1)
+    Return the Li-Zhou-Li-Qu construction from 2022.
+    Defined by f(x) = L(z)^(2^m + 1) + cz^(2^m + 1).
+
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
 
     INPUT:
     - ``n`` -- the degree of the finite field extension GF(2^n)

@@ -4,7 +4,7 @@ from helpers import is_primitive_element, reduce_canonical, get_terms
 
 def _belong_family1_2(n, p, poly):
     """
-    Shared implementation for family1 (p=3) and family2 (p=4)
+    Shared implementation for family1 (p=3) and family2 (p=4).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -69,7 +69,7 @@ def _belong_family1_2(n, p, poly):
 def belong_family1(n, poly):
     """
     Check if the polynomial belongs to Family1, the Budaghyan-Carlet-Leander construction from 2008 for p = 3.
-    Defined by f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))
+    Defined by f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s)).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -121,7 +121,7 @@ def belong_family1(n, poly):
 def belong_family2(n, poly):
     """
     Check if the polynomial belongs to Family2, the Budaghyan-Carlet-Leander construction from 2008 for p = 4.
-    Defined by f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(i*k) + 2^(mk + s))
+    Defined by f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(i*k) + 2^(mk + s)).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -164,8 +164,8 @@ def belong_family2(n, poly):
 
 def belong_family3(n, poly):
     """
-    Check if the polynomial belongs to Family3, the Budaghyan-Carlet construction from 2008
-    Defined by f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q))
+    Check if the polynomial belongs to Family3, the Budaghyan-Carlet construction from 2008.
+    Defined by f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q)).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -230,8 +230,8 @@ def belong_family3(n, poly):
 
 def belong_family4(n, poly):
     """
-    Check if the polynomial belongs to Family4, the Budaghyan-Carlet-Leander construction from 2009
-    Defined by f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9)
+    Check if the polynomial belongs to Family4, the Budaghyan-Carlet-Leander construction from 2009.
+    Defined by f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -243,8 +243,8 @@ def belong_family4(n, poly):
 
 def belong_family5(n, poly):
     """
-    Check if the polynomial belongs to Family5, the Budaghyan-Carlet-Leander construction from 2009
-    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18)
+    Check if the polynomial belongs to Family5, the Budaghyan-Carlet-Leander construction from 2009.
+    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -256,8 +256,8 @@ def belong_family5(n, poly):
 
 def belong_family6(n, poly):
     """
-    Check if the polynomial belongs to Family6, the Budaghyan-Carlet-Leander construction from 2009
-    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36)
+    Check if the polynomial belongs to Family6, the Budaghyan-Carlet-Leander construction from 2009.
+    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -269,8 +269,8 @@ def belong_family6(n, poly):
 
 def belong_family7_9(n, poly):
     """
-    Check if the polynomial belongs to Family7 - Family9, the Bracken-Byrne-Markin-McGuire construction from 2011
-    Defined by f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s))
+    Check if the polynomial belongs to Family7 - Family9, the Bracken-Byrne-Markin-McGuire construction from 2011.
+    Defined by f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s)).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -357,21 +357,94 @@ def belong_family10(n, poly):
 
 def belong_family11(n, poly):
     """
-    Check if the polynomial belongs to Family11, the Budaghyan-Helleseth-Kaleyski construction from 2020
-    Defined by f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k
+    Check if the polynomial belongs to Family11, the Budaghyan-Helleseth-Kaleyski construction from 2020.
+    Defined by f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k.
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+
+    EXAMPLE USAGE::
+        sage: from cryptographicFunctionsLibrary import belong_family11
+        sage: F.<a> = GF(2^10)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly =  (a^5 + a^3 + a)*x^576 + (a^5 + a^3 + a + 1)*x^96 + x^18 + x^3
+        sage: belong_family11(10, poly)
+        (True, {'k': 6, 'i': 3, 'a': a^5 + a^3 + a, 'b': a^5 + a^3 + a + 1, 'c': 1})
+
+        sage: poly = x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3
+        sage: belong_family11(10, poly)
+        (True, {'k': 2, 'i': 9, 'a': a^5 + a^3 + a, 'b': a^5 + a^3 + a + 1, 'c': 1})
+
+        sage: F.<a> = GF(2^14)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = x^768 + (a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a + 1)*x^384 + (a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^6 + x^3
+        sage: belong_family11(14, poly)
+        (True,
+        {'k': 2,
+        'i': 13,
+        'a': a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a,
+        'b': a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a + 1,
+        'c': 1})
     """
-    # Placeholder for future implementation
+    if n % 2 != 0:
+        return False, {}
+    
+    m = n // 2
+    if m % 2 == 0 or m % 3 == 0:
+        return False, {}
+    
+    F = GF(2**n, 'a')
+    K = F.subfield(2)
+
+    terms = get_terms(reduce_canonical(F, poly))
+    if not terms:
+        return False, {}
+
+    if terms.get(3, F(0)) != F(1):
+        return False, {}
+    
+    for k in range(0, n):
+        if k % 2 == 0:
+            i_list = {m-2, m, n-1} | {i for i in range(1, n) if (i * (m - 2)) % n == 1}
+        else:
+            i_list = {m+2, m} | {i for i in range(1, n) if (i * (m + 2)) % n == 1}
+        
+        for i in i_list:
+            e_3 = 3                                                 # exponent of x^3
+            e_a = ((2**i + 1) * 2**k) % (2**n - 1)                  # exponent of a(x^2^i + 1)^2^k
+            e_b = (3 * 2**m)                                        # exponent of bx^(3 * 2^m)
+            e_c = ((2**(i + m) + 2**m) * 2**k) % (2**n - 1)         # exponent of c(x^(2^(i + m) + 2^m))^2^k
+    
+            if not set(terms).issubset({e_3, e_a, e_b, e_c}):
+                continue
+
+            if e_a == e_c:
+                c = K(1)
+                a = terms.get(e_a, K(0)) + K(1)
+            else:
+                a = terms.get(e_a, K(0))
+                c = terms.get(e_c, K(0))
+            
+            b = terms.get(e_b, K(0))
+            if b != a**2:
+                continue
+            if c != K(1):
+                continue
+       
+            # a must be a primitive element of GF(2^2)
+            if a == K(0) or not is_primitive_element(K, a):
+                continue
+            
+            return True, {'k': k, 'i': i, 'a': a, 'b': b, 'c': c}
+        
     return False, {}
 
 
 def belong_family12(n, poly):
     """
-    Check if the polynomial belongs to Family12, the Zheng-Kan-Li-Peng-Tang from 2022
-    Defined by f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1)
+    Check if the polynomial belongs to Family12, the Zheng-Kan-Li-Peng-Tang from 2022.
+    Defined by f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1)).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
@@ -383,8 +456,8 @@ def belong_family12(n, poly):
 
 def belong_family13(n, poly):
     """
-    Check if the polynomial belongs to Family13, the Li-Zhou-Li-Qu construction from 2022
-    Defined by f(x) = L(z)^(2^m + 1) + cz^(2^m + 1)
+    Check if the polynomial belongs to Family13, the Li-Zhou-Li-Qu construction from 2022.
+    Defined by f(x) = L(z)^(2^m + 1) + cz^(2^m + 1).
 
     INPUT:
     - ``n`` -- the degree of the field GF(2^n)
