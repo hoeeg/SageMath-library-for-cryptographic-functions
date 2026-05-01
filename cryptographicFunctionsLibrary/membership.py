@@ -1,15 +1,19 @@
 from sage.all import *
-from helpers import is_primitive_element, reduce_canonical, get_terms
+from helpers import is_primitive_element
+
+
+def get_terms(poly):
+    """
+    Return {exponent: coefficient} for every nonzero term.
+    """
+    if poly == 0:
+        return {}
+    return dict(zip(poly.exponents(), poly.coefficients()))
 
 
 def _belong_family1_2(n, p, poly):
     """
     Shared implementation for family1 (p=3) and family2 (p=4).
-
-    INPUT:
-    - ``n`` -- the degree of the field GF(2^n)
-    - ``p`` -- an integer in {3, 4}
-    - ``polynomial`` -- a univariate polynomial over GF(2^n)
     """
     if n < 12:
         raise ValueError("n must be at least 12")
@@ -21,8 +25,10 @@ def _belong_family1_2(n, p, poly):
     if gcd(k, 3) != 1:
         return False, {}
     
-    F = GF(2**n, 'a')    
-    terms = get_terms(reduce_canonical(F, poly))
+    F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()    
+    terms = get_terms((poly.mod(x**(2**n) - x)))
 
     for s in range(1, n):
         if gcd(s, 3 * k) != 1:
@@ -67,15 +73,17 @@ def _belong_family1_2(n, p, poly):
 
 
 def belong_family1(n, poly):
-    """
-    Check if the polynomial belongs to Family1, the Budaghyan-Carlet-Leander construction from 2008 for p = 3.
-    Defined by f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s)).
+    r"""
+    Check if the polynomial belongs to Family1, the Budaghyan-Carlet-Leander construction from 2008 for `p = 3`.
+    Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import belong_family1
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
@@ -119,15 +127,17 @@ def belong_family1(n, poly):
 
 
 def belong_family2(n, poly):
-    """
-    Check if the polynomial belongs to Family2, the Budaghyan-Carlet-Leander construction from 2008 for p = 4.
-    Defined by f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(i*k) + 2^(mk + s)).
+    r"""
+    Check if the polynomial belongs to Family2, the Budaghyan-Carlet-Leander construction from 2008 for `p = 4`.
+    Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(i*k) + 2^(mk + s))`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+    
         sage: from cryptographicFunctionsLibrary import belong_family2
         sage: F.<a> = GF(2^16)
         sage: R.<x> = PolynomialRing(F)
@@ -163,15 +173,17 @@ def belong_family2(n, poly):
 
 
 def belong_family3(n, poly):
-    """
+    r"""
     Check if the polynomial belongs to Family3, the Budaghyan-Carlet construction from 2008.
-    Defined by f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q)).
+    Defined by `f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q))`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+    
         sage: from cryptographicFunctionsLibrary import belong_family3
         sage: F.<a> = GF(2^6)
         sage: R.<x> = PolynomialRing(F)
@@ -188,9 +200,11 @@ def belong_family3(n, poly):
     
     m = n // 2
     q = 2**m
-    F = GF(2**n, 'a')
 
-    terms = get_terms(reduce_canonical(F, poly))
+    F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()    
+    terms = get_terms((poly.mod(x**(2**n) - x)))
 
     if not terms:
         return False, {}
@@ -229,11 +243,12 @@ def belong_family3(n, poly):
     return False, {}
 
 def belong_family4(n, poly):
-    """
+    r"""
     Check if the polynomial belongs to Family4, the Budaghyan-Carlet-Leander construction from 2009.
-    Defined by f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9).
+    Defined by `f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9)`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
     """
@@ -242,41 +257,49 @@ def belong_family4(n, poly):
 
 
 def belong_family5(n, poly):
-    """
+    r"""
     Check if the polynomial belongs to Family5, the Budaghyan-Carlet-Leander construction from 2009.
-    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18).
+    Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18)`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+
+    EXAMPLES::
     """
     # Placeholder for future implementation
     return False, {}
 
 
 def belong_family6(n, poly):
-    """
+    r"""
     Check if the polynomial belongs to Family6, the Budaghyan-Carlet-Leander construction from 2009.
-    Defined by f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36).
+    Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36)`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+
+    EXAMPLES::
     """
     # Placeholder for future implementation
     return False, {}
 
 
 def belong_family7_9(n, poly):
-    """
+    r"""
     Check if the polynomial belongs to Family7 - Family9, the Bracken-Byrne-Markin-McGuire construction from 2011.
-    Defined by f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s)).
+    Defined by `f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s))`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import belong_family7_9
         sage: F.<a> = GF(2^3)
         sage: R.<x> = PolynomialRing(F)
@@ -315,8 +338,10 @@ def belong_family7_9(n, poly):
     
     F = GF(2**n, 'a')
     K = F.subfield(k)
+    R = PolynomialRing(F, 'x')
+    x = R.gen()    
 
-    terms = get_terms(reduce_canonical(F, poly))
+    terms = get_terms((poly.mod(x**(2**n) - x)))
     if not terms:
         return False, {}
     
@@ -356,15 +381,17 @@ def belong_family10(n, poly):
 
 
 def belong_family11(n, poly):
-    """
+    r"""
     Check if the polynomial belongs to Family11, the Budaghyan-Helleseth-Kaleyski construction from 2020.
-    Defined by f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k.
+    Defined by `f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
-    EXAMPLE USAGE::
+    EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import belong_family11
         sage: F.<a> = GF(2^10)
         sage: R.<x> = PolynomialRing(F)
@@ -396,8 +423,10 @@ def belong_family11(n, poly):
     
     F = GF(2**n, 'a')
     K = F.subfield(2)
+    R = PolynomialRing(F, 'x')
+    x = R.gen()    
 
-    terms = get_terms(reduce_canonical(F, poly))
+    terms = get_terms((poly.mod(x**(2**n) - x)))
     if not terms:
         return False, {}
 
@@ -442,26 +471,33 @@ def belong_family11(n, poly):
 
 
 def belong_family12(n, poly):
-    """
+    r"""
     Check if the polynomial belongs to Family12, the Zheng-Kan-Li-Peng-Tang from 2022.
-    Defined by f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1)).
+    Defined by `f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1))`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+    
+
+    EXAMPLES::
     """
     # Placeholder for future implementation
     return False, {}
 
 
 def belong_family13(n, poly):
-    """
+    r"""
     Check if the polynomial belongs to Family13, the Li-Zhou-Li-Qu construction from 2022.
-    Defined by f(x) = L(z)^(2^m + 1) + cz^(2^m + 1).
+    Defined by `f(x) = L(z)^(2^m + 1) + cz^(2^m + 1)`.
 
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+
+    EXAMPLES::
     """
     # Placeholder for future implementation
     return False, {}
@@ -471,30 +507,34 @@ FAMILIES = {
     "Family1": belong_family1,
     "Family2": belong_family2,
     "Family3": belong_family3,
+    "Family7_9": belong_family7_9,
+    "Family11": belong_family11,
 }
 
 def belong(n, polynomial):
-    """
+    r"""
     Check a function for membership in known infinite families of quadratic APN polynomials
     
     INPUT:
+
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+
         sage: belong(6, x^3)
         Belong to Family1: False
         Belong to Family2: False
         Belong to Family3: False
-
-        sage: belong(n, f1)
-        Belong to Family1: False
-        Belong to Family2: False
-        Belong to Family3: True
-        With params: {'i': 1, 's': a, 'c': a, 'q': 8}
+        Belong to Family7_9: False
+        Belong to Family11: False
     """
     for family_name, family_function in FAMILIES.items():
-        found, params = family_function(n, polynomial)
+        try:
+            found, params = family_function(n, polynomial)
+        except Exception as e:
+            print(f"Belong to {family_name}: {False}")
+            continue
         print(f"Belong to {family_name}: {found}")
         if found:
             print(f"With params: {params}")

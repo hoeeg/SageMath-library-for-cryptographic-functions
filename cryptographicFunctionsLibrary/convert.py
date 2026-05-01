@@ -1,18 +1,14 @@
 from sage.all import *
-from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
-from sage.matrix.constructor import Matrix
-from sage.crypto.sbox import SBox
-from sage.all import Polynomial, SR
-from sage.crypto.sboxes import monomial_function
 
-# from sage.all import GF, PolynomialRing, Matrix, Polynomial, SBox, SR
 
 def is_apn(F, function):
-    """
+    r"""
     Check if a given univariate polynomial over GF(2^n) is APN by evaluating the differential uniformity.
 
     INPUT:
+
     - ``F`` -- a finite field GF(2^n)
+
     - ``function`` -- either
         - a univariate polynomial over GF(2^n)
         - a truth table (look up table) represented as a list of integers
@@ -28,16 +24,21 @@ def is_apn(F, function):
 
 
 def polynomial_to_matrix(F, polynomial, basis, output_format='univariate'):
-    """
+    r"""
     Compute the quadratic APN matrix (QAM) of a univariate polynomial over GF(2^n) with respect to a normal basis.
 
     INPUT:
+
     - ``F`` -- a finite field GF(2^n)
+
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+
     - ``basis`` -- a normal basis of GF(2^n) over GF(2)
+
     - ``output_format`` -- default as 'univariate', if 'power', output matrix entries as powers of the field generator a
     
     EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import polynomial_to_matrix
         sage: F.<a> = GF(2^4)
         sage: R.<x> = PolynomialRing(F)
@@ -82,15 +83,17 @@ def polynomial_to_matrix(F, polynomial, basis, output_format='univariate'):
 
 
 def matrix_to_polynomial(F, M, basis):
-    """
+    r"""
     Compute the univariate polynomial representation from a matrix over GF(2^n) with respect to a normal basis.
 
     INPUT:
+
     - ``F`` -- a finite field GF(2^n)
     - ``M`` -- a matrix over GF(2^n)
     - ``basis`` -- a normal basis of GF(2^n) over GF(2)
     
     EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import matrix_to_polynomial
         sage: F.<a> = GF(2^4)
         sage: basis = [(a^3)**(2^i) for i in range(4)]
@@ -139,14 +142,16 @@ def binary_integer_to_field_element(F, basis, integer):
 
 
 def apn_function_to_algebra_sequence(F, polynomial):
-    """
+    r"""
     Compute the APN algebra sequence associated to a quadratic APN function F.
 
     INPUT:
+
     - ``F`` -- a finite field GF(2^n) 
     - ``polynomial`` -- a polynomial over F
     
     EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import apn_function_to_algebra_sequence
         sage: F.<a> = GF(2^7)
         sage: R.<x> = PolynomialRing(F)
@@ -169,14 +174,16 @@ def apn_function_to_algebra_sequence(F, polynomial):
 
 
 def algebra_sequence_to_apn_function(F, sequence):
-    """
+    r"""
     Reconstruct a quadratic APN polynomial from its APN algebraic sequence.
 
     INPUT:
+
     - ``F`` -- a finite field GF(2^n)
     - ``sequence`` -- an APN algebraic sequence
     
     EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import algebra_sequence_to_apn_function
         sage: F.<a> = GF(2^7)
         sage: seq = [6, 20, 72, 22, 56, 32, 48, 35, 76, 51, 69, 5, 30, 108, 29, 40, 115, 106, 70, 17, 60]
@@ -204,14 +211,16 @@ def construct_truth_table(F, polynomial):
 
 
 def polynomial_to_truth_table(F, polynomial):
-    """
+    r"""
     Evaluates a polynomial for all elements in the field F to create a truth table.
 
     INPUT:
+
     - ``F`` -- a finite field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+
         sage: from cryptographicFunctionsLibrary import polynomial_to_truth_table
         sage: F.<a> = GF(2^3)
         sage: R.<x> = PolynomialRing(F)
@@ -228,14 +237,16 @@ def polynomial_to_truth_table(F, polynomial):
 
 
 def truth_table_to_polynomial(F, tt: list):
-    """
+    r"""
     Convert a truth table (look up table) into a univariate polynomial representation using Lagrange interpolation.
 
     INPUT:
+
     - ``F`` -- a finite field GF(2^n)
     - ``tt`` -- a truth table (look up table) represented as a list of integers
 
     EXAMPLES::
+    
         sage: from cryptographicFunctionsLibrary import truth_table_to_polynomial
         sage: F.<a> = GF(2^3)
         sage: tt = [0, 1, 3, 4, 5, 6, 7, 2]
