@@ -1,22 +1,14 @@
 from sage.all import *
-from helpers import is_primitive_element
-
-
-def get_terms(poly):
-    """
-    Return {exponent: coefficient} for every nonzero term.
-    """
-    if poly == 0:
-        return {}
-    return dict(zip(poly.exponents(), poly.coefficients()))
+from helpers import is_primitive_element, get_terms
 
 
 def _belong_family1_2(n, p, poly):
     """
     Shared implementation for family1 (p=3) and family2 (p=4).
     """
+    # If the degree is less than 12, the polynomial can collapse to a simpler form that does not fit the family structure
     if n < 12:
-        raise ValueError("n must be at least 12")
+        return False, {}
     
     if n % p != 0:
         return False, {}
@@ -28,7 +20,10 @@ def _belong_family1_2(n, p, poly):
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()    
+
     terms = get_terms((poly.mod(x**(2**n) - x)))
+    if not terms:
+        return False, {}
 
     for s in range(1, n):
         if gcd(s, 3 * k) != 1:
@@ -204,8 +199,8 @@ def belong_family3(n, poly):
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()    
-    terms = get_terms((poly.mod(x**(2**n) - x)))
 
+    terms = get_terms((poly.mod(x**(2**n) - x)))
     if not terms:
         return False, {}
     
@@ -242,6 +237,7 @@ def belong_family3(n, poly):
 
     return False, {}
 
+
 def belong_family4(n, poly):
     r"""
     Check if the polynomial belongs to Family4, the Budaghyan-Carlet-Leander construction from 2009.
@@ -251,9 +247,63 @@ def belong_family4(n, poly):
 
     - ``n`` -- the degree of the field GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+
+    EXAMPLES::
+
+        sage: from cryptographicFunctionsLibrary import belong_family4
+        sage: F.<a> = GF(2^9)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = (a^8 + a^3 + a)*x^288 + (a^8 + a^6 + a^5 + a^4 + a)*x^260 + (a^7 + a^4 + a^3 + a^2 + a)*x^144 + (a^8 + a^6 + a^2 + a)*x^130 + (a^6 + a^5 + a^4)*x^72 + (a^7 + a^6 + a^4 + a^3)*x^65 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^36 + (a^8 + a^4 + a^2 + 1)*x^18 + (a^5 + a^3 + a)*x^9 + x^3
+        sage: belong_family4(9, poly)
+        (True, {'a': a^8 + a^6 + a^5 + a^3 + a})
+
+        poly = x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
+        sage: belong_family4(9, poly)
+        (True, {'a': 1})
+
+        sage: F.<a> = GF(2^7)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = (a^6 + a^5 + a^3 + a^2 + a + 1)*x^72 + (a^5 + a^4 + a^2 + 1)*x^68 + (a^5 + a^4 + a^3 + 1)*x^36 + (a^3 + a^2 + 1)*x^34 + (a^6 + a^5 + a^4 + a)*x^18 + (a^5 + a^3 + a^2 + a)*x^17 + (a^6 + a^4 + a^2 + 1)*x^9 + x^3
+        sage: belong_family4(7, poly)
+        (True, {'a': a^3 + a^2 + a + 1})
     """
-    # Placeholder for future implementation
-    return False, {}
+    # If the degree is less than 7, the polynomial can collapse to a simpler form that does not fit the family structure
+    if n < 7:
+        return False, {}
+
+    F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()
+
+    # Get the terms of the polynomial reduced modulo x^(2^n) - x
+    terms = get_terms(R(poly.mod(x**(2**n) - x)))
+    if not terms:
+        return False, {}
+    
+    # x^3 must be present with coefficient 1
+    if terms.get(3, F(0)) != F(1):
+        return False, {}
+    
+    # All exponents must be 3 or of the form 9*2^i mod (2^n - 1)
+    e_expected = {3} | {(9 * 2**i) % (2**n - 1) for i in range(n)}
+    if not set(terms).issubset(e_expected):
+        return False, {}
+
+    # Recover a by square root, a = a^2^(2^(n - 1))
+    a_square = terms.get(9 % (2**n - 1), F(0))
+    if a_square == F(0):
+        return False, {}
+    a = a_square**(2**(n - 1))
+    if a == F(0):
+        return False, {}
+    
+    # Verify all n terms match the expected form a^(3 * 2^i - 1)
+    for i in range(n):
+        e = (9 * 2**i) % (2**n - 1)
+        if terms.get(e, F(0)) != a ** (3 * 2**i - 1):
+            return False, {}
+
+    return True, {'a': a}
 
 
 def belong_family5(n, poly):
@@ -507,13 +557,14 @@ FAMILIES = {
     "Family1": belong_family1,
     "Family2": belong_family2,
     "Family3": belong_family3,
+    "Family4": belong_family4,
     "Family7_9": belong_family7_9,
     "Family11": belong_family11,
 }
 
 def belong(n, polynomial):
     r"""
-    Check a function for membership in known infinite families of quadratic APN polynomials
+    Check if a given function belongs to any of the known infinite families of quadratic APN polynomials. 
     
     INPUT:
 
@@ -521,11 +572,12 @@ def belong(n, polynomial):
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
-
+    
         sage: belong(6, x^3)
         Belong to Family1: False
         Belong to Family2: False
         Belong to Family3: False
+        Belong to Family4: False
         Belong to Family7_9: False
         Belong to Family11: False
     """

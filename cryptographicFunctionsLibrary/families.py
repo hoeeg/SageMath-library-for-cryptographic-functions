@@ -255,26 +255,30 @@ def family4(n, a=None):
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import family4
-        sage: family4(9)
-        [(a^6 + a^3 + 1)*x^288 + (a^7 + a^5 + a^2 + 1)*x^260 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^8 + a^5 + a^4)*x^72 + (a^8 + a^7 + a^4 + a)*x^65 + (a^6 + a^2)*x^36 + a^5*x^18 + a^2*x^9 + x^3,
-        ...
-        x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3]
-        
-        sage: F.<a> = GF(2^9)
-        sage: family4(9, F(1))
-        x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
-
         sage: F.<a> = GF(2^9)
         sage: a = a^8 + a^7 + a^5 + a^3 + 1
         sage: family4(9, a)
         (a^7 + a^5 + a^4 + 1)*x^288 + (a^7 + a^6 + a^4 + a^2)*x^260 + (a^8 + a^7 + a^5 + a^4 + a + 1)*x^144 + (a^8 + a^7 + a^5 + 1)*x^130 + (a^8 + a^6 + a + 1)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^65 + (a^7 + a^5 + a^2 + 1)*x^36 + (a^8 + a^6 + a^4 + a^2 + a)*x^18 + (a^7 + a^4 + a^2 + a)*x^9 + x^3
+
+        sage: F.<a> = GF(2^9)
+        sage: family4(9, F(1))
+        x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
+
+        sage: result = family4(9); result
+        [(a^6 + a^3 + 1)*x^288 + (a^7 + a^5 + a^2 + 1)*x^260 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^8 + a^5 + a^4)*x^72 + (a^8 + a^7 + a^4 + a)*x^65 + (a^6 + a^2)*x^36 + a^5*x^18 + a^2*x^9 + x^3,
+        (a^7 + a^6 + a^3 + 1)*x^288 + a*x^260 + (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + 1)*x^65 + (a^7 + a^4 + a^3)*x^36 + (a^5 + a)*x^18 + a^4*x^9 + x^3,
+        ...
+        x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3]
+
+        sage: len(result)
+        511
     """
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()
-
+  
     def _poly(a_val):
-        trace = sum((a_val**(3 * 2**i) * x**(9 * 2**i)) for i in range(n))
+        trace = sum(a_val**(3 * 2**i) * x**((9 * 2**i) % (2**(n) - 1)) for i in range(n))
         return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
     
     if a is None:
