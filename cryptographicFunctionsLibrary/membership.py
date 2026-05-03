@@ -21,7 +21,7 @@ def _belong_family1_2(n, p, poly):
     R = PolynomialRing(F, 'x')
     x = R.gen()    
 
-    terms = get_terms((poly.mod(x**(2**n) - x)))
+    terms = get_terms(R(poly).mod(x**(2**n) - x))
     if not terms:
         return False, {}
 
@@ -53,6 +53,7 @@ def _belong_family1_2(n, p, poly):
         
         if u_power == F(0):
             continue
+
         try:
             all_roots = u_power.nth_root(2**k - 1, all=True)
         except ValueError:
@@ -200,7 +201,7 @@ def belong_family3(n, poly):
     R = PolynomialRing(F, 'x')
     x = R.gen()    
 
-    terms = get_terms((poly.mod(x**(2**n) - x)))
+    terms = get_terms(R(poly).mod(x**(2**n) - x))
     if not terms:
         return False, {}
     
@@ -267,8 +268,8 @@ def belong_family4(n, poly):
         sage: belong_family4(7, poly)
         (True, {'a': a^3 + a^2 + a + 1})
     """
-    # If the degree is less than 7, the polynomial can collapse to a simpler form that does not fit the family structure
-    if n < 7:
+    # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
+    if n <= 6:
         return False, {}
 
     F = GF(2**n, 'a')
@@ -276,7 +277,7 @@ def belong_family4(n, poly):
     x = R.gen()
 
     # Get the terms of the polynomial reduced modulo x^(2^n) - x
-    terms = get_terms(R(poly.mod(x**(2**n) - x)))
+    terms = get_terms(R(poly).mod(x**(2**n) - x))
     if not terms:
         return False, {}
     
@@ -285,11 +286,11 @@ def belong_family4(n, poly):
         return False, {}
     
     # All exponents must be 3 or of the form 9*2^i mod (2^n - 1)
-    e_expected = {3} | {(9 * 2**i) % (2**n - 1) for i in range(n)}
-    if not set(terms).issubset(e_expected):
+    e_9 = {(9 * 2**i) % (2**n - 1) for i in range(n)}
+    if not set(terms).issubset({3} | e_9):
         return False, {}
 
-    # Recover a by square root, a = a^2^(2^(n - 1))
+    # Recover a by square root, x^9 = a^(3-1) = a^2
     a_square = terms.get(9 % (2**n - 1), F(0))
     if a_square == F(0):
         return False, {}
@@ -299,8 +300,8 @@ def belong_family4(n, poly):
     
     # Verify all n terms match the expected form a^(3 * 2^i - 1)
     for i in range(n):
-        e = (9 * 2**i) % (2**n - 1)
-        if terms.get(e, F(0)) != a ** (3 * 2**i - 1):
+        a_9 = (9 * 2**i) % (2**n - 1)
+        if terms.get(a_9, F(0)) != a ** (3 * 2**i - 1):
             return False, {}
 
     return True, {'a': a}
@@ -317,9 +318,66 @@ def belong_family5(n, poly):
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+        sage: from cryptographicFunctionsLibrary import belong_family5
+        sage: F.<a> = GF(2^9)
+        sage: R.<x> = PolynomialRing(F)
+        sage: sage: poly = (a^8 + a^4 + a)*x^144 + (a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^130 + (a^6 + a^4 + a^3 + a^2 + a + 1)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^65 + (a^7 + a^3 + a^2)*x^18 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3)*x^9 + x^3
+        sage: belong_family5(9, poly)
+        (True, {'a': a^7 + a^6 + a^4 + a^3 + 1})
+
+        sage: poly = x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3
+        sage: belong_family5(9, poly)
+        (True, {'a': 1})
+
+        sage: F.<a> = GF(2^12)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = (a^11 + a^10 + a^9 + a^8 + a^7 + a^3 + a^2)*x^1152 + (a^10 + a^9 + a^7 + a^3 + a^2)*x^1026 + (a^11 + a^8 + a^6 + a^3 + 1)*x^576 + (a^11 + a^10 + a^6 + a^5 + a^4 + a)*x^513 + (a^10 + a^8 + a^5 + a^3 + a^2 + 1)*x^144 + (a^9 + a^8 + a^5 + a^4 + a^3 + 1)*x^72 + (a^9 + a^8 + a^7 + a^5 + a^3 + 1)*x^18 + (a^11 + a^5 + a^4 + a^2 + 1)*x^9 + x^3
+        sage: belong_family5(12, poly)
+        (True, {'a': a^10 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2})
     """
-    # Placeholder for future implementation
-    return False, {}
+    # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
+    if n <= 6:
+        return False, {}
+    
+    if n % 3 != 0:
+        return False, {}
+    
+    k = n // 3
+    F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()
+
+    # Get the terms of the polynomial reduced modulo x^(2^n) - x
+    terms = get_terms(R(poly).mod(x**(2**n) - x))
+    if not terms:
+        return False, {}
+
+    # x^3 must be present with coefficient 1
+    if terms.get(3, F(0)) != F(1):
+        return False, {}
+    
+    # All exponents must be 3 or of the form 9*2^3i mod (2^n - 1) or 18*2^3i mod (2^n - 1)
+    e_9 = {(9 * 2**(3*i)) % (2**n - 1) for i in range(k)}
+    e_18 = {(18 * 2**(3*i)) % (2**n - 1) for i in range(k)}
+    if not set(terms).issubset({3} | e_9 | e_18):
+        return False, {}
+    
+    # Recover a by square root, x^9 = a^(3-1) = a^2
+    a_square = terms.get(9 % (2**n - 1), F(0))
+    if a_square == F(0):
+        return False, {}
+    a = a_square**(2**(n - 1))
+    if a == F(0):
+        return False, {}
+    
+    # Verify x^(9 * 2^(3i)) terms: coeff = a^(3 * 2^(3i) - 1) and x^(18 * 2^(3i)) terms: coeff = a^(6 * 2^(3i) - 1)
+    for i in range(k):
+        a_9  = (9  * 2**(3*i)) % (2**n - 1)
+        a_18 = (18 * 2**(3*i)) % (2**n - 1)
+        if terms.get(a_9, F(0)) != a ** (3 * 2**(3*i) - 1) or terms.get(a_18, F(0)) != a ** (6 * 2**(3*i) - 1):
+            return False, {}
+
+    return True, {'a': a}
 
 
 def belong_family6(n, poly):
@@ -333,8 +391,77 @@ def belong_family6(n, poly):
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+
+        sage: from cryptographicFunctionsLibrary import belong_family6
+        sage: F.<a> = GF(2^9)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = (a^7 + a^5 + a^3)*x^288 + (a^8 + a^4 + a^3)*x^260 + (a^6 + a^5 + a^3 + a^2)*x^144 + (a^7 + a^2 + 1)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^36 + (a^8 + a^4 + a^3 + a^2 + 1)*x^18 + x^3
+        sage: belong_family6(9,  poly)
+        (True, {'a': a^8 + a^7 + a^2})
+
+        sage: poly = x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3
+        sage: belong_family6(9,  poly)
+        (True, {'a': 1})
+
+        sage: F.<a> = GF(2^12)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^2304 + (a^11 + a^7 + a^6 + a^5 + a^4 + a^3)*x^2052 + (a^10 + a^7 + a^6 + a^4 + a + 1)*x^1152 + (a^10 + a^8 + a^7 + a^6 + a^3 + 1)*x^1026 + (a^11 + a^8 + a^5 + a^2 + a)*x^288 + (a^10 + a^8 + a^6 + a^5 + a^4 + a^3 + a^2)*x^144 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + a)*x^36 + (a^9 + a^7 + a^6 + a^5 + a^3 + a^2)*x^18 + x^3
+        sage: belong_family6(12, poly)
+        (True, {'a': a^11 + a^10 + a^9 + a^8 + a^7 + a^5 + a^4 + a})
     """
-    # Placeholder for future implementation
+    # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
+    if n <= 6:
+        return False, {}
+    
+    if n % 3 != 0:
+        return False, {}
+    
+    k = n // 3
+    F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()
+
+    # Get the terms of the polynomial reduced modulo x^(2^n) - x
+    terms = get_terms(R(poly).mod(x**(2**n) - x))
+    if not terms:
+        return False, {}
+    
+    # x^3 must be present with coefficient 1
+    if terms.get(3, F(0)) != F(1):
+        return False, {}
+    
+    # All exponents must be 3 or of the form 18*2^3i mod (2^n - 1) or 36*2^3i mod (2^n - 1)
+    e_18 = {(18 * 2**(3*i)) % (2**n - 1) for i in range(k)}
+    e_36 = {(36 * 2**(3*i)) % (2**n - 1) for i in range(k)}
+    if not set(terms).issubset({3} | e_18 | e_36):
+        return False, {}
+    
+    # Recover a by fifth root, x^18 = a^(6-1) = a^5
+    a_fifth = terms.get(18 % (2**n - 1), F(0))
+    if a_fifth == F(0):
+        return False, {}
+    
+    try:
+        all_roots = a_fifth.nth_root(5, all=True)
+    except ValueError:
+        return False, {}
+    
+    # Verify all fifth roots to find a valid a such that all x^(18 * 2^(3i)) terms: coeff = a^(6 * 2^(3i) - 1) and x^(36 * 2^(3i)) terms: coeff = a^(12 * 2**(3i) - 1)
+    for a in all_roots:
+        if a == F(0):
+            continue
+        
+        valid = True
+        for i in range(k):
+            a_18  = (18  * 2**(3*i)) % (2**n - 1)
+            a_36 = (36 * 2**(3*i)) % (2**n - 1)
+            if terms.get(a_18, F(0)) != a ** (6 * 2**(3*i) - 1) or terms.get(a_36, F(0)) != a ** (12 * 2**(3*i) - 1):
+                valid = False
+                break
+
+        if valid:
+            return True, {'a': a}
+
     return False, {}
 
 
@@ -391,7 +518,7 @@ def belong_family7_9(n, poly):
     R = PolynomialRing(F, 'x')
     x = R.gen()    
 
-    terms = get_terms((poly.mod(x**(2**n) - x)))
+    terms = get_terms(R(poly).mod(x**(2**n) - x))
     if not terms:
         return False, {}
     
@@ -476,7 +603,7 @@ def belong_family11(n, poly):
     R = PolynomialRing(F, 'x')
     x = R.gen()    
 
-    terms = get_terms((poly.mod(x**(2**n) - x)))
+    terms = get_terms(R(poly).mod(x**(2**n) - x))
     if not terms:
         return False, {}
 
@@ -584,7 +711,7 @@ def belong(n, polynomial):
     for family_name, family_function in FAMILIES.items():
         try:
             found, params = family_function(n, polynomial)
-        except Exception as e:
+        except Exception:
             print(f"Belong to {family_name}: {False}")
             continue
         print(f"Belong to {family_name}: {found}")

@@ -304,19 +304,20 @@ def family5(n, a=None):
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import family5
-        sage: family5(9)
-        [(a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^8 + a^5 + a^4)*x^72 + (a^8 + a^7 + a^4 + a)*x^65 + a^5*x^18 + a^2*x^9 + x^3,
-        ...
-        x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3]
-        
         sage: F.<a> = GF(2^9)
+        sage: family5(9, a^6 + a^5)
+        (a^3 + a^2 + 1)*x^144 + (a^8 + a^5 + a^3 + a^2)*x^130 + (a^4 + a^3 + a + 1)*x^72 + (a^3 + a + 1)*x^65 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a)*x^9 + x^3
+        
         sage: family5(9, F(1))
         x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3
 
-        sage: F.<a> = GF(2^9)
-        sage: a = a^6 + a^5
-        sage: family5(9, a)
-        (a^3 + a^2 + 1)*x^144 + (a^8 + a^5 + a^3 + a^2)*x^130 + (a^4 + a^3 + a + 1)*x^72 + (a^3 + a + 1)*x^65 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a)*x^9 + x^3
+        sage: result = family5(9); result
+        [(a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^8 + a^5 + a^4)*x^72 + (a^8 + a^7 + a^4 + a)*x^65 + a^5*x^18 + a^2*x^9 + x^3,
+        (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + 1)*x^65 + (a^5 + a)*x^18 + a^4*x^9 + x^3,        ...
+        x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3]
+        
+        sage: len(result)
+        511
     """
     if n % 3 != 0:
         raise TypeError("n must be divisible by 3")
@@ -327,16 +328,13 @@ def family5(n, a=None):
     x = R.gen()
 
     def _poly(a_val):
-        trace = sum(a_val**(3 * 2**(3 * i)) * x**(9 * 2**(3 * i)) + a_val**(6 * 2**(3 * i)) * x**(18 * 2**(3 * i)) for i in range(k))
+        trace = sum(a_val**(3 * 2**(3 * i)) * x**((9 * 2**(3 * i)) % (2**(n) - 1))+ a_val**(6 * 2**(3 * i)) * x**((18 * 2**(3 * i) % (2**(n) - 1))) for i in range(k))
         return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
 
     if a is None:
         return [_poly(a_val) for a_val in F if a_val != 0]
-    
-    if a == 0:
-        raise TypeError("a must be nonzero")
-    if a not in F:
-        raise TypeError("a must be an element of GF(2^n)")
+    elif a == 0 or a not in F:
+        raise TypeError("a must be a nonzero element of GF(2^n)")
     
     return _poly(a)
 
@@ -356,19 +354,21 @@ def family6(n, a=None):
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import family6
-        sage: family6(9)
-        [(a^6 + a^3 + 1)*x^288 + (a^7 + a^5 + a^2 + 1)*x^260 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^6 + a^2)*x^36 + a^5*x^18 + x^3,
-        ...
-        x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3]
-
         sage: F.<a> = GF(2^9)
+        sage: family6(9, a^8 + a^5 + a^3 + 1)
+        (a^8 + a^7 + a^6 + a^4 + a^3 + a)*x^288 + (a^8 + a^7 + a^6 + a^2 + 1)*x^260 + (a^7 + a^6 + a^5 + a^4)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + 1)*x^36 + (a^8 + a^7 + a^5 + a^4 + a^2 + a + 1)*x^18 + x^3
+
         sage: family6(9, F(1))
         x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3
 
-        sage: F.<a> = GF(2^9)
-        sage: a = a^8 + a^5 + a^3 + 1
-        sage: family6(9, a)
-        (a^8 + a^7 + a^6 + a^4 + a^3 + a)*x^288 + (a^8 + a^7 + a^6 + a^2 + 1)*x^260 + (a^7 + a^6 + a^5 + a^4)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + 1)*x^36 + (a^8 + a^7 + a^5 + a^4 + a^2 + a + 1)*x^18 + x^3
+        sage: result = family6(9); result
+        [(a^6 + a^3 + 1)*x^288 + (a^7 + a^5 + a^2 + 1)*x^260 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^6 + a^2)*x^36 + a^5*x^18 + x^3,
+        (a^7 + a^6 + a^3 + 1)*x^288 + a*x^260 + (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^7 + a^4 + a^3)*x^36 + (a^5 + a)*x^18 + x^3,
+        ...
+        x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3]
+
+        sage: len(result)
+        511
     """
     if n % 3 != 0:
         raise TypeError("n must be divisible by 3")
@@ -379,16 +379,13 @@ def family6(n, a=None):
     x = R.gen()
 
     def _poly(a_val):
-        trace = sum(a_val**(6 * 2**(3 * i)) * x**(18 * 2**(3 * i)) + a_val**(12 * 2**(3 * i)) * x**(36 * 2**(3 * i)) for i in range(k))
+        trace = sum(a_val**(6 * 2**(3 * i)) * x**((18 * 2**(3 * i)) % (2**(n) - 1))+ a_val**(12 * 2**(3 * i)) * x**((36 * 2**(3 * i)) % (2**(n) - 1)) for i in range(k))
         return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
 
     if a is None:
         return [_poly(a_val) for a_val in F if a_val != 0]
-    
-    if a == 0:
-        raise TypeError("a must be nonzero")
-    if a not in F:
-        raise TypeError("a must be an element of GF(2^n)")
+    elif a == 0 or a not in F:
+        raise TypeError("a must be a nonzero element of GF(2^n)")
     
     return _poly(a)
 
