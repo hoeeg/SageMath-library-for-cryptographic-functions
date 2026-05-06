@@ -2,6 +2,7 @@ from sage.all import *
 from sage.crypto.sbox import SBox
 from sage.all import Polynomial
 
+
 def construct_truth_table(F, polynomial):
     """
     Construct the truth table of a polynomial function over GF(2^n) by evaluating it at all field elements.
@@ -9,15 +10,8 @@ def construct_truth_table(F, polynomial):
     return [polynomial(F.from_integer(i)).to_integer() for i in range(F.order())]
 
 def is_apn(F, function):
-    r"""
+    """
     Check if a given univariate polynomial or truth table over GF(2^n) is APN by evaluating the differential uniformity.
-
-    INPUT:
-
-    - ``F`` -- a finite field GF(2^n)
-    - ``function`` -- either
-        - a univariate polynomial over GF(2^n)
-        - a truth table (look up table) represented as a list of integers
     """
     if isinstance(function, list):
         tt = function
@@ -34,13 +28,19 @@ def is_primitive_element(F, e):
     """
     return e.multiplicative_order() == F.order() - 1
 
-def get_terms(poly):
+def get_terms(n, poly):
     """
-    Return {exponent: coefficient} for every nonzero term.
+    Return {exponent: coefficient} for every nonzero term in the polynomial reduced modulo x^(2^n) - x.
     """
-    if poly == 0:
+    F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()
+    poly_reduced = R(poly).mod(x**(2**n) - x)
+
+    if poly_reduced == 0:
         return {}
-    return dict(zip(poly.exponents(), poly.coefficients()))
+
+    return dict(zip(poly_reduced.exponents(), poly_reduced.coefficients()))
 
 def is_cube(F, x):
     """
