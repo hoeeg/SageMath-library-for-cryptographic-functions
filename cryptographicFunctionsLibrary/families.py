@@ -256,11 +256,9 @@ def family4(n, a=None):
 
         sage: from cryptographicFunctionsLibrary import family4
         sage: F.<a> = GF(2^9)
-        sage: a = a^8 + a^7 + a^5 + a^3 + 1
-        sage: family4(9, a)
-        (a^7 + a^5 + a^4 + 1)*x^288 + (a^7 + a^6 + a^4 + a^2)*x^260 + (a^8 + a^7 + a^5 + a^4 + a + 1)*x^144 + (a^8 + a^7 + a^5 + 1)*x^130 + (a^8 + a^6 + a + 1)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^65 + (a^7 + a^5 + a^2 + 1)*x^36 + (a^8 + a^6 + a^4 + a^2 + a)*x^18 + (a^7 + a^4 + a^2 + a)*x^9 + x^3
+        sage: family4(9, a^8 + a^7 + a^5 + a^3 + 1)
+        (a^8 + a^7 + a^6 + a^4 + a^3)*x^288 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^260 + (a^8 + a^7 + a^5 + 1)*x^144 + (a^7 + a^6 + 1)*x^130 + (a^7 + a^6 + a^4 + a^2 + a + 1)*x^72 + (a^6 + a^5 + a^4 + a^2 + a)*x^65 + (a^7 + a^6 + a^4 + a^3 + a)*x^36 + (a^8 + a^6 + a^4 + a^3 + 1)*x^18 + (a^5 + a^4 + a^2 + 1)*x^9 + x^3
 
-        sage: F.<a> = GF(2^9)
         sage: family4(9, F(1))
         x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
 
@@ -531,7 +529,7 @@ def family11(n, k=None, i=None, a=None):
         sage: family11(10, 2, 3, a^5 + a^3 + a)
         x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3
 
-        sage: family11(10, 2, None, a)
+        sage: family11(10, 2, None, a^5 + a^3 + a)
         [(a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3,
         x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3,
         x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3,
@@ -567,28 +565,27 @@ def family11(n, k=None, i=None, a=None):
     else:
         k = [k]
     
+    def _valid_i(i_arg, k_val):
+        p = (m - 2) if k_val % 2 == 0 else (m + 2)
+        base = {m - 2, m, n - 1} if k_val % 2 == 0 else {m + 2, m}
+
+        if i_arg is not None:
+            if i_arg not in base and (i_arg * p) % n != 1:
+                raise TypeError("i is not valid")
+            return [i_arg]
+        
+        inv_set = {pow(p, -1, n)} if gcd(p, n) == 1 else set()
+        return base | inv_set
+
+    i = {k_val: _valid_i(i, k_val) for k_val in k}
+    
     if a is None:
         a = [a_val for a_val in K if a_val != 0 and is_primitive_element(K, a_val)]
     elif a == 0 or not is_primitive_element(K, a) or a not in K:
         raise TypeError("a must be a primitive element of GF(2)")
     else:
         a = [a]
-   
-    def find_i(i_arg, k_val):
-        if i_arg is not None:
-            if k_val % 2 == 0:
-                if i_arg not in {m-2,m,n-1} and (i_arg * (m - 2)) % n != 1:
-                    raise TypeError("i is not valid")
-            else:
-                if i_arg not in {m+2, m} and (i_arg * (m + 2)) % n != 1:
-                    raise TypeError("i is not valid")
-            return [i_arg]
-        
-        if k_val % 2 == 0:
-            return list({m-2, m, n-1} | {j for j in range(1, n) if (j*(m-2)) % n == 1})
-        else:
-            return list({m+2, m} | {j for j in range(1, n) if (j*(m+2)) % n == 1})
-
+    
     def _poly(k_val, i_val, a_val, b_val, c_val):
         e_a = (2**i_val + 1) * 2**k_val % (2**n - 1)
         e_b = 3 * 2**m
@@ -599,7 +596,7 @@ def family11(n, k=None, i=None, a=None):
     for a_val in a:
         b_val, c_val = a_val**2, F(1)
         for k_val in k:
-            for i_val in find_i(i, k_val):
+            for i_val in i[k_val]:
                 res.add(_poly(k_val, i_val, a_val, b_val, c_val))
 
     if not res:

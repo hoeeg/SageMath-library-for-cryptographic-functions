@@ -583,8 +583,6 @@ def belong_family11(n, poly):
         return False, {}
     
     F = GF(2**n, 'a')
-    #K = F.subfield(2)
-
     terms = get_terms(n, poly)
     if not terms:
         return False, {}
@@ -592,18 +590,21 @@ def belong_family11(n, poly):
     if terms.get(3, F(0)) != F(1):
         return False, {}
     
+    def _make_i_set(ref, base):
+        inv_set = {pow(ref, -1, n)} if gcd(ref, n) == 1 else set()
+        return base | inv_set
+
+    i_list_even = _make_i_set(m - 2, {m - 2, m, n - 1})
+    i_list_odd  = _make_i_set(m + 2, {m + 2, m})
+    
     for k in range(0, n):
-        if k % 2 == 0:
-            i_list = {m-2, m, n-1} | {i for i in range(1, n) if (i * (m - 2)) % n == 1}
-        else:
-            i_list = {m+2, m} | {i for i in range(1, n) if (i * (m + 2)) % n == 1}
-        
+        i_list = i_list_even if k % 2 == 0 else i_list_odd
         for i in i_list:
             e_a = ((2**i + 1) * 2**k) % (2**n - 1)                  # exponent of a(x^2^i + 1)^2^k
             e_b = (3 * 2**m)                                        # exponent of bx^(3 * 2^m)
             e_c = ((2**(i + m) + 2**m) * 2**k) % (2**n - 1)         # exponent of c(x^(2^(i + m) + 2^m))^2^k
     
-            if not set(terms).issubset({e_a, e_b, e_c}):
+            if not set(terms).issubset({3, e_a, e_b, e_c}):
                 continue
             
             # Single term case
