@@ -36,11 +36,7 @@ def get_terms(n, poly):
     R = PolynomialRing(F, 'x')
     x = R.gen()
     poly_reduced = R(poly).mod(x**(2**n) - x)
-
-    if poly_reduced == 0:
-        return {}
-
-    return dict(zip(poly_reduced.exponents(), poly_reduced.coefficients()))
+    return dict(zip(poly_reduced.exponents(), poly_reduced.coefficients())) if poly_reduced != 0 else {}
 
 def is_cube(F, x):
     """

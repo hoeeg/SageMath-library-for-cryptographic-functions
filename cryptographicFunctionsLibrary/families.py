@@ -1,5 +1,5 @@
 from sage.all import *
-from helpers import is_primitive_element
+from helpers import is_primitive_element, family12_conditions
 
 
 def _family1_2(n, p, s, u):
@@ -405,8 +405,6 @@ def family7_9(n, s=None, u=None, v=None, w=None):
     - ``v`` -- (optional) element of GF(2^n) with v*w != 1; if None, returns a list for all valid v in GF(2^n)
     - ``w`` -- (optional) element of GF(2^n) with v*w != 1; if None, returns a list for all valid w in GF(2^n)
 
-    NOTE: v and w must be supplied together or not at all
-
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import family7_9
@@ -415,24 +413,36 @@ def family7_9(n, s=None, u=None, v=None, w=None):
         sage: family7_9(12, 5, u, v, w)
         (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^9 + a^6 + a^4 + a^2 + a)*x^544 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257 + a*x^33
         
-        sage: family7_9(12, 5, a)
-        [(a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^9 + a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^544 + (a^11 + a^9 + a^8 + a^6 + a^3 + a)*x^257 + a*x^33,
-        (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^8 + a^7 + a^6 + a^4 + a^3)*x^544 + x^257 + a*x^33,
-        ...
-        (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^9 + a^6 + a^4 + a^2 + a)*x^544 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257 + a*x^33]
-
         sage: v, w = a^11 + a^9 + a^8 + a^6 + a^3 + a + 1, a^10 + a^9 + a^6 + a^5 + a^3 + 1
         sage: family7_9(12, 11, None, v, w)
-        [(a^10 + a^9 + a^7 + a^6 + a^4 + a^3)*x^2056 + (a^11 + a^10 + a^8 + a^6 + a^4 + a^3 + a^2 + a)*x^2049 + (a^11 + a^7 + a^6 + a^3)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
-        (a^11 + a^10 + a^7 + a^6 + a^2 + 1)*x^2056 + (a^10 + a^9 + a^7 + a^5 + a^4 + a^3 + 1)*x^2049 + (a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
+        [(a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a)*x^2056 + (a^10 + a^9 + a^8 + a^6 + a^2 + 1)*x^2049 + (a^10 + a^8 + a^5 + a^4 + a^3 + a + 1)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
+        (a^10 + a^9 + a^7 + a^6 + a^4 + a^3)*x^2056 + (a^11 + a^10 + a^8 + a^6 + a^4 + a^3 + a^2 + a)*x^2049 + (a^11 + a^7 + a^6 + a^3)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
         ...
-        (a^11 + a^10 + a^9 + a^8 + a^7 + a^4 + a^3 + a)*x^2056 + (a^11 + a^8 + a^4 + a + 1)*x^2049 + (a^11 + a^6 + a^4 + 1)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257]
+        (a^7 + a^5 + a^4 + a^3 + a)*x^2056 + (a^11 + a^9 + a^6 + a^5 + a^4 + a + 1)*x^2049 + (a^9 + a^8 + a^7 + a^6 + a^2)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257]
+        
+        sage: family7_9(12, 11, None, v)
+        [(a^11 + a^6 + a^4 + a^3 + a^2 + a)*x^2056 + (a^11 + a^9 + a^7 + a^5 + a^3 + a^2 + 1)*x^2049 + (a^11 + a^10 + a^8 + a^6 + a^4 + a^3)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
+        (a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^4 + 1)*x^2056 + (a^11 + a^10 + a^9 + a^8 + a^6 + a^4 + a^3 + a^2 + a)*x^2049 + (a^11 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
+        ...
+        (a^7 + a^5 + a^4 + a)*x^2056 + (a^11 + a^8 + a^3 + 1)*x^2049 + (a^11 + a^10 + a^7 + a^4 + 1)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257]
+
+        sage: family7_9(12, 11, None, None, w)
+        [(a^10 + a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^2056 + (a^8 + a^7 + a^5 + a)*x^2049 + (a^10 + a^7 + a + 1)*x^264 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2 + 1)*x^257,
+        (a^10 + a^9 + a^6 + a^5 + a^4 + a^3 + a^2 + 1)*x^2056 + (a^8 + a^7 + a^3 + 1)*x^2049 + (a^11 + a^10 + a^6 + a^4 + a + 1)*x^264 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257,
+        ...
+        (a^11 + a^10 + a^8 + a^6 + a^5 + a^3)*x^2056 + (a^11 + a^8 + a^7 + a^6 + a^2)*x^2049 + (a^11 + a^10 + a^8 + a^7 + a^5 + a^2 + a + 1)*x^264 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2)*x^257]
+
+        sage: family7_9(12, 5, a)
+        [(a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^8 + a^7 + a^3 + a + 1)*x^544 + (a^8 + a^6 + a^5 + a^4 + a^2 + 1)*x^257 + a*x^33,
+        (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^9 + a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^544 + (a^11 + a^10 + a^8 + a^5 + a + 1)*x^257 + a*x^33
+        ...
+        (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^6 + a^4 + a + 1)*x^544 + a*x^33]
 
         sage: result = family7_9(12, 5); result
-        [(a^6 + a^4 + a)*x^768 + (a^9 + a^7 + a^5 + a^4 + a^3 + a^2 + a)*x^544 + (a^8 + a^6 + a^5 + a^4 + a^2 + 1)*x^257 + (a^11 + a^9 + a^7 + a^3 + a^2 + 1)*x^33,
-        (a^10 + a^6 + a^5 + a^3 + a)*x^768 + (a^9 + a^8 + a^6 + a^5 + a^2)*x^544 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257 + (a^7 + a^5 + a^3 + a^2 + 1)*x^33,
+        [(a^11 + a^9 + a^8 + a^7 + a^5 + a^2 + a + 1)*x^768 + (a^7 + a^3 + a)*x^544 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^257 + (a^10 + a^9 + a^8 + a^7 + a^4 + a^3 + a + 1)*x^33,
+        (a^11 + a^10 + a^3 + a^2)*x^768 + (a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^3 + a + 1)*x^544 + x^257 + (a^7 + a^4 + a^3 + a)*x^33,
         ...
-        (a^9 + a^7 + a^5 + a^3 + a + 1)*x^768 + (a^9 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^544 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a)*x^257 + (a^9 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^33]
+        (a^11 + a^10 + a^9 + a^8 + a^4 + a^2 + a)*x^768 + (a^11 + a^10 + a^8 + a^7 + a^6 + a^4 + a^3 + a)*x^544 + (a^11 + a^10 + a^8 + a^5 + a)*x^257 + (a^9 + a^7 + a^6 + a)*x^33]
         
         sage: len(result)
         416448
@@ -456,19 +466,21 @@ def family7_9(n, s=None, u=None, v=None, w=None):
     else:
         u = [u]
 
-    # TODO: can have just one of them
-    if (v is None) != (w is None):
-        raise TypeError("Supply both v and w, or neither")
-    
-    if v is None and w is None:
-        pair = set((v_val, w_val) for v_val in K for w_val in K if v_val * w_val != K(1))
-    elif v not in K or w not in K:
-        raise TypeError("v and w must be elements of GF(2^k)")
-    elif v*w == K(1):
-        raise TypeError("vw must not be 1")
-    else:
+    if v is not None and v not in K:
+        raise TypeError("v must be an element of GF(2^k)")
+    if w is not None and w not in K:
+        raise TypeError("w must be an element of GF(2^k)")
+
+    if v is not None and w is not None:
+        if v * w == K(1):
+            raise TypeError("v and w must be elements of GF(2^k)")
         pair = {(v, w)}
-    
+    else:
+        v_vals = K if v is None else [v]
+        w_vals = K if w is None else [w]
+
+        pair = set((v_val, w_val) for v_val in v_vals for w_val in w_vals if v_val * w_val != K(1))
+
     if s is None:
         s = [s_val for s_val in range(1, n) if (gcd(s_val, 3*k) == 1 and (k + s_val) % 3 == 0)]
     elif gcd(s, 3*k) != 1 or (k + s) % 3 != 0:
@@ -516,10 +528,7 @@ def family11(n, k=None, i=None, a=None):
 
         sage: from cryptographicFunctionsLibrary import family11
         sage: F.<a> = GF(2^10)
-        sage: K = F.subfield(2)
-        sage: a = K.gen(); a
-        a2
-        sage: family11(10, 2, 3, a)
+        sage: family11(10, 2, 3, a^5 + a^3 + a)
         x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3
 
         sage: family11(10, 2, None, a)
@@ -537,6 +546,9 @@ def family11(n, k=None, i=None, a=None):
         (a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3,
         ...
         x^576 + (a^5 + a^3 + a)*x^96 + (a^5 + a^3 + a + 1)*x^18 + x^3]
+
+        sage: len(result)
+        39
     """
     if n % 2 != 0:
         raise TypeError("n must be even")
@@ -585,7 +597,7 @@ def family11(n, k=None, i=None, a=None):
 
     res = set()
     for a_val in a:
-        b_val, c_val = a_val**2, K(1)
+        b_val, c_val = a_val**2, F(1)
         for k_val in k:
             for i_val in find_i(i, k_val):
                 res.add(_poly(k_val, i_val, a_val, b_val, c_val))
@@ -596,17 +608,7 @@ def family11(n, k=None, i=None, a=None):
     return list(res) if len(res) > 1 else list(res)[0]
 
 
-def _is_cube(x, F):
-    """
-    Check if an element is a cube in GF(2^n)
-    """
-    if x == F(0): 
-        return True
-    order = F.order() - 1
-    return x**(order // 3) == F(1)
-
-
-def family12(n, i=None, a=None, b=None, c=None):
+def family12(n, i=None, s=None, a=None, b=None, c=None):
     r"""
     Return the Zheng-Kan-Li-Peng-Tang construction from 2022.
     Defined by `f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1))`.
@@ -617,6 +619,7 @@ def family12(n, i=None, a=None, b=None, c=None):
 
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``i`` -- (optional) integer with gcd(i, n) = 1; if None, returns a list for all valid i in {1, ... , n - 1}
+    - ``s`` -- (optional) integer; if None, returns a list for all valid s in {1, ... , n - 1}
     - ``a`` -- (optional) element of GF(2^n) not in GF(q) with a + a^q != 0; if None, returns a list for all valid a in GF(2^n)
     - ``b`` -- (optional) nonzero element of GF(2^n); if None, returns a list for all nonzero b in GF(2^n)
     - ``c`` -- (optional) nonzero element of GF(2^n); if None, returns a list for all nonzero c in GF(2^n)
@@ -624,50 +627,25 @@ def family12(n, i=None, a=None, b=None, c=None):
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import family12
-        sage: F = GF(2^10)
-        sage: a = F.primitive_element()
-        sage: family12(10, 1, a, a^2, a^2)
-        [(z10^8 + z10^7 + z10^2 + z10 + 1)*x^96 + (z10^9 + z10^5 + z10^4 + z10^3 + z10)*x^33 + z10^3*x^3]
+        sage: F.<a> = GF(2^10)
+        sage: family12(10, 1, 5, a, a^2, a^2)
+        (a^8 + a^7 + a^2 + a + 1)*x^96 + (a^9 + a^5 + a^4 + a^3 + a)*x^33 + a^3*x^3
 
-        sage: family12(10, 3, a, a^2, a^2)
-        [(z10^8 + z10^7 + z10^2 + z10 + 1)*x^288 + (z10^9 + z10^5 + z10^4 + z10^3 + z10)*x^33 + z10^3*x^9]
-        
-        sage: family12(10, 1)
-        [(z10^9 + z10^7 + z10^6 + z10^5 + z10^4 + z10^2)*x^1056 + (z10^8 + z10^6 + z10^2)*x^96 + (z10^8 + z10^6 + z10^2)*x^33 + z10^2*x^3]
+        sage: family12(10, 1, 5, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1)
+        [(a^9 + a^8 + a^7 + a^3 + a^2)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^8 + a^5 + a^3 + a^2)*x^3,
+        (a^6 + a^4 + a^3)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^9 + a^8 + a^7 + a^5 + a^3 + 1)*x^3,
         ...
+        (a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^9 + a^7 + a^6 + a^4)*x^33 + (a^8 + a^6 + a^2 + a)*x^3]
+
+        sage: result = family12(10, 1, None, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1); result
+        [(a^9 + a^8 + a^7 + a^3 + a^2)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^8 + a^5 + a^3 + a^2)*x^3,
+        (a^7 + a^3)*x^129 + (a^6 + a^2 + a + 1)*x^96 + (a^8 + a^7 + a^5 + a^4 + a^2 + a)*x^36 + (a^9 + a^7 + a^5 + a^4 + a^3 + a + 1)*x^3,
+        ...
+        (a^9 + a^8 + a^5 + a^4 + a^3 + a + 1)*x^513 + (a^7 + a^3 + a^2 + a)*x^96 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^3)*x^48 + (a^8 + a^7 + a^2 + 1)*x^3]
+
+        sage: len(result)
+        116281
     """
-    def _conditions(i_val, b_val, c_val):
-        s_list = []
- 
-        if not _is_cube(b_val, F):
-            term = b_val**(2**(2 * i_val) - 2**i_val + 1) * c_val**(-1)
-            if term**q == term:
-                s_list.append(3 * i_val)
-            
-            term = b_val**(2**i_val - 1) * c_val**(-(2**(2 * i_val)))
-            if term**q == term and (m - 2 * i_val) > 0:
-                s_list.append(m - 2 * i_val)
-
-            term = c_val * b_val**(2**i_val - 1)
-            if term**q == term:
-                s_list.append(m + 2 * i_val)
-
-            if i_val == 1:
-                for s in (1, n):
-                    if (s * (m - 2)) % n == 1:
-                        term = b_val**(2**(2 * s)) * c_val**(-(2**s - 1))
-                        if term**q == term:
-                            s_list.append(s)
-            
-            if c_val**q != c_val:
-                s_list.append(m)
-            
-        term = b_val * c_val**(-(2**i_val))
-        if term**q == term:
-            s_list.append(n - i_val)
-
-        return list(set(s_list))
-
     if n % 2 != 0:
         raise TypeError("n must be even")
     
@@ -676,34 +654,45 @@ def family12(n, i=None, a=None, b=None, c=None):
     if m % 2 == 0:
         raise TypeError("m must be odd")
 
-    F = GF(2**n)
+    F = GF(2**n, 'a')
     Q = GF(q)
     R = PolynomialRing(F, 'x')
     x = R.gen()
 
-    def _poly(i_val, a_val, b_val, c_val, s_val):
-        bx = b_val * x**(2**i_val + 1)
-        cx = c_val * x**(2**s_val + 1)
-        poly = a_val*(bx + bx**q) + a_val**q * (cx + cx**q)
-        return poly.mod(x**(2**n) - x)
+    if a is None:
+        a = [a_val for a_val in F if a_val not in Q and a_val + a_val**q != F(0)]
+    elif a + a**q == F(0) or a not in F or a in Q:
+        raise TypeError("a must be an element of GF(2^n) not in GF(q) with a + a^q != 0")
+    else:
+        a = [a]
     
-    i_list = [i] if i is not None else [i for i in range(1, n) if gcd(i, n) == 1]
-    a_list = [F(a)] if a is not None else [a for a in F if a not in Q and a + a**q != F(0)]
-    b_list = [F(b)] if b is not None else [b for b in F if b != F(0)]
-    c_list = [F(c)] if c is not None else [c for c in F if c != F(0)]
+    i = [i] if i is not None else [i_val for i_val in range(1, n) if gcd(i_val, n) == 1]
+    b = [b] if b is not None else [b_val for b_val in F if b_val != F(0)]
+    c = [c] if c is not None else [c_val for c_val in F if c_val != F(0)]
 
-    res = []
-    for i_val in i_list:
-        for a_val in a_list:
-            for b_val in b_list:
-                for c_val in c_list:
-                   for s_val in _conditions(i_val, b_val, c_val):
-                        res.append(_poly(i_val, a_val, b_val, c_val, s_val))
+    def _poly(i_val, a_val, b_val, c_val, s_val):
+        e1 = (2**i_val + 1) % (2**n - 1)
+        e2 = (q * (2**i_val + 1)) % (2**n - 1)
+        e3 = (2**s_val + 1) % (2**n - 1)
+        e4 = (q * (2**s_val + 1)) % (2**n - 1)
+        return (a_val * b_val * x**e1 + a_val * b_val**q * x**e2 + a_val**q * c_val * x**e3 + a_val**q * c_val**q * x**e4).mod(x**(2**n) - x)
+    
+    res = set()
+    for a_val in a:
+        for i_val in i:
+            for b_val in b:
+                for c_val in c:
+                    if s is not None:
+                        if s in family12_conditions(F, i_val, b_val, c_val):
+                            res.add(_poly(i_val, a_val, b_val, c_val, s))
+                    else:
+                        for s_val in family12_conditions(F, i_val, b_val, c_val):
+                            res.add(_poly(i_val, a_val, b_val, c_val, s_val))
                     
     if not res:
         raise TypeError("No valid polynomials found")
     
-    return res
+    return list(res) if len(res) > 1 else list(res)[0]
 
 
 def family13(n, s=None, v=None, mu=None):
