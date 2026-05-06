@@ -2,8 +2,7 @@ from sage.rings.finite_rings.finite_field_constructor import GF
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.all import SR
 from sage.matrix.constructor import Matrix
-
-from .helpers import is_apn, construct_truth_table
+from helpers import is_apn, construct_truth_table
 
 
 def polynomial_to_truth_table(n, polynomial):
@@ -202,12 +201,12 @@ def matrix_to_polynomial(n, M, basis=None):
 def polynomial_to_sequence(n, polynomial, basis=None):
     r"""
     Compute the sequence of the Quadratic APN Matrix (QAM) of a univariate polynomial over GF(2^n) with respect to a normal basis.
-    Defined by constructing the QAM `M` with respect to the standard basis and reading off the upper-triangular entries row by row as integers, `[M[i,j].to_integer() for 0 <= i < j <= n-1]`.
+    Defined by constructing the QAM `M` with respect to a normal basis and reading off the upper-triangular entries row by row as integers, `[M[i,j].to_integer() for 0 <= i < j <= n-1]`.
 
     INPUT:
 
     - ``n`` -- the degree of the finite field extension GF(2^n)
-    - ``polynomial`` -- a polynomial over F
+    - ``polynomial`` -- a univariate polynomial over GF(2^n)
     - ``basis`` -- (optional) basis of GF(2^n) over GF(2); if None, a normal basis is used
 
     EXAMPLES::
