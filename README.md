@@ -1,7 +1,6 @@
 # SageMath Library for APN Cryptographic Functions
 
-This project provides a SageMath library for working with cryptographic functions,
-with a particular focus on quadratic APN (Almost Perfect Nonlinear) functions.
+This project provides a SageMath library for working with cryptographic functions, with a particular focus on quadratic APN (Almost Perfect Nonlinear) functions.
 
 The library aims to make research workflows involving APN families, representation conversions, and family membership testing easier to reproduce and extend.
 
@@ -9,7 +8,7 @@ The library aims to make research workflows involving APN families, representati
 ## Features
 - Conversion between major representations of APN functions, univariate polynomial to / from  
     - Truth table
-    - Quadratic APN Matrix
+    - Quadratic Matrix
     - Sequence
 - Implementations of known infinite families of quadratic APN functions in univariate form
 - Membership testing for identifying whether a function belongs to a known family
@@ -56,9 +55,9 @@ More about Sage or how to download it, can be found in its [Documentation](https
 ## Layout
 ```
 ├── library/
-    ├── convert.py        Representation conversions
-    ├── families.py       Known APN family constructions
-    ├── helpers.py        Finite field utility functions
+│   ├── convert.py        Representation conversions
+│   ├── families.py       Known APN family constructions
+│   ├── helpers.py        Finite field utility functions
 │   └── membership.py     Family identification algorithms
 ├── README.md             This file
 ├── setup.py              Top-level configure script

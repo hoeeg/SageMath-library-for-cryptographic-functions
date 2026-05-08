@@ -82,7 +82,7 @@ def truth_table_to_polynomial(n, tt: list):
 
 def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate'):
     r"""
-    Compute the Quadratic APN Matrix (QAM) of a univariate polynomial over GF(2^n) with respect to a normal basis.
+    Compute the Quadratic Matrix (QM) of a univariate polynomial over GF(2^n) with respect to a normal basis.
     Defined by `M[i,j] = f(b_i + b_j) + f(b_i) + f(b_j) + f(0)` for `i != j` and `M[i,i] = 0`, where `b_0, ..., b_{n-1}` is the supplied normal basis.
     
     INPUT:
@@ -151,7 +151,7 @@ def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate'):
 
 def matrix_to_polynomial(n, M, basis=None):
     r"""
-    Recover the univariate polynomial representation of a quadratic APN function from its Quadratic APN Matrix (QAM) with respect to a normal basis.
+    Recover the univariate polynomial representation of a quadratic function from its Quadratic Matrix (QM) with respect to a normal basis.
     Defined by computing the coefficient matrix `C` via `C = (M_b^{-1})^T * M * M_b^{-1}`, where `M_b[i,j] = b_i^{2^j}`, and returning `f(x) = sum_{i<j} C[i,j] * x^{2^i + 2^j}`.
     
     INPUT:
@@ -200,8 +200,8 @@ def matrix_to_polynomial(n, M, basis=None):
 
 def polynomial_to_sequence(n, polynomial, basis=None):
     r"""
-    Compute the sequence of the Quadratic APN Matrix (QAM) of a univariate polynomial over GF(2^n) with respect to a normal basis.
-    Defined by constructing the QAM `M` with respect to a normal basis and reading off the upper-triangular entries row by row as integers, `[M[i,j].to_integer() for 0 <= i < j <= n-1]`.
+    Compute the sequence of the Quadratic Matrix (QM) of a univariate polynomial over GF(2^n) with respect to a normal basis.
+    Defined by constructing the QM `M` with respect to a normal basis and reading off the upper-triangular entries row by row as integers, `[M[i,j].to_integer() for 0 <= i < j <= n-1]`.
 
     INPUT:
 
@@ -244,13 +244,13 @@ def polynomial_to_sequence(n, polynomial, basis=None):
 
 def sequence_to_polynomial(n, sequence, basis=None):
     r"""
-    Recover the univariate polynomial representation of a sequence of the Quadratic APN Matrix (QAM) with respect to a normal basis.
+    Recover the univariate polynomial representation of a sequence of the Quadratic Matrix (QM) with respect to a normal basis.
     Defined by filling the symmetric matrix `M` with `M[i,j] = M[j,i] = s_k` for the k-th sequence element (in row-major upper-triangular order), then applying `matrix_to_polynomial` to recover `f`.
     
     INPUT:
 
     - ``n`` -- the degree of the finite field extension GF(2^n)
-    - ``sequence`` -- a list of integers representing the upper-triangular entries of the QAM, of length `n*(n-1)/2`
+    - ``sequence`` -- a list of integers representing the upper-triangular entries of the QM, of length `n*(n-1)/2`
     - ``basis`` -- (optional) basis of GF(2^n) over GF(2); if None, a normal basis is used
 
     EXAMPLES::
