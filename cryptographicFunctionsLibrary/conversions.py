@@ -5,15 +5,18 @@ from sage.matrix.constructor import Matrix
 from helpers import is_apn, construct_truth_table
 
 
-def polynomial_to_truth_table(n, polynomial):
+def polynomial_to_truth_table(n, polynomial, enforce_apn=True):
     r"""
     Construct the truth table of a univariate polynomial over GF(2^n).
     Defined by evaluating `f` at every element of `GF(2^n)` in order, `T[i] = f(i)` for `i = 0, 1, ... , 2^n - 1`, where elements are identified with integers via their integer representation.
+
+    NOTE: the parameter `enforce_apn` is set to `True` by default, so the function will raise a `ValueError` if the provided polynomial does not correspond to a quadratic APN function. Set `enforce_apn` to `False` to disable this check.
 
     INPUT:
 
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+    - ``enforce_apn`` -- (optional) boolean flag indicateing whether to check if the polynomial is APN; defaults to `True`
 
     EXAMPLES::
 
@@ -39,13 +42,13 @@ def polynomial_to_truth_table(n, polynomial):
     F = GF(2**n, 'a')
     tt = construct_truth_table(F, polynomial)
 
-    if not is_apn(F, tt):
+    if enforce_apn and not is_apn(F, tt):
         raise ValueError("The provided polynomial is not a quadratic APN function")
     
     return tt
 
 
-def truth_table_to_polynomial(n, tt: list):
+def truth_table_to_polynomial(n, tt: list, enforce_apn=True):
     r"""
     Recover the unique univariate polynomial over GF(2^n) from a truth table.
     Defined by applying Lagrange interpolation to the point set `{(i, T[i]) : i in GF(2^n)}`, where integers are identified with field elements via their integer representation.    
@@ -54,6 +57,7 @@ def truth_table_to_polynomial(n, tt: list):
 
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``tt`` -- a truth table (look up table) represented as a list of integers
+    - ``enforce_apn`` -- (optional) boolean flag indicateing whether to check if the polynomial is APN; defaults to `True`
 
     EXAMPLES::
     
@@ -73,14 +77,14 @@ def truth_table_to_polynomial(n, tt: list):
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
 
-    if not is_apn(F, tt):
+    if enforce_apn and not is_apn(F, tt):
         raise ValueError("The provided truth table is not a quadratic APN function")
 
     points = [(F.from_integer(i), F.from_integer(val)) for i, val in enumerate(tt)]
     return R.lagrange_polynomial(points)
 
 
-def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate'):
+def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate', enforce_apn=True):
     r"""
     Compute the Quadratic Matrix (QM) of a univariate polynomial over GF(2^n) with respect to a normal basis.
     Defined by `M[i,j] = f(b_i + b_j) + f(b_i) + f(b_j) + f(0)` for `i != j` and `M[i,i] = 0`, where `b_0, ..., b_{n-1}` is the supplied normal basis.
@@ -91,7 +95,8 @@ def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate'):
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
     - ``basis`` -- (optional) basis of GF(2^n) over GF(2); if None, a normal basis is used
     - ``output_format`` -- (optional) the format of the output matrix entries, either 'univariate' or 'power'; if None, 'univariate' is used
-    
+    - ``enforce_apn`` -- (optional) boolean flag indicateing whether to check if the polynomial is APN; defaults to `True`
+
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import polynomial_to_matrix
@@ -123,7 +128,7 @@ def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate'):
         [                  a^5 + 1                   a^2 + 1 a^5 + a^4 + a^3 + a^2 + 1             a^4 + a^2 + 1       a^4 + a^3 + a^2 + a                         0]
     """
     F = GF(2**n, 'a')
-    if not is_apn(F, polynomial):
+    if enforce_apn and not is_apn(F, polynomial):
         raise ValueError("The provided polynomial is not a quadratic APN function")
 
     if basis is None:
@@ -198,7 +203,7 @@ def matrix_to_polynomial(n, M, basis=None):
     return polynomial
 
 
-def polynomial_to_sequence(n, polynomial, basis=None):
+def polynomial_to_sequence(n, polynomial, basis=None, enforce_apn=True):
     r"""
     Compute the sequence of the Quadratic Matrix (QM) of a univariate polynomial over GF(2^n) with respect to a normal basis.
     Defined by constructing the QM `M` with respect to a normal basis and reading off the upper-triangular entries row by row as integers, `[M[i,j].to_integer() for 0 <= i < j <= n-1]`.
@@ -208,6 +213,7 @@ def polynomial_to_sequence(n, polynomial, basis=None):
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
     - ``basis`` -- (optional) basis of GF(2^n) over GF(2); if None, a normal basis is used
+    - ``enforce_apn`` -- (optional) boolean flag indicateing whether to check if the polynomial is APN; defaults to `True`
 
     EXAMPLES::
 
@@ -235,14 +241,14 @@ def polynomial_to_sequence(n, polynomial, basis=None):
     if basis is None:
         basis = [(F.gen()**3)**(2**i) for i in range(n)]
 
-    if not is_apn(F, polynomial):
+    if enforce_apn and not is_apn(F, polynomial):
         raise ValueError("The provided polynomial is not a quadratic APN function")
 
     M = polynomial_to_matrix(n, polynomial, basis)
     return [M[i, j].to_integer() for i in range(n) for j in range(i + 1, n)]
 
 
-def sequence_to_polynomial(n, sequence, basis=None):
+def sequence_to_polynomial(n, sequence, basis=None, enforce_apn=True):
     r"""
     Recover the univariate polynomial representation of a sequence of the Quadratic Matrix (QM) with respect to a normal basis.
     Defined by filling the symmetric matrix `M` with `M[i,j] = M[j,i] = s_k` for the k-th sequence element (in row-major upper-triangular order), then applying `matrix_to_polynomial` to recover `f`.
@@ -252,6 +258,7 @@ def sequence_to_polynomial(n, sequence, basis=None):
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``sequence`` -- a list of integers representing the upper-triangular entries of the QM, of length `n*(n-1)/2`
     - ``basis`` -- (optional) basis of GF(2^n) over GF(2); if None, a normal basis is used
+    - ``enforce_apn`` -- (optional) boolean flag indicateing whether to check if the polynomial is APN; defaults to `True`
 
     EXAMPLES::
 
@@ -280,4 +287,4 @@ def sequence_to_polynomial(n, sequence, basis=None):
         for j in range(i + 1, n):
             M[i,j] =  M[j,i] = next(seq_iter)
 
-    return matrix_to_polynomial(n, M, basis)
+    return matrix_to_polynomial(n, M, basis, enforce_apn)
