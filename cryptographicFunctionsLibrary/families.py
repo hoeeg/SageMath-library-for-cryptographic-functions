@@ -1,5 +1,5 @@
 from sage.all import *
-from helpers import is_primitive_element, family12_conditions
+from helpers import is_primitive_element, family12_conditions, family12_check_s
 
 
 def _family1_2(n, p, s, u):
@@ -60,8 +60,8 @@ def family1(n, s=None, u=None):
 
     INPUT:
 
-    - ``n`` -- the degree of the finite field extension GF(2^n); must satisfy n = 3k, gcd(k, 3) = 1
-    - ``s`` -- (optional) integer with gcd(s, 3k) = 1; if None, returns a list for all valid s in {1, ... , n - 1}
+    - ``n`` -- the degree of the finite field extension GF(2^n); must satisfy n = 3k
+    - ``s`` -- (optional) integer with gcd(s, 3k) = 1 and gcd(k, 3) = 1; if None, returns a list for all valid s in {1, ... , n - 1}
     - ``u`` -- (optional) primitive element of GF(2^n); if None, returns a list for all primitive elements of GF(2^n)
 
     EXAMPLES::
@@ -104,8 +104,8 @@ def family2(n, s=None, u=None):
 
     INPUT:
 
-    - ``n`` -- the degree of the finite field extension GF(2^n); must satisfy n = 3k, gcd(k, 3) = 1
-    - ``s`` -- (optional) integer with gcd(s, 3k) = 1; if None, returns a list for all valid s in {1, ... , n - 1}
+    - ``n`` -- the degree of the finite field extension GF(2^n); must satisfy n = 4k
+    - ``s`` -- (optional) integer with gcd(s, 3k) = 1 and gcd(k, 3) = 1; if None, returns a list for all valid s in {1, ... , n - 1}
     - ``u`` -- (optional) primitive element of GF(2^n); if None, returns a list for all primitive elements of GF(2^n)
 
     EXAMPLES::
@@ -151,7 +151,7 @@ def family3(n, i=None, s=None, c=None):
 
     - ``n`` -- the degree of the finite field extension GF(2^n); must be even 
     - ``i`` -- (optional) positive integer with gcd(i, n/2) = 1; if None, returns a list over all valid i in {1, ... , m - 1}
-    - ``s`` -- (optional) element of GF(2^n) not in GF(q); if None, returns a list over all valid s in {1, ... , n - 1}
+    - ``s`` -- (optional) element of GF(2^n) not in GF(q); if None, returns a list over all valid s in GF(2^n) \ GF(q)
     - ``c`` -- (optional) element of GF(2^n); if None, returns a list over all valid c in GF(2^n)
 
     EXAMPLES::
@@ -400,8 +400,8 @@ def family7_9(n, s=None, u=None, v=None, w=None):
     - ``n`` -- the degree of the finite field extension GF(2^n); must satisfy n = 3k, gcd(k, 3) = 1
     - ``s`` -- (optional) integer with gcd(s, 3k) = 1 and 3|(k + s); if None, returns a list for all valid s in {1, ... , n - 1}
     - ``u`` -- (optional) primitive element of GF(2^n)
-    - ``v`` -- (optional) element of GF(2^n) with v*w != 1; if None, returns a list for all valid v in GF(2^n)
-    - ``w`` -- (optional) element of GF(2^n) with v*w != 1; if None, returns a list for all valid w in GF(2^n)
+    - ``v`` -- (optional) element of GF(2^k) with v*w != 1; if None, returns a list for all valid v in GF(2^k)
+    - ``w`` -- (optional) element of GF(2^k) with v*w != 1; if None, returns a list for all valid w in GF(2^k)
 
     EXAMPLES::
 
@@ -625,14 +625,20 @@ def family12(n, i=None, s=None, a=None, b=None, c=None):
 
         sage: from cryptographicFunctionsLibrary import family12
         sage: F.<a> = GF(2^10)
-        sage: family12(10, 1, 5, a, a^2, a^2)
-        (a^8 + a^7 + a^2 + a + 1)*x^96 + (a^9 + a^5 + a^4 + a^3 + a)*x^33 + a^3*x^3
+        sage: family12(10, 1, 5, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
+        (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3
 
         sage: family12(10, 1, 5, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1)
-        [(a^9 + a^8 + a^7 + a^3 + a^2)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^8 + a^5 + a^3 + a^2)*x^3,
-        (a^6 + a^4 + a^3)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^9 + a^8 + a^7 + a^5 + a^3 + 1)*x^3,
+        [(a^6 + a^3 + a^2 + a + 1)*x^96 + (a^9 + a^8 + a^7 + a^3 + a + 1)*x^33 + (a^9 + a^7 + a)*x^3,
+        (a^7 + a^6 + a^5 + 1)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^9 + a^4 + a^3 + a + 1)*x^3,
         ...
-        (a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^9 + a^7 + a^6 + a^4)*x^33 + (a^8 + a^6 + a^2 + a)*x^3]
+        (a^9 + a^8 + a^6 + a^3 + a^2 + 1)*x^96 + (a^9 + a^6 + a^5 + a^2 + a)*x^33 + (a^9 + a^5 + a^3 + a + 1)*x^3]
+
+        sage: family12(10, None, None, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
+        [(a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^129 + (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^36 + (a^7 + a^2 + a)*x^33,
+        (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3,
+        (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^288 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^9,
+        (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^513 + (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^48 + (a^7 + a^2 + a)*x^33]
 
         sage: result = family12(10, 1, None, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1); result
         [(a^9 + a^8 + a^7 + a^3 + a^2)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^8 + a^5 + a^3 + a^2)*x^3,
@@ -641,7 +647,8 @@ def family12(n, i=None, s=None, a=None, b=None, c=None):
         (a^9 + a^8 + a^5 + a^4 + a^3 + a + 1)*x^513 + (a^7 + a^3 + a^2 + a)*x^96 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^3)*x^48 + (a^8 + a^7 + a^2 + 1)*x^3]
 
         sage: len(result)
-        116281
+        116281 (original)
+        137423 (now)
     """
     if n % 2 != 0:
         raise TypeError("n must be even")
@@ -658,21 +665,27 @@ def family12(n, i=None, s=None, a=None, b=None, c=None):
 
     if a is None:
         a = [a_val for a_val in F if a_val not in Q and a_val + a_val**q != F(0)]
-    elif a + a**q == F(0) or a not in F or a in Q:
+    elif a not in F or a in Q:
         raise TypeError("a must be an element of GF(2^n) not in GF(q) with a + a^q != 0")
     else:
         a = [a]
     
-    i = [i] if i is not None else [i_val for i_val in range(1, n) if gcd(i_val, n) == 1]
+    if i is None:
+        i = [i_val for i_val in range(1, n) if gcd(i_val, n) == 1]
+    elif gcd(i, n) != 1:
+        raise TypeError("i must satisfy gcd(i, n) = 1")
+    else:
+        i = [i]
+    
     b = [b] if b is not None else [b_val for b_val in F if b_val != F(0)]
     c = [c] if c is not None else [c_val for c_val in F if c_val != F(0)]
 
     def _poly(i_val, a_val, b_val, c_val, s_val):
-        e1 = (2**i_val + 1) % (2**n - 1)
-        e2 = (q * (2**i_val + 1)) % (2**n - 1)
-        e3 = (2**s_val + 1) % (2**n - 1)
-        e4 = (q * (2**s_val + 1)) % (2**n - 1)
-        return (a_val * b_val * x**e1 + a_val * b_val**q * x**e2 + a_val**q * c_val * x**e3 + a_val**q * c_val**q * x**e4).mod(x**(2**n) - x)
+        e_x1 = (2**i_val + 1)
+        e_b = (q * e_x1) % (2**n - 1)
+        e_x2 = (2**s_val + 1)
+        e_c = (q * e_x2) % (2**n - 1)
+        return (a_val * b_val * x**e_x1 + a_val * b_val**q * x**e_b + a_val**q * c_val * x**e_x2 + a_val**q * c_val**q * x**e_c).mod(x**(2**n) - x)
     
     res = set()
     for a_val in a:
@@ -680,7 +693,7 @@ def family12(n, i=None, s=None, a=None, b=None, c=None):
             for b_val in b:
                 for c_val in c:
                     if s is not None:
-                        if s in family12_conditions(F, i_val, b_val, c_val):
+                        if family12_check_s(F, i_val, b_val, c_val, s):
                             res.add(_poly(i_val, a_val, b_val, c_val, s))
                     else:
                         for s_val in family12_conditions(F, i_val, b_val, c_val):
@@ -703,56 +716,69 @@ def family13(n, s=None, v=None, mu=None):
 
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``s`` -- (optional) integer with gcd(s, n/3) = 1; if None, returns a list for all valid s in {1, ... , m}
-    - ``v`` -- (optional) nonzero element of GF(2^(n/3)); randomised if None
-    - ``mu`` -- (optional) nonzero element of GF(2^n) satisfying mu^(2^(2*(n/3)) + 2^(n/3) + 1) != 1; randomised if None
+    - ``v`` -- (optional) nonzero element of GF(2^(n/3)); if None, returns a list for all nonzero v in GF(2^m)
+    - ``mu`` -- (optional) nonzero element of GF(2^n) satisfying mu^(2^(2*(n/3)) + 2^(n/3) + 1) != 1; if None, returns a list for all valid mu in GF(2^n)
     
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import family13
-        sage: F = GF(2^9)
-        sage: a = F.gen()
-        sage: Fm = GF(2^3)
+        sage: F.<a> = GF(2^9)
+        sage: Fm = F.subfield(3)
         sage: family13(9, 1, Fm(1), a^7 + a^5 + a^3 + a + 1)
-        x^144 + (z9^7 + z9^5 + z9^3 + z9 + 1)*x^130 + x^129 + (z9^8 + z9^7 + z9^5 + z9^2 + 1)*x^32 + x^24 + (z9^7 + z9^6 + z9^5)*x^18 + (z9^8 + z9^7 + z9^5 + z9^2 + 1)*x^17 + (z9^7 + z9^5 + z9^3 + z9 + 1)*x^10
+        x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10
 
-        sage: Fm = GF(2^3)
         sage: family13(9, 1, Fm(1))
-        x^144 + (z9^8 + z9^7 + z9^6 + z9^5 + z9^2 + 1)*x^130 + x^129 + (z9^8 + z9^7 + z9^6 + z9^5 + z9^3 + 1)*x^32 + x^24 + (z9^7 + z9^5 + z9^4 + z9^2 + z9)*x^18 + (z9^8 + z9^7 + z9^6 + z9^5 + z9^3 + 1)*x^17 + (z9^8 + z9^7 + z9^6 + z9^5 + z9^2 + 1)*x^10
+        [x^144 + (a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^130 + x^129 + (a^4 + a)*x^32 + x^24 + (a^7 + a^6 + a^5 + a^3 + 1)*x^18 + (a^4 + a)*x^17 + (a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^10,
+        x^144 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^130 + x^129 + (a^8 + a^7 + a^5 + a)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^18 + (a^8 + a^7 + a^5 + a)*x^17 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^10,
+        ...
+        x^144 + (a^7 + a^6 + a^5 + a^3 + a)*x^130 + x^129 + (a^3 + a^2 + a + 1)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^2)*x^18 + (a^3 + a^2 + a + 1)*x^17 + (a^7 + a^6 + a^5 + a^3 + a)*x^10]
 
         sage: family13(9, 1, None, a^7 + a^5 + a^3 + a + 1)
-        x^144 + (z9^7 + z9^5 + z9^3 + z9 + 1)*x^130 + x^129 + (z9^8 + z9^7 + z9^5 + z9^2 + 1)*x^32 + x^24 + (z9^7 + z9^6 + z9^5)*x^18 + (z9^8 + z9^7 + z9^5 + z9^2 + 1)*x^17 + (z9^7 + z9^5 + z9^3 + z9 + 1)*x^10 + (z9^8 + z9^6 + z9^4 + 1)*x^9
+        [x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10 + (a^8 + a^6 + a^3 + a^2)*x^9,
+        x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10 + (a^4 + a^3 + a^2 + 1)*x^9,
+        ...        
+        x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10]
 
         sage: family13(9, 1)
-        x^144 + (z9^8 + z9^7 + z9^2 + 1)*x^130 + x^129 + (z9^6 + z9^5 + z9^4 + z9^2)*x^32 + x^24 + (z9^8 + z9^7 + z9^6 + z9^5 + z9)*x^18 + (z9^6 + z9^5 + z9^4 + z9^2)*x^17 + (z9^8 + z9^7 + z9^2 + 1)*x^10 + (z9^8 + z9^6 + z9^4)*x^9
+        [x^144 + (a^3 + a^2)*x^130 + x^129 + (a^7 + a^5 + a^4 + a^2 + 1)*x^32 + x^24 + (a^8 + a^6 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^4 + a^2 + 1)*x^17 + (a^3 + a^2)*x^10 + (a^8 + a^6 + a^3 + a^2 + 1)*x^9,
+        x^144 + (a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^130 + x^129 + (a^6 + a^4 + a^3 + a^2 + 1)*x^32 + x^24 + (a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^6 + a^4 + a^3 + a^2 + 1)*x^17 + (a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^10 + (a^4 + a^3 + a^2)*x^9,
+        ...
+        x^144 + (a^7 + a^5 + 1)*x^130 + x^129 + (a^7 + a^6 + a^4 + a^2)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + 1)*x^18 + (a^7 + a^6 + a^4 + a^2)*x^17 + (a^7 + a^5 + 1)*x^10 + (a^8 + a^6 + a^3 + a^2)*x^9]
 
         sage: family13(9)
-        [x^144 + (z9^6 + z9^5 + 1)*x^130 + x^129 + (z9^8 + z9^7 + z9^4 + z9^3 + z9^2)*x^32 + x^24 + (z9^8 + z9^7 + z9^2 + z9 + 1)*x^18 + (z9^8 + z9^7 + z9^4 + z9^3 + z9^2)*x^17 + (z9^6 + z9^5 + 1)*x^10 + (z9^8 + z9^6 + z9^4 + 1)*x^9,
-        x^288 + (z9^6 + z9^5 + 1)*x^260 + x^257 + (z9^8 + z9^7 + z9^4 + z9^3 + z9^2)*x^64 + x^40 + (z9^8 + z9^7 + z9^2 + z9 + 1)*x^36 + (z9^8 + z9^7 + z9^4 + z9^3 + z9^2)*x^33 + (z9^6 + z9^5 + 1)*x^12 + (z9^8 + z9^6 + z9^4 + 1)*x^9]
+        [x^144 + (a^3 + a^2)*x^130 + x^129 + (a^7 + a^5 + a^4 + a^2 + 1)*x^32 + x^24 + (a^8 + a^6 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^4 + a^2 + 1)*x^17 + (a^3 + a^2)*x^10 + (a^8 + a^6 + a^3 + a^2 + 1)*x^9,
+        x^288 + (a^8 + a^3 + a^2 + a + 1)*x^260 + x^257 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^64 + x^40 + (a^8 + a^6 + a^5 + a + 1)*x^36 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^33 + (a^8 + a^3 + a^2 + a + 1)*x^12 + (a^8 + a^6 + a^4 + 1)*x^9,
+        ...
+        x^288 + (a^7 + a^5 + a^4 + a^3 + a^2 + 1)*x^260 + x^257 + (a^7 + a^6 + a^3)*x^64 + x^40 + (a^8 + a^7 + a^5 + a + 1)*x^36 + (a^7 + a^6 + a^3)*x^33 + (a^7 + a^5 + a^4 + a^3 + a^2 + 1)*x^12 + (a^8 + a^6 + a^4 + 1)*x^9]
 
-        sage: family13(12)
-        [x^544 + (z12^10 + z12^9 + z12^8 + z12^7 + z12^5 + z12^3 + z12^2 + z12 + 1)*x^514 + x^513 + (z12^11 + z12^10 + z12^8 + z12^6 + z12^5 + z12^4)*x^64 + x^48 + (z12^10 + z12^9 + z12^5 + z12^4 + z12)*x^34 + (z12^11 + z12^10 + z12^8 + z12^6 + z12^5 + z12^4)*x^33 + (z12^10 + z12^9 + z12^8 + z12^7 + z12^5 + z12^3 + z12^2 + z12 + 1)*x^18 + (z12^10 + z12^9 + z12^6 + z12^5 + z12^3 + 1)*x^17,
-        x^2176 + (z12^10 + z12^9 + z12^8 + z12^7 + z12^5 + z12^3 + z12^2 + z12 + 1)*x^2056 + x^2049 + (z12^11 + z12^10 + z12^8 + z12^6 + z12^5 + z12^4)*x^256 + x^144 + (z12^10 + z12^9 + z12^5 + z12^4 + z12)*x^136 + (z12^11 + z12^10 + z12^8 + z12^6 + z12^5 + z12^4)*x^129 + (z12^10 + z12^9 + z12^8 + z12^7 + z12^5 + z12^3 + z12^2 + z12 + 1)*x^24 + (z12^10 + z12^9 + z12^6 + z12^5 + z12^3 + 1)*x^17]
+        sage: result = family13(12); result
+        [x^544 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^514 + x^513 + (a^7 + a^6 + a^4 + a^3 + a)*x^64 + x^48 + (a^11 + a^9 + a^5)*x^34 + (a^7 + a^6 + a^4 + a^3 + a)*x^33 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^17,
+        x^2176 + (a^10 + a^9 + a^5 + a^4 + a^3 + a^2)*x^2056 + x^2049 + (a^10 + a^8 + a^7 + a^6 + a^5 + a + 1)*x^256 + x^144 + (a^10 + a^8 + a^7 + a^5 + a^4 + a^3 + 1)*x^136 + (a^10 + a^8 + a^7 + a^6 + a^5 + a + 1)*x^129 + (a^10 + a^9 + a^5 + a^4 + a^3 + a^2)*x^24 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^17,
+        ...
+        x^544 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^514 + x^513 + (a^9 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^64 + x^48 + (a^11 + a^8 + a^5 + a^3 + a^2)*x^34 + (a^9 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^33 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^18 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2)*x^17]
+
+        sage: len(result)
+        32760
     """
     def _permutes(s_val, mu_val):
         L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
-        return all(L(a) != 0 for a in F if a != 0)
+        return L.gcd(x**(2**n) - x) == x
         
     if n % 3 != 0:
         raise TypeError("n must be divisible by 3")
 
     m = n // 3
-    F = GF(2**n)
+    F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()
-    Fm = GF(2**m)
+    Fm = F.subfield(m)
 
     if v is None:
-        while True:
-            v = Fm.random_element() 
-            if v != 0:
-                break
-    elif v == 0 or v**(2**m - 1) != 1:
+        v = [v_val for v_val in Fm if v_val != 0]
+    elif v == 0 or v not in Fm:
         raise TypeError("v must be a nonzero element of GF(2^m)")
+    else:
+        v = [v]
 
     if s is not None:
         if gcd(s, m) != 1:
@@ -761,26 +787,26 @@ def family13(n, s=None, v=None, mu=None):
     s = [s_val for s_val in range(1, m + 1) if gcd(s_val, m) == 1] if s is None else [s]
     
     if mu is None:
-        while True:
-            mu = F.random_element()
-            if mu == 0 or mu**(2**(2*m) + 2**m + 1) == 1:
-                continue
-            if all(_permutes(s_val, mu) for s_val in s):
-                break
+        mu = [mu_val for mu_val in F if mu_val != 0 and mu_val**(2**(2*m) + 2**m + 1) != 1]
+    elif mu not in F or mu == 0 or mu**(2**(2*m) + 2**m + 1) == 1:
+        raise TypeError("mu must be a nonzero element of GF(2^n) satisfying mu^(2^(2*m)+2^m+1) != 1")
     else:
-        if mu not in F or mu == 0:
-            raise TypeError("mu must be a nonzero element of GF(2^n)")
-        if mu**(2**(2*m) + 2**m + 1) == 1:
-            raise TypeError("mu must satisfy mu^(2^(2*m)+2^m+1) != 1")
+        mu = [mu]
+
+    def _poly(s_val, mu_val, v_val):
+        L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
+        return (L**(2**m + 1) + v_val*x**(2**m + 1)).mod(x**(2**n) - x)
+
+    res = set()
+
+    for mu_val in mu:
         for s_val in s:
-            if not _permutes(s_val, mu):
-                raise TypeError("L does not permute GF(2^n) for s and the given mu")
-
-    def _poly(s_val):
-        L = x**(2**(m + s_val)) + mu*x**(2**s_val) + x
-        return (L**(2**m + 1) + v*x**(2**m + 1)).mod(x**(2**n) - x)
-
-    if len(s) > 1:
-        return [_poly(s_val) for s_val in s]
+            if not _permutes(s_val, mu_val):
+                continue
+            for v_val in v:
+                res.add(_poly(s_val, mu_val, v_val))
     
-    return _poly(s[0])
+    if not res:
+        raise TypeError("No valid polynomials found")
+    
+    return list(res) if len(res) > 1 else list(res)[0]

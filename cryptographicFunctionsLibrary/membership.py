@@ -1,5 +1,7 @@
 from sage.all import *
-from helpers import is_primitive_element, get_terms, family12_conditions
+from sage.rings.finite_rings.finite_field_constructor import GF
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from helpers import is_primitive_element, get_terms, family12_check_s
 
 
 def _belong_family1_2(n, p, poly):
@@ -464,7 +466,7 @@ def belong_family7_9(n, poly):
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import belong_family7_9
-        sage: F.<a> = GF(2^3)
+        sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^10 + a^6 + a^5 + a^3 + a)*x^768 + (a^9 + a^8 + a^6 + a^5 + a^2)*x^544 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257 + (a^7 + a^5 + a^3 + a^2 + 1)*x^33
         sage: belong_family7_9(12, poly)
@@ -671,6 +673,7 @@ def belong_family12(n, poly):
         return False, {}
     
     F = GF(2**n, 'a')
+    Q = GF(q)
 
     # Get the terms of the polynomial reduced modulo x^(2^n) - x
     terms = get_terms(n, poly)
@@ -682,17 +685,20 @@ def belong_family12(n, poly):
             continue
 
         for s in range(1, n):
-            e1 = (2**i + 1) % (2**n - 1)   # a*b
-            e2 = (q * (2**i + 1)) % (2**n - 1)   # a*b^q
-            e3 = (2**s + 1) % (2**n - 1)   # a^q*c
-            e4 = (q * (2**s + 1)) % (2**n - 1)   # a^q*c^q
-
-            if not set(terms).issubset({e1, e2, e3, e4}):
+            if i == s:
                 continue
 
-            c1 = terms.get(e1, F(0))
-            c2 = terms.get(e2, F(0))
-            c3 = terms.get(e3, F(0))
+            e_x1 = (2**i + 1)
+            e_b = (q * e_x1) % (2**n - 1)
+            e_x2 = (2**s + 1)
+            e_c = (q * e_x2) % (2**n - 1)
+
+            if not set(terms).issubset({e_x1, e_b, e_x2, e_c}):
+                continue
+
+            c1 = terms.get(e_x1, F(0))
+            c2 = terms.get(e_b, F(0))
+            c3 = terms.get(e_x2, F(0))
 
             if c1 == F(0) or c2 == F(0) or c3 == F(0):
                 continue
@@ -704,7 +710,7 @@ def belong_family12(n, poly):
                 continue
 
             for a in all_roots:
-                if a == F(0) or a**q == a or a + a**q == F(0) or a in GF(q):
+                if a == F(0) or a in Q:
                     continue
             
                 b = c1 / a
@@ -712,7 +718,7 @@ def belong_family12(n, poly):
                     continue
 
                 c_can = c3 / a**q
-                if e3 == e4:
+                if e_x2 == e_c:
                     c_list = [c for c in F if c != F(0) and c**q + c == c_can]
                 elif c_can == F(0):
                     continue
@@ -720,10 +726,8 @@ def belong_family12(n, poly):
                     c_list = [c_can]
 
                 for c in c_list:
-                    if s not in family12_conditions(F, i, b, c):
-                        continue
-                    
-                    return True, {'i': i, 's': s, 'a': a, 'b': b, 'c': c}
+                    if family12_check_s(F, i, b, c, s):
+                        return True, {'i': i, 's': s, 'a': a, 'b': b, 'c': c}
     
     return False, {}
 
@@ -739,8 +743,94 @@ def belong_family13(n, poly):
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
+
+        sage: from cryptographicFunctionsLibrary import belong_family13
+        sage: F.<a> = GF(2^9)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = x^144 + (a^8 + a^7 + a^3 + a^2 + a)*x^130 + x^129 + (a^8 + a^2)*x^32 + x^24 + (a^7 + a^6 + a^4 + a^3 + a)*x^18 + (a^8 + a^2)*x^17 + (a^8 + a^7 + a^3 + a^2 + a)*x^10 + (a^4 + a^3 + a^2 + 1)*x^9
+        sage: belong_family13(9, poly)
+        (True, {'s': 1, 'v': a^4 + a^3 + a^2, 'mu': a^8 + a^7 + a^3 + a^2 + a})
+
+        sage: poly = x^288 + (a^8 + a^7 + a^6 + a^3 + a^2)*x^260 + x^257 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^64 + x^40 + (a^7 + a^3 + a^2)*x^36 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^33 + (a^8 + a^7 + a^6 + a^3 + a^2)*x^12
+        sage: belong_family13(9, poly)
+        (True, {'s': 2, 'v': 1, 'mu': a^8 + a^7 + a^6 + a^3 + a^2})
+
+        sage: F.<a> = GF(2^12)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = x^544 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^514 + x^513 + (a^7 + a^6 + a^4 + a^3 + a)*x^64 + x^48 + (a^11 + a^9 + a^5)*x^34 + (a^7 + a^6 + a^4 + a^3 + a)*x^33 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^17
+        sage: belong_family13(12, poly)
+        (True,
+        {'s': 1,
+        'v': a^11 + a^9 + a^8 + a^6 + a^3 + a,
+        'mu': a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1})
     """
-    # Placeholder for future implementation
+    if n % 3 != 0:
+        return False, {}
+    
+    m = n // 3
+    F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()
+    Fm = F.subfield(m)
+
+    terms = get_terms(n, poly)
+    if not terms:
+        return False, {}
+
+    for s_val in range(1, m + 1):
+        if gcd(s_val, m) != 1:
+            continue
+
+        P = 2**(2*m + s_val)
+        Q = 2**(m + s_val)
+        Rp = 2**m
+        B = 2**s_val
+
+        e_PQ = (P + Q) % (2**n - 1)
+        e_PB = (P + B) % (2**n - 1)
+        e_P1 = (P + 1) % (2**n - 1)
+        e_2Q = (2 * Q) % (2**n - 1)
+        e_QB = (Q + B) % (2**n - 1)
+        e_Q1 = (Q + 1) % (2**n - 1)
+        e_RQ = (Rp + Q) % (2**n - 1)
+        e_RB = (Rp + B) % (2**n - 1)
+        e_R1 = (Rp + 1) % (2**n - 1)
+
+        expected = {e_PQ, e_PB, e_P1, e_2Q, e_QB, e_Q1, e_RQ, e_RB, e_R1}
+        if not set(terms).issubset(expected):
+            continue
+
+        # Recover mu from x^(P+B)
+        mu = terms.get(e_PB, F(0))
+        if mu == F(0):
+            continue
+
+        if terms.get(e_PQ, F(0)) != F(1) or terms.get(e_P1, F(0)) != F(1) or terms.get(e_RQ, F(0)) != F(1):
+            continue
+        if terms.get(e_RB, F(0)) != mu:
+            continue
+        mu_q = mu**(2**m)
+        if terms.get(e_2Q, F(0)) != mu_q or terms.get(e_Q1, F(0)) != mu_q:
+            continue
+        if terms.get(e_QB, F(0)) != mu_q * mu:
+            continue
+
+        # v from x^(R+1) coefficient = 1 + v
+        v = terms.get(e_R1, F(0)) + F(1)
+        if v == F(0) or v not in Fm:
+            continue
+
+        # mu^(q^2 + q + 1) != 1
+        if mu**(2**(2*m) + 2**m + 1) == F(1):
+            continue
+
+        # L permutes F
+        L = x**(2**(m + s_val)) + mu*x**(2**s_val) + x
+        if L.gcd(x**(2**n) - x) != x:
+            continue
+
+        return True, {'s': s_val, 'v': v, 'mu': mu}
+
     return False, {}
 
 
@@ -753,7 +843,8 @@ FAMILIES = {
     "Family6": belong_family6,
     "Family7_9": belong_family7_9,
     "Family11": belong_family11,
-    "Family12": belong_family12
+    "Family12": belong_family12,
+    "Family13": belong_family13
 }
 
 def belong(n, polynomial):
@@ -775,8 +866,12 @@ def belong(n, polynomial):
         Belong to Family2: False
         Belong to Family3: False
         Belong to Family4: False
+        Belong to Family5: False
+        Belong to Family6: False
         Belong to Family7_9: False
         Belong to Family11: False
+        Belong to Family12: False
+        Belong to Family13: False
     """
     for family_name, family_function in FAMILIES.items():
         try:

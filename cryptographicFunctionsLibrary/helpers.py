@@ -1,6 +1,7 @@
 from sage.all import *
 from sage.crypto.sbox import SBox
 from sage.all import Polynomial
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 
 
 def construct_truth_table(F, polynomial):
@@ -42,9 +43,12 @@ def is_cube(F, x):
     """
     Check if an element is a cube in GF(2^n).
     """
+    x = F(x)
     if x == F(0): 
         return True
     order = F.order() - 1
+    if order % 3 != 0:
+        return True
     return x**(order // 3) == F(1)
 
 def family12_conditions(F, i_val, b_val, c_val):
@@ -61,8 +65,8 @@ def family12_conditions(F, i_val, b_val, c_val):
     if term**q == term:
         s.append(n - i_val)
     
-    if not is_cube(F, b_val):
-        return s
+    if is_cube(F, b_val):
+        return list(set(s))
 
     term = b_val**(2**(2 * i_val) - 2**i_val + 1) * c_val**(-1)
     if term**q == term:
@@ -97,29 +101,34 @@ def family12_check_s(F, i_val, b_val, c_val, s_val):
 
     if s_val == n - i_val:
         term = b_val * c_val**(-(2**i_val))
-        return term**q == term
+        if term**q == term: 
+            return True
 
-    # All remaining branches require b not a cube
+    # All remaining cases requires that b is not a cube
     if is_cube(F, b_val):
         return False
 
     if s_val == 3 * i_val:
         term = b_val**(2**(2*i_val) - 2**i_val + 1) * c_val**(-1)
-        return term**q == term
+        if term**q == term: 
+            return True
     
     if s_val == m - 2*i_val and s_val > 0:
         term = b_val**(2**i_val - 1) * c_val**(-(2**(2*i_val)))
-        return term**q == term
+        if term**q == term:
+            return True
     
     if s_val == m + 2*i_val:
         term = c_val * b_val**(2**i_val - 1)
-        return term**q == term
+        if term**q == term:
+            return True
     
-    if s_val == m:
-        return c_val**q != c_val
+    if s_val == m and c_val**q != c_val:
+        return True
     
     if i_val == 1 and gcd(m - 2, n) == 1 and s_val == pow(m - 2, -1, n):
         term = b_val**(2**(2*s_val)) * c_val**(-(2**s_val - 1))
-        return term**q == term
+        if term**q == term:
+            return True
     
     return False
