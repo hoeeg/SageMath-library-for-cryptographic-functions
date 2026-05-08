@@ -164,7 +164,7 @@ def matrix_to_polynomial(n, M, basis=None):
 
         sage: from cryptographicFunctionsLibrary import matrix_to_polynomial
         sage: F.<a> = GF(2^4)
-        sage: M = Matrix(F, [[ 0, a^3 + a^2 + a, a^2 + a + 1, a^3 + a^2 + 1], [a^3 + a^2 + a, 0, a^3 + a + 1, a^2 + a], [ a^2 + a + 1, a^3 + a + 1, 0, a^3 + 1], [a^3 + a^2 + 1, a^2 + a, a^3 + 1, 0]])
+        sage: M = Matrix(F, [[0, a^3 + a^2 + a, a^2 + a + 1, a^3 + a^2 + 1], [a^3 + a^2 + a, 0, a^3 + a + 1, a^2 + a], [ a^2 + a + 1, a^3 + a + 1, 0, a^3 + 1], [a^3 + a^2 + 1, a^2 + a, a^3 + 1, 0]])
         sage: polynomial = matrix_to_polynomial(4, M); polynomial
         x^3
 
