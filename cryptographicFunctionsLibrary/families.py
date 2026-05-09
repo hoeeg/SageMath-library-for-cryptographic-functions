@@ -2,9 +2,9 @@ from sage.all import *
 from helpers import is_primitive_element, family12_conditions, family12_check_s
 
 
-def _family1_2(n, p, s, u):
+def _family_1_2(n, p, s, u):
     """
-    Shared implementation for family1 (p=3) and family2 (p=4).
+    Shared implementation for Family 1 (p=3) and Family 2 (p=4).
     """
     if n < 12:
         raise TypeError("n must be at least 12")
@@ -51,7 +51,7 @@ def _family1_2(n, p, s, u):
     return list(res) if len(res) > 1 else list(res)[0]
 
 
-def family1(n, s=None, u=None):
+def family_1(n, s=None, u=None):
     r"""
     Return the Budaghyan-Carlet-Leander construction from 2008 for `p = 3`.
     Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
@@ -66,24 +66,24 @@ def family1(n, s=None, u=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family1
+        sage: from cryptographicFunctionsLibrary import family_1
         sage: F.<a> = GF(2^12)
-        sage: family1(12, 5, a^2)
+        sage: family_1(12, 5, a^2)
         (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33
 
-        sage: family1(12, None, a^6 + a^5 + 1)
+        sage: family_1(12, None, a^6 + a^5 + 1)
         [x^2049 + (a^11 + a^9 + a^7 + a^6 + a^2)*x^264,
         (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33,
         (a^11 + a^9 + a^7 + a^6 + a^2)*x^528 + x^3,
         x^129 + (a^11 + a^9 + a^7 + a^6 + a^2)*x^24]
 
-        sage: family1(12, 1)
+        sage: family_1(12, 1)
         [(a^9 + a^8 + a^7 + a^5 + 1)*x^528 + x^3,
         (a^11 + a^9 + a^7 + a^4 + a^3 + a^2 + a)*x^528 + x^3,
         ...
         (a^8 + a^7 + a^6 + a^5 + a^4 + a)*x^528 + x^3]
 
-        sage: result = family1(12); result
+        sage: result = family_1(12); result
         [(a^9 + a^6 + a^5 + a^4 + a^2 + 1)*x^768 + x^33,
         (a^11 + a^10 + a^8 + a^7 + a^6 + a^3 + a^2 + a)*x^768 + x^33,
         ...
@@ -92,10 +92,10 @@ def family1(n, s=None, u=None):
         sage: len(result)
         576
     """
-    return _family1_2(n, 3, s, u)
+    return _family_1_2(n, 3, s, u)
 
 
-def family2(n, s=None, u=None):
+def family_2(n, s=None, u=None):
     r"""
     Return the Budaghyan-Carlet-Leander construction from 2008 for `p = 4`.
     Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
@@ -110,25 +110,25 @@ def family2(n, s=None, u=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family2
+        sage: from cryptographicFunctionsLibrary import family_2
         sage: F.<a> = GF(2^16)
-        sage: family2(16, 5, a^15 + a^14 + a^13 + a^11 + a^3 + a^2 + a)
+        sage: family_2(16, 5, a^15 + a^14 + a^13 + a^11 + a^3 + a^2 + a)
         (a^15 + a^14 + a^13 + a^12 + a^10 + a^9 + a^8 + a^4 + a^2 + a + 1)*x^33
 
-        sage: family2(16, None, a^15 + a^14 + a^7 + a^6 + a^3 + a)
+        sage: family_2(16, None, a^15 + a^14 + a^7 + a^6 + a^3 + a)
         [(a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3,
         (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^129,
         (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^8193,
         (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^2049,
         (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^33]
  
-        sage: family2(16, 1)
+        sage: family_2(16, 1)
         [(a^15 + a^12 + a^11 + a^8 + a^7 + a^6 + a)*x^3,
         (a^15 + a^14 + a^13 + a^12 + a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^3,
         ...
         (a^15 + a^13 + a^10 + a^8 + a^6 + a^5 + a^3 + a^2)*x^3]
         
-        sage: result = family2(16); result
+        sage: result = family_2(16); result
         [(a^15 + a^12 + a^11 + a^8 + a^7 + a^6 + a)*x^3,
         (a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^2049,
         ...
@@ -137,10 +137,10 @@ def family2(n, s=None, u=None):
         sage: len(result)
         20480
     """
-    return _family1_2(n, 4, s, u)
+    return _family_1_2(n, 4, s, u)
 
 
-def family3(n, i=None, s=None, c=None):
+def family_3(n, i=None, s=None, c=None):
     r"""
     Return the Budaghyan-Carlet construction from 2008.
     Defined by `f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q))`.
@@ -156,22 +156,22 @@ def family3(n, i=None, s=None, c=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family3
+        sage: from cryptographicFunctionsLibrary import family_3
         sage: F.<a> = GF(2^6)
-        sage: family3(6, 1, a, a)
+        sage: family_3(6, 1, a, a)
         x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
 
-        sage: family3(6, None, a^2 + a + 1, a^5 + a^4 + a^2 + a + 1)
+        sage: family_3(6, None, a^2 + a + 1, a^5 + a^4 + a^2 + a + 1)
         [x^40 + (a^5 + a^4 + a^2 + a + 1)*x^33 + a*x^12 + (a^2 + a + 1)*x^9 + x^5,
         x^24 + (a^5 + a^4 + a^2 + a + 1)*x^17 + a*x^10 + (a^2 + a + 1)*x^9 + x^3]
         
-        sage: family3(6, 1)
+        sage: family_3(6, 1)
         [x^24 + (a^4 + a^3 + a^2)*x^17 + (a^3 + a)*x^10 + (a^3 + 1)*x^9 + x^3,
         x^24 + (a^5 + a^4 + a^3 + 1)*x^17 + (a^3 + a^2 + 1)*x^10 + (a^4 + a^3 + a^2 + a)*x^9 + x^3,
         ...
         x^24 + a^4*x^17 + (a^5 + a^4 + a)*x^10 + (a^5 + a^4 + a)*x^9 + x^3]
 
-        sage: result = family3(6); result
+        sage: result = family_3(6); result
         [x^24 + (a^4 + a^3 + a^2)*x^17 + (a^3 + a)*x^10 + (a^5 + a^4 + a^2)*x^9 + x^3,
         x^24 + (a^3 + a)*x^17 + (a^4 + a^3 + a^2)*x^10 + (a^5 + a^4 + a^2)*x^9 + x^3,
         ...
@@ -240,7 +240,7 @@ def family3(n, i=None, s=None, c=None):
     return list(res) if len(res) > 1 else list(res)[0]
 
 
-def family4(n, a=None):
+def family_4(n, a=None):
     r"""
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9)`.
@@ -254,12 +254,12 @@ def family4(n, a=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family4
+        sage: from cryptographicFunctionsLibrary import family_4
         sage: F.<a> = GF(2^9)
-        sage: family4(9, a^8 + a^7 + a^5 + a^3 + 1)
+        sage: family_4(9, a^8 + a^7 + a^5 + a^3 + 1)
         (a^8 + a^7 + a^6 + a^4 + a^3)*x^288 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^260 + (a^8 + a^7 + a^5 + 1)*x^144 + (a^7 + a^6 + 1)*x^130 + (a^7 + a^6 + a^4 + a^2 + a + 1)*x^72 + (a^6 + a^5 + a^4 + a^2 + a)*x^65 + (a^7 + a^6 + a^4 + a^3 + a)*x^36 + (a^8 + a^6 + a^4 + a^3 + 1)*x^18 + (a^5 + a^4 + a^2 + 1)*x^9 + x^3
 
-        sage: family4(9, F(1))
+        sage: family_4(9, F(1))
         x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
 
         sage: result = family4(9); result
@@ -287,7 +287,7 @@ def family4(n, a=None):
     return _poly(a)
 
 
-def family5(n, a=None):
+def family_5(n, a=None):
     r"""
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18)`.
@@ -303,13 +303,13 @@ def family5(n, a=None):
 
         sage: from cryptographicFunctionsLibrary import family5
         sage: F.<a> = GF(2^9)
-        sage: family5(9, a^6 + a^5)
+        sage: family_5(9, a^6 + a^5)
         (a^3 + a^2 + 1)*x^144 + (a^8 + a^5 + a^3 + a^2)*x^130 + (a^4 + a^3 + a + 1)*x^72 + (a^3 + a + 1)*x^65 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a)*x^9 + x^3
         
-        sage: family5(9, F(1))
+        sage: family_5(9, F(1))
         x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3
 
-        sage: result = family5(9); result
+        sage: result = family_5(9); result
         [(a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^8 + a^5 + a^4)*x^72 + (a^8 + a^7 + a^4 + a)*x^65 + a^5*x^18 + a^2*x^9 + x^3,
         (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + 1)*x^65 + (a^5 + a)*x^18 + a^4*x^9 + x^3,        ...
         x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3]
@@ -337,7 +337,7 @@ def family5(n, a=None):
     return _poly(a)
 
 
-def family6(n, a=None):
+def family_6(n, a=None):
     r"""
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36)`.
@@ -351,15 +351,15 @@ def family6(n, a=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family6
+        sage: from cryptographicFunctionsLibrary import family_6
         sage: F.<a> = GF(2^9)
-        sage: family6(9, a^8 + a^5 + a^3 + 1)
+        sage: family_6(9, a^8 + a^5 + a^3 + 1)
         (a^8 + a^7 + a^6 + a^4 + a^3 + a)*x^288 + (a^8 + a^7 + a^6 + a^2 + 1)*x^260 + (a^7 + a^6 + a^5 + a^4)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + 1)*x^36 + (a^8 + a^7 + a^5 + a^4 + a^2 + a + 1)*x^18 + x^3
 
-        sage: family6(9, F(1))
+        sage: family_6(9, F(1))
         x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3
 
-        sage: result = family6(9); result
+        sage: result = family_6(9); result
         [(a^6 + a^3 + 1)*x^288 + (a^7 + a^5 + a^2 + 1)*x^260 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^6 + a^2)*x^36 + a^5*x^18 + x^3,
         (a^7 + a^6 + a^3 + 1)*x^288 + a*x^260 + (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^7 + a^4 + a^3)*x^36 + (a^5 + a)*x^18 + x^3,
         ...
@@ -388,7 +388,7 @@ def family6(n, a=None):
     return _poly(a)
 
 
-def family7_9(n, s=None, u=None, v=None, w=None):
+def family_7_9(n, s=None, u=None, v=None, w=None):
     r"""
     Return the Bracken-Byrne-Markin-McGuire construction from 2011.
     Defined by `f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s))`.
@@ -405,38 +405,38 @@ def family7_9(n, s=None, u=None, v=None, w=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family7_9
+        sage: from cryptographicFunctionsLibrary import family_7_9
         sage: F.<a> = GF(2^12)
         sage: u, v, w = a, a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1, a^10 + a^9 + a^8 + a^4 + a^3 + a^2
-        sage: family7_9(12, 5, u, v, w)
+        sage: family_7_9(12, 5, u, v, w)
         (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^9 + a^6 + a^4 + a^2 + a)*x^544 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257 + a*x^33
         
         sage: v, w = a^11 + a^9 + a^8 + a^6 + a^3 + a + 1, a^10 + a^9 + a^6 + a^5 + a^3 + 1
-        sage: family7_9(12, 11, None, v, w)
+        sage: family_7_9(12, 11, None, v, w)
         [(a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a)*x^2056 + (a^10 + a^9 + a^8 + a^6 + a^2 + 1)*x^2049 + (a^10 + a^8 + a^5 + a^4 + a^3 + a + 1)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
         (a^10 + a^9 + a^7 + a^6 + a^4 + a^3)*x^2056 + (a^11 + a^10 + a^8 + a^6 + a^4 + a^3 + a^2 + a)*x^2049 + (a^11 + a^7 + a^6 + a^3)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
         ...
         (a^7 + a^5 + a^4 + a^3 + a)*x^2056 + (a^11 + a^9 + a^6 + a^5 + a^4 + a + 1)*x^2049 + (a^9 + a^8 + a^7 + a^6 + a^2)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257]
         
-        sage: family7_9(12, 11, None, v)
+        sage: family_7_9(12, 11, None, v)
         [(a^11 + a^6 + a^4 + a^3 + a^2 + a)*x^2056 + (a^11 + a^9 + a^7 + a^5 + a^3 + a^2 + 1)*x^2049 + (a^11 + a^10 + a^8 + a^6 + a^4 + a^3)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
         (a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^4 + 1)*x^2056 + (a^11 + a^10 + a^9 + a^8 + a^6 + a^4 + a^3 + a^2 + a)*x^2049 + (a^11 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
         ...
         (a^7 + a^5 + a^4 + a)*x^2056 + (a^11 + a^8 + a^3 + 1)*x^2049 + (a^11 + a^10 + a^7 + a^4 + 1)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257]
 
-        sage: family7_9(12, 11, None, None, w)
+        sage: family_7_9(12, 11, None, None, w)
         [(a^10 + a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^2056 + (a^8 + a^7 + a^5 + a)*x^2049 + (a^10 + a^7 + a + 1)*x^264 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2 + 1)*x^257,
         (a^10 + a^9 + a^6 + a^5 + a^4 + a^3 + a^2 + 1)*x^2056 + (a^8 + a^7 + a^3 + 1)*x^2049 + (a^11 + a^10 + a^6 + a^4 + a + 1)*x^264 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257,
         ...
         (a^11 + a^10 + a^8 + a^6 + a^5 + a^3)*x^2056 + (a^11 + a^8 + a^7 + a^6 + a^2)*x^2049 + (a^11 + a^10 + a^8 + a^7 + a^5 + a^2 + a + 1)*x^264 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2)*x^257]
 
-        sage: family7_9(12, 5, a)
+        sage: family_7_9(12, 5, a)
         [(a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^8 + a^7 + a^3 + a + 1)*x^544 + (a^8 + a^6 + a^5 + a^4 + a^2 + 1)*x^257 + a*x^33,
         (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^9 + a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^544 + (a^11 + a^10 + a^8 + a^5 + a + 1)*x^257 + a*x^33
         ...
         (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^6 + a^4 + a + 1)*x^544 + a*x^33]
 
-        sage: result = family7_9(12, 5); result
+        sage: result = family_7_9(12, 5); result
         [(a^11 + a^9 + a^8 + a^7 + a^5 + a^2 + a + 1)*x^768 + (a^7 + a^3 + a)*x^544 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^257 + (a^10 + a^9 + a^8 + a^7 + a^4 + a^3 + a + 1)*x^33,
         (a^11 + a^10 + a^3 + a^2)*x^768 + (a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^3 + a + 1)*x^544 + x^257 + (a^7 + a^4 + a^3 + a)*x^33,
         ...
@@ -502,13 +502,9 @@ def family7_9(n, s=None, u=None, v=None, w=None):
         raise TypeError("No valid polynomials found")
 
     return list(res) if len(res) > 1 else list(res)[0]
-     
-
-def family10():
-    pass
 
 
-def family11(n, k=None, i=None, a=None):
+def family_11(n, k=None, i=None, a=None):
     r"""
     Return the Budaghyan-Helleseth-Kaleyski construction from 2020.
     Defined by `f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k`.
@@ -519,27 +515,27 @@ def family11(n, k=None, i=None, a=None):
 
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``k`` -- (optional) positive integer; if None, returns a list for all valid k in {0, ... , n - 1}
-    - ``ì`` -- (optional) positive integer; if None, returns a list for all valid i in {1, ... , n - 1}
+    - ``i`` -- (optional) positive integer; if None, returns a list for all valid i in {1, ... , n - 1}
     - ``a`` -- (optional) primitive element of GF(2^2); if None, returns a list for all primitive elements of GF(2^2)
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family11
+        sage: from cryptographicFunctionsLibrary import family_11
         sage: F.<a> = GF(2^10)
-        sage: family11(10, 2, 3, a^5 + a^3 + a)
+        sage: family_11(10, 2, 3, a^5 + a^3 + a)
         x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3
 
-        sage: family11(10, 2, None, a^5 + a^3 + a)
+        sage: family_11(10, 2, None, a^5 + a^3 + a)
         [(a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3,
         x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3,
         x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3,
         (a^5 + a^3 + a + 1)*x^132 + (a^5 + a^3 + a + 1)*x^96 + x^3]
 
-        sage: family11(10, 2, 5)
+        sage: family_11(10, 2, 5)
         [(a^5 + a^3 + a)*x^132 + (a^5 + a^3 + a)*x^96 + x^3,
         (a^5 + a^3 + a + 1)*x^132 + (a^5 + a^3 + a + 1)*x^96 + x^3]
 
-        sage: result = family11(10); result
+        sage: result = family_11(10); result
         [(a^5 + a^3 + a + 1)*x^576 + (a^5 + a^3 + a)*x^96 + x^18 + x^3,
         (a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3,
         ...
@@ -605,7 +601,7 @@ def family11(n, k=None, i=None, a=None):
     return list(res) if len(res) > 1 else list(res)[0]
 
 
-def family12(n, i=None, s=None, a=None, b=None, c=None):
+def family_12(n, i=None, s=None, a=None, b=None, c=None):
     r"""
     Return the Zheng-Kan-Li-Peng-Tang construction from 2022.
     Defined by `f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1))`.
@@ -625,30 +621,29 @@ def family12(n, i=None, s=None, a=None, b=None, c=None):
 
         sage: from cryptographicFunctionsLibrary import family12
         sage: F.<a> = GF(2^10)
-        sage: family12(10, 1, 5, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
+        sage: family_12(10, 1, 5, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
         (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3
 
-        sage: family12(10, 1, 5, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1)
+        sage: family_12(10, 1, 5, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1)
         [(a^6 + a^3 + a^2 + a + 1)*x^96 + (a^9 + a^8 + a^7 + a^3 + a + 1)*x^33 + (a^9 + a^7 + a)*x^3,
         (a^7 + a^6 + a^5 + 1)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^9 + a^4 + a^3 + a + 1)*x^3,
         ...
         (a^9 + a^8 + a^6 + a^3 + a^2 + 1)*x^96 + (a^9 + a^6 + a^5 + a^2 + a)*x^33 + (a^9 + a^5 + a^3 + a + 1)*x^3]
 
-        sage: family12(10, None, None, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
+        sage: family_12(10, None, None, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
         [(a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^129 + (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^36 + (a^7 + a^2 + a)*x^33,
         (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3,
         (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^288 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^9,
         (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^513 + (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^48 + (a^7 + a^2 + a)*x^33]
 
-        sage: result = family12(10, 1, None, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1); result
+        sage: result = family_12(10, 1, None, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1); result
         [(a^9 + a^8 + a^7 + a^3 + a^2)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^8 + a^5 + a^3 + a^2)*x^3,
         (a^7 + a^3)*x^129 + (a^6 + a^2 + a + 1)*x^96 + (a^8 + a^7 + a^5 + a^4 + a^2 + a)*x^36 + (a^9 + a^7 + a^5 + a^4 + a^3 + a + 1)*x^3,
         ...
         (a^9 + a^8 + a^5 + a^4 + a^3 + a + 1)*x^513 + (a^7 + a^3 + a^2 + a)*x^96 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^3)*x^48 + (a^8 + a^7 + a^2 + 1)*x^3]
 
         sage: len(result)
-        116281 (original)
-        137423 (now)
+        137423
     """
     if n % 2 != 0:
         raise TypeError("n must be even")
@@ -705,7 +700,7 @@ def family12(n, i=None, s=None, a=None, b=None, c=None):
     return list(res) if len(res) > 1 else list(res)[0]
 
 
-def family13(n, s=None, v=None, mu=None):
+def family_13(n, s=None, v=None, mu=None):
     r"""
     Return the Li-Zhou-Li-Qu construction from 2022.
     Defined by `f(x) = L(z)^(2^m + 1) + cz^(2^m + 1)`.
@@ -721,37 +716,37 @@ def family13(n, s=None, v=None, mu=None):
     
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family13
+        sage: from cryptographicFunctionsLibrary import family_13
         sage: F.<a> = GF(2^9)
         sage: Fm = F.subfield(3)
-        sage: family13(9, 1, Fm(1), a^7 + a^5 + a^3 + a + 1)
+        sage: family_13(9, 1, Fm(1), a^7 + a^5 + a^3 + a + 1)
         x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10
 
-        sage: family13(9, 1, Fm(1))
+        sage: family_13(9, 1, Fm(1))
         [x^144 + (a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^130 + x^129 + (a^4 + a)*x^32 + x^24 + (a^7 + a^6 + a^5 + a^3 + 1)*x^18 + (a^4 + a)*x^17 + (a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^10,
         x^144 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^130 + x^129 + (a^8 + a^7 + a^5 + a)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^18 + (a^8 + a^7 + a^5 + a)*x^17 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^10,
         ...
         x^144 + (a^7 + a^6 + a^5 + a^3 + a)*x^130 + x^129 + (a^3 + a^2 + a + 1)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^2)*x^18 + (a^3 + a^2 + a + 1)*x^17 + (a^7 + a^6 + a^5 + a^3 + a)*x^10]
 
-        sage: family13(9, 1, None, a^7 + a^5 + a^3 + a + 1)
+        sage: family_13(9, 1, None, a^7 + a^5 + a^3 + a + 1)
         [x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10 + (a^8 + a^6 + a^3 + a^2)*x^9,
         x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10 + (a^4 + a^3 + a^2 + 1)*x^9,
         ...        
         x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10]
 
-        sage: family13(9, 1)
+        sage: family_13(9, 1)
         [x^144 + (a^3 + a^2)*x^130 + x^129 + (a^7 + a^5 + a^4 + a^2 + 1)*x^32 + x^24 + (a^8 + a^6 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^4 + a^2 + 1)*x^17 + (a^3 + a^2)*x^10 + (a^8 + a^6 + a^3 + a^2 + 1)*x^9,
         x^144 + (a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^130 + x^129 + (a^6 + a^4 + a^3 + a^2 + 1)*x^32 + x^24 + (a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^6 + a^4 + a^3 + a^2 + 1)*x^17 + (a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^10 + (a^4 + a^3 + a^2)*x^9,
         ...
         x^144 + (a^7 + a^5 + 1)*x^130 + x^129 + (a^7 + a^6 + a^4 + a^2)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + 1)*x^18 + (a^7 + a^6 + a^4 + a^2)*x^17 + (a^7 + a^5 + 1)*x^10 + (a^8 + a^6 + a^3 + a^2)*x^9]
 
-        sage: family13(9)
+        sage: family_13(9)
         [x^144 + (a^3 + a^2)*x^130 + x^129 + (a^7 + a^5 + a^4 + a^2 + 1)*x^32 + x^24 + (a^8 + a^6 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^4 + a^2 + 1)*x^17 + (a^3 + a^2)*x^10 + (a^8 + a^6 + a^3 + a^2 + 1)*x^9,
         x^288 + (a^8 + a^3 + a^2 + a + 1)*x^260 + x^257 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^64 + x^40 + (a^8 + a^6 + a^5 + a + 1)*x^36 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^33 + (a^8 + a^3 + a^2 + a + 1)*x^12 + (a^8 + a^6 + a^4 + 1)*x^9,
         ...
         x^288 + (a^7 + a^5 + a^4 + a^3 + a^2 + 1)*x^260 + x^257 + (a^7 + a^6 + a^3)*x^64 + x^40 + (a^8 + a^7 + a^5 + a + 1)*x^36 + (a^7 + a^6 + a^3)*x^33 + (a^7 + a^5 + a^4 + a^3 + a^2 + 1)*x^12 + (a^8 + a^6 + a^4 + 1)*x^9]
 
-        sage: result = family13(12); result
+        sage: result = family_13(12); result
         [x^544 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^514 + x^513 + (a^7 + a^6 + a^4 + a^3 + a)*x^64 + x^48 + (a^11 + a^9 + a^5)*x^34 + (a^7 + a^6 + a^4 + a^3 + a)*x^33 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^17,
         x^2176 + (a^10 + a^9 + a^5 + a^4 + a^3 + a^2)*x^2056 + x^2049 + (a^10 + a^8 + a^7 + a^6 + a^5 + a + 1)*x^256 + x^144 + (a^10 + a^8 + a^7 + a^5 + a^4 + a^3 + 1)*x^136 + (a^10 + a^8 + a^7 + a^6 + a^5 + a + 1)*x^129 + (a^10 + a^9 + a^5 + a^4 + a^3 + a^2)*x^24 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^17,
         ...

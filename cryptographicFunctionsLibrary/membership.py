@@ -4,9 +4,9 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from helpers import is_primitive_element, get_terms, family12_check_s
 
 
-def _belong_family1_2(n, p, poly):
+def _membership_family1_2(n, p, poly):
     """
-    Shared implementation for family1 (p=3) and family2 (p=4).
+    Shared implementation for Family 1 (p=3) and Family 2 (p=4).
     """
     # If the degree is less than 12, the polynomial can collapse to a simpler form that does not fit the family structure
     if n < 12:
@@ -68,9 +68,9 @@ def _belong_family1_2(n, p, poly):
     return False, {}
 
 
-def belong_family1(n, poly):
+def membership_family_1(n, poly):
     r"""
-    Check if the polynomial belongs to Family1, the Budaghyan-Carlet-Leander construction from 2008 for `p = 3`.
+    Check if the polynomial is a member of Family 1, the Budaghyan-Carlet-Leander construction from 2008 for `p = 3`.
     Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
 
     INPUT:
@@ -80,11 +80,11 @@ def belong_family1(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import belong_family1
+        sage: from cryptographicFunctionsLibrary import membership_family_1
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33
-        sage: belong_family1(12, poly)
+        sage: membership_family_1(12, poly)
         (True,
         {'s': 5,
         'k': 4,
@@ -102,7 +102,7 @@ def belong_family1(n, poly):
         a^10 + a^8 + a^7 + a^5 + a^4 + 1]})
         
         sage: poly = x^129 + (a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^4)*x^24
-        sage: belong_family1(12, poly)
+        sage: membership_family_1(12, poly)
         (True,
         {'s': 7,
         'k': 4,
@@ -119,12 +119,12 @@ def belong_family1(n, poly):
         a^8 + a^7 + a^6 + a + 1,
         a^11 + a^9 + a^5 + a^3 + a^2 + a]})
     """
-    return _belong_family1_2(n, 3, poly)
+    return _membership_family1_2(n, 3, poly)
 
 
-def belong_family2(n, poly):
+def membership_family_2(n, poly):
     r"""
-    Check if the polynomial belongs to Family2, the Budaghyan-Carlet-Leander construction from 2008 for `p = 4`.
+    Check if the polynomial is a member of Family 2, the Budaghyan-Carlet-Leander construction from 2008 for `p = 4`.
     Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(i*k) + 2^(mk + s))`.
 
     INPUT:
@@ -134,11 +134,11 @@ def belong_family2(n, poly):
 
     EXAMPLES::
     
-        sage: from cryptographicFunctionsLibrary import belong_family2
+        sage: from cryptographicFunctionsLibrary import membership_family_2
         sage: F.<a> = GF(2^16)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3
-        sage: belong_family2(16, poly)
+        sage: membership_family_2(16, poly)
         (True,
         {'s': 1,
         'k': 4,
@@ -147,12 +147,12 @@ def belong_family2(n, poly):
         a^11 + a^10 + a^9 + a^8 + a^7 + a^3 + a + 1,
         a^13 + a^11 + a^10 + a^7 + a^4 + a + 1,
         a^15 + a^14 + a^12 + a^11 + a^10 + a^9 + a^5 + a^4 + a^3 + a^2 + 1,
-        a^15 + a^14 + a^13 + a^12 + a^9 + a^7 + a^5 + a^3 + a^2 + a,
-        a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^8 + a^5 + a^2 + 1,
+        a^15 + a^14 + a^13 +	a^12 +	a^9 +	a^7 +	a^5 +	a^3 +	a^2 +	a,
+       	a^15 +	a^14 +	a^13 +	a^12 +	a^11 +	a^10 +	a^8 +
         a^13 + a^12 + a^11 + a^10 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a + 1]})
 
         sage: poly = (a^15 + a^14 + a^12 + a^8 + a^7 + a^5 + a^4 + a^3 + a^2)*x^2049
-        sage: belong_family2(16, poly)
+        sage: membership_family_2(16, poly)
         (True,
         {'s': 11,
         'k': 4,
@@ -165,12 +165,12 @@ def belong_family2(n, poly):
         a^14 + a^13 + a^12 + a^2 + a,
         a^14 + a^11 + a^10 + a^4 + a^2 + 1]})
     """
-    return _belong_family1_2(n, 4, poly)
+    return _membership_family1_2(n, 4, poly)
 
 
-def belong_family3(n, poly):
+def membership_family_3(n, poly):
     r"""
-    Check if the polynomial belongs to Family3, the Budaghyan-Carlet construction from 2008.
+    Check if the polynomial is a member of Family 3, the Budaghyan-Carlet construction from 2008.
     Defined by `f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q))`.
 
     INPUT:
@@ -180,15 +180,15 @@ def belong_family3(n, poly):
 
     EXAMPLES::
     
-        sage: from cryptographicFunctionsLibrary import belong_family3
+        sage: from cryptographicFunctionsLibrary import membership_family_3
         sage: F.<a> = GF(2^6)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
-        sage: belong_family3(6, poly)
+        sage: membership_family_3(6, poly)
         (True, {'q': 8, 'i': 1, 's': a, 'c': a})  
 
         sage: poly = x^40 + (a^5 + a^4 + a^2 + a + 1)*x^33 + a*x^12 + (a^2 + a + 1)*x^9 + x^5
-        sage: belong_family3(6, poly)
+        sage: membership_family_3(6, poly)
         (True, {'q': 8, 'i': 2, 's': a^2 + a + 1, 'c': a^5 + a^4 + a^2 + a + 1})
     """
     if n % 2 != 0:
@@ -237,9 +237,9 @@ def belong_family3(n, poly):
     return False, {}
 
 
-def belong_family4(n, poly):
+def membership_family_4(n, poly):
     r"""
-    Check if the polynomial belongs to Family4, the Budaghyan-Carlet-Leander construction from 2009.
+    Check if the polynomial is a member of Family 4, the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9)`.
 
     INPUT:
@@ -249,21 +249,21 @@ def belong_family4(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import belong_family4
+        sage: from cryptographicFunctionsLibrary import membership_family_4
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^8 + a^3 + a)*x^288 + (a^8 + a^6 + a^5 + a^4 + a)*x^260 + (a^7 + a^4 + a^3 + a^2 + a)*x^144 + (a^8 + a^6 + a^2 + a)*x^130 + (a^6 + a^5 + a^4)*x^72 + (a^7 + a^6 + a^4 + a^3)*x^65 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^36 + (a^8 + a^4 + a^2 + 1)*x^18 + (a^5 + a^3 + a)*x^9 + x^3
-        sage: belong_family4(9, poly)
+        sage: membership_family_4(9, poly)
         (True, {'a': a^8 + a^6 + a^5 + a^3 + a})
 
         poly = x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
-        sage: belong_family4(9, poly)
+        sage: membership_family_4(9, poly)
         (True, {'a': 1})
 
         sage: F.<a> = GF(2^7)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^6 + a^5 + a^3 + a^2 + a + 1)*x^72 + (a^5 + a^4 + a^2 + 1)*x^68 + (a^5 + a^4 + a^3 + 1)*x^36 + (a^3 + a^2 + 1)*x^34 + (a^6 + a^5 + a^4 + a)*x^18 + (a^5 + a^3 + a^2 + a)*x^17 + (a^6 + a^4 + a^2 + 1)*x^9 + x^3
-        sage: belong_family4(7, poly)
+        sage: membership_family_4(7, poly)
         (True, {'a': a^3 + a^2 + a + 1})
     """
     # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
@@ -303,9 +303,9 @@ def belong_family4(n, poly):
     return True, {'a': a}
 
 
-def belong_family5(n, poly):
+def membership_family_5(n, poly):
     r"""
-    Check if the polynomial belongs to Family5, the Budaghyan-Carlet-Leander construction from 2009.
+    Check if the polynomial is a member of Family 5, the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18)`.
 
     INPUT:
@@ -314,21 +314,21 @@ def belong_family5(n, poly):
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
-        sage: from cryptographicFunctionsLibrary import belong_family5
+        sage: from cryptographicFunctionsLibrary import membership_family_5
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: sage: poly = (a^8 + a^4 + a)*x^144 + (a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^130 + (a^6 + a^4 + a^3 + a^2 + a + 1)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^65 + (a^7 + a^3 + a^2)*x^18 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3)*x^9 + x^3
-        sage: belong_family5(9, poly)
+        sage: membership_family_5(9, poly)
         (True, {'a': a^7 + a^6 + a^4 + a^3 + 1})
 
         sage: poly = x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3
-        sage: belong_family5(9, poly)
+        sage: membership_family_5(9, poly)
         (True, {'a': 1})
 
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^11 + a^10 + a^9 + a^8 + a^7 + a^3 + a^2)*x^1152 + (a^10 + a^9 + a^7 + a^3 + a^2)*x^1026 + (a^11 + a^8 + a^6 + a^3 + 1)*x^576 + (a^11 + a^10 + a^6 + a^5 + a^4 + a)*x^513 + (a^10 + a^8 + a^5 + a^3 + a^2 + 1)*x^144 + (a^9 + a^8 + a^5 + a^4 + a^3 + 1)*x^72 + (a^9 + a^8 + a^7 + a^5 + a^3 + 1)*x^18 + (a^11 + a^5 + a^4 + a^2 + 1)*x^9 + x^3
-        sage: belong_family5(12, poly)
+        sage: membership_family_5(12, poly)
         (True, {'a': a^10 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2})
     """
     # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
@@ -374,9 +374,9 @@ def belong_family5(n, poly):
     return True, {'a': a}
 
 
-def belong_family6(n, poly):
+def membership_family_6(n, poly):
     r"""
-    Check if the polynomial belongs to Family6, the Budaghyan-Carlet-Leander construction from 2009.
+    Check if the polynomial is a member of Family 6, the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36)`.
 
     INPUT:
@@ -386,21 +386,21 @@ def belong_family6(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import belong_family6
+        sage: from cryptographicFunctionsLibrary import membership_family_6
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^7 + a^5 + a^3)*x^288 + (a^8 + a^4 + a^3)*x^260 + (a^6 + a^5 + a^3 + a^2)*x^144 + (a^7 + a^2 + 1)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^36 + (a^8 + a^4 + a^3 + a^2 + 1)*x^18 + x^3
-        sage: belong_family6(9,  poly)
+        sage: membership_family_6(9,  poly)
         (True, {'a': a^8 + a^7 + a^2})
 
         sage: poly = x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3
-        sage: belong_family6(9,  poly)
+        sage: membership_family_6(9,  poly)
         (True, {'a': 1})
 
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^2304 + (a^11 + a^7 + a^6 + a^5 + a^4 + a^3)*x^2052 + (a^10 + a^7 + a^6 + a^4 + a + 1)*x^1152 + (a^10 + a^8 + a^7 + a^6 + a^3 + 1)*x^1026 + (a^11 + a^8 + a^5 + a^2 + a)*x^288 + (a^10 + a^8 + a^6 + a^5 + a^4 + a^3 + a^2)*x^144 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + a)*x^36 + (a^9 + a^7 + a^6 + a^5 + a^3 + a^2)*x^18 + x^3
-        sage: belong_family6(12, poly)
+        sage: membership_family_6(12, poly)
         (True, {'a': a^11 + a^10 + a^9 + a^8 + a^7 + a^5 + a^4 + a})
     """
     # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
@@ -453,9 +453,9 @@ def belong_family6(n, poly):
     return False, {}
 
 
-def belong_family7_9(n, poly):
+def membership_family_7_9(n, poly):
     r"""
-    Check if the polynomial belongs to Family7 - Family9, the Bracken-Byrne-Markin-McGuire construction from 2011.
+    Check if the polynomial is a member of Family 7 - Family 9, the Bracken-Byrne-Markin-McGuire construction from 2011.
     Defined by `f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s))`.
 
     INPUT:
@@ -465,11 +465,11 @@ def belong_family7_9(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import belong_family7_9
+        sage: from cryptographicFunctionsLibrary import membership_family_7_9
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^10 + a^6 + a^5 + a^3 + a)*x^768 + (a^9 + a^8 + a^6 + a^5 + a^2)*x^544 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257 + (a^7 + a^5 + a^3 + a^2 + 1)*x^33
-        sage: belong_family7_9(12, poly)
+        sage: membership_family_7_9(12, poly)
         (True,
         {'s': 5,
         'k': 4,
@@ -478,11 +478,11 @@ def belong_family7_9(n, poly):
         'w': a^10 + a^9 + a^6 + a^5 + a^3 + 1})
 
         sage: poly = a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + x^257
-        sage: belong_family7_9(12, poly)
+        sage: membership_family_7_9(12, poly)
         (True, {'s': 11, 'k': 4, 'u': a, 'v': 1, 'w': 0})
 
         sage: poly =  (a^10 + a^3 + a^2 + 1)*x^2056 + a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257
-        sage: belong_family7_9(12, poly)
+        sage: membership_family_7_9(12, poly)
         (True,
         {'s': 11,
         'k': 4,
@@ -539,13 +539,9 @@ def belong_family7_9(n, poly):
     return False, {}
 
 
-def belong_family10(n, poly):
-    pass
-
-
-def belong_family11(n, poly):
+def membership_family_11(n, poly):
     r"""
-    Check if the polynomial belongs to Family11, the Budaghyan-Helleseth-Kaleyski construction from 2020.
+    Check if the polynomial is a member of Family 11, the Budaghyan-Helleseth-Kaleyski construction from 2020.
     Defined by `f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k`.
 
     INPUT:
@@ -555,21 +551,21 @@ def belong_family11(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import belong_family11
+        sage: from cryptographicFunctionsLibrary import membership_family_11
         sage: F.<a> = GF(2^10)
         sage: R.<x> = PolynomialRing(F)
         sage: poly =  (a^5 + a^3 + a)*x^576 + (a^5 + a^3 + a + 1)*x^96 + x^18 + x^3
-        sage: belong_family11(10, poly)
+        sage: membership_family_11(10, poly)
         (True, {'k': 6, 'i': 3, 'a': a^5 + a^3 + a, 'b': a^5 + a^3 + a + 1, 'c': 1})
 
         sage: poly = x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3
-        sage: belong_family11(10, poly)
+        sage: membership_family_11(10, poly)
         (True, {'k': 2, 'i': 9, 'a': a^5 + a^3 + a, 'b': a^5 + a^3 + a + 1, 'c': 1})
 
         sage: F.<a> = GF(2^14)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = x^768 + (a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a + 1)*x^384 + (a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^6 + x^3
-        sage: belong_family11(14, poly)
+        sage: membership_family_11(14, poly)
         (True,
         {'k': 2,
         'i': 13,
@@ -631,9 +627,9 @@ def belong_family11(n, poly):
     return False, {}
 
 
-def belong_family12(n, poly):
+def membership_family_12(n, poly):
     r"""
-    Check if the polynomial belongs to Family12, the Zheng-Kan-Li-Peng-Tang from 2022.
+    Check if the polynomial is a member of Family 12, the Zheng-Kan-Li-Peng-Tang from 2022.
     Defined by `f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1))`.
 
     INPUT:
@@ -643,11 +639,11 @@ def belong_family12(n, poly):
     
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import belong_family12
+        sage: from cryptographicFunctionsLibrary import membership_family_12
         sage: F.<a> = GF(2^10)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^8 + a^6 + a^4 + a^3 + 1)*x^96 + (a^9 + a^7 + a^6 + a^4)*x^33 + (a^8 + a^6 + a^5 + a^3)*x^3
-        sage: belong_family12(10, poly)
+        sage: membership_family_12(10, poly)
         (True,
         {'i': 1,
         's': 5,
@@ -656,7 +652,7 @@ def belong_family12(n, poly):
         'c': a})
 
         sage: poly = a^3*x^513 + (a^8 + a^7 + a^2 + a + 1)*x^48 + (a^3 + a^2 + 1)*x^33
-        sage: belong_family12(10, poly)
+        sage: membership_family_12(10, poly)
         (True,
         {'i': 9,
         's': 5,
@@ -732,9 +728,9 @@ def belong_family12(n, poly):
     return False, {}
 
 
-def belong_family13(n, poly):
+def membership_family_13(n, poly):
     r"""
-    Check if the polynomial belongs to Family13, the Li-Zhou-Li-Qu construction from 2022.
+    Check if the polynomial is a member of Family 13, the Li-Zhou-Li-Qu construction from 2022.
     Defined by `f(x) = L(z)^(2^m + 1) + cz^(2^m + 1)`.
 
     INPUT:
@@ -744,21 +740,21 @@ def belong_family13(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import belong_family13
+        sage: from cryptographicFunctionsLibrary import membership_family_13
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = x^144 + (a^8 + a^7 + a^3 + a^2 + a)*x^130 + x^129 + (a^8 + a^2)*x^32 + x^24 + (a^7 + a^6 + a^4 + a^3 + a)*x^18 + (a^8 + a^2)*x^17 + (a^8 + a^7 + a^3 + a^2 + a)*x^10 + (a^4 + a^3 + a^2 + 1)*x^9
-        sage: belong_family13(9, poly)
+        sage: membership_family_13(9, poly)
         (True, {'s': 1, 'v': a^4 + a^3 + a^2, 'mu': a^8 + a^7 + a^3 + a^2 + a})
 
         sage: poly = x^288 + (a^8 + a^7 + a^6 + a^3 + a^2)*x^260 + x^257 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^64 + x^40 + (a^7 + a^3 + a^2)*x^36 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^33 + (a^8 + a^7 + a^6 + a^3 + a^2)*x^12
-        sage: belong_family13(9, poly)
+        sage: membership_family_13(9, poly)
         (True, {'s': 2, 'v': 1, 'mu': a^8 + a^7 + a^6 + a^3 + a^2})
 
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = x^544 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^514 + x^513 + (a^7 + a^6 + a^4 + a^3 + a)*x^64 + x^48 + (a^11 + a^9 + a^5)*x^34 + (a^7 + a^6 + a^4 + a^3 + a)*x^33 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^17
-        sage: belong_family13(12, poly)
+        sage: membership_family_13(12, poly)
         (True,
         {'s': 1,
         'v': a^11 + a^9 + a^8 + a^6 + a^3 + a,
@@ -835,21 +831,21 @@ def belong_family13(n, poly):
 
 
 FAMILIES = {
-    "Family1": belong_family1,
-    "Family2": belong_family2,
-    "Family3": belong_family3,
-    "Family4": belong_family4,
-    "Family5": belong_family5,
-    "Family6": belong_family6,
-    "Family7_9": belong_family7_9,
-    "Family11": belong_family11,
-    "Family12": belong_family12,
-    "Family13": belong_family13
+    "Family 1": membership_family_1,
+    "Family 2": membership_family_2,
+    "Family 3": membership_family_3,
+    "Family 4": membership_family_4,
+    "Family 5": membership_family_5,
+    "Family 6": membership_family_6,
+    "Family 7_9": membership_family_7_9,
+    "Family 11": membership_family_11,
+    "Family 12": membership_family_12,
+    "Family 13": membership_family_13
 }
 
-def belong(n, polynomial):
+def membership_all(n, polynomial):
     r"""
-    Check if a given function belongs to any of the known infinite families of quadratic APN polynomials. 
+    Check if a given function is a member of any of the known infinite families of quadratic APN polynomials. 
     
     INPUT:
 
@@ -858,20 +854,36 @@ def belong(n, polynomial):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import belong
-        sage: F.<a> = GF(2^10)
+        sage: from cryptographicFunctionsLibrary import membership_all
+        sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
-        sage: belong(6, x^3)
-        Belong to Family1: False
-        Belong to Family2: False
-        Belong to Family3: False
-        Belong to Family4: False
-        Belong to Family5: False
-        Belong to Family6: False
-        Belong to Family7_9: False
-        Belong to Family11: False
-        Belong to Family12: False
-        Belong to Family13: False
+        sage: membership_all(12, x^3)
+        Belong to Family 1: False
+        Belong to Family 2: False
+        Belong to Family 3: False
+        Belong to Family 4: False
+        Belong to Family 5: False
+        Belong to Family 6: False
+        Belong to Family 7_9: False
+        Belong to Family 11: False
+        Belong to Family 12: False
+        Belong to Family 13: False
+
+        sage: F.<a> = GF(2^6)
+        sage: R.<x> = PolynomialRing(F)
+        sage: poly = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
+        sage: membership_all(6, poly)
+        Belong to Family 1: False
+        Belong to Family 2: False
+        Belong to Family 3: True
+        With params: {'q': 8, 'i': 1, 's': a, 'c': a}
+        Belong to Family 4: False
+        Belong to Family 5: False
+        Belong to Family 6: False
+        Belong to Family 7_9: False
+        Belong to Family 11: False
+        Belong to Family 12: False
+        Belong to Family 13: False
     """
     for family_name, family_function in FAMILIES.items():
         try:
