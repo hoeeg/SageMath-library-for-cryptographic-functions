@@ -2,7 +2,7 @@ from sage.rings.finite_rings.finite_field_constructor import GF
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.all import SR
 from sage.matrix.constructor import Matrix
-from helpers import is_apn, construct_truth_table
+from helpers import check_apn, construct_truth_table
 
 
 def polynomial_to_truth_table(n, polynomial, enforce_apn=True):
@@ -42,7 +42,7 @@ def polynomial_to_truth_table(n, polynomial, enforce_apn=True):
     F = GF(2**n, 'a')
     tt = construct_truth_table(F, polynomial)
 
-    if enforce_apn and not is_apn(F, tt):
+    if enforce_apn and not check_apn(F, tt):
         raise ValueError("The provided polynomial is not a quadratic APN function")
     
     return tt
@@ -77,7 +77,7 @@ def truth_table_to_polynomial(n, tt: list, enforce_apn=True):
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
 
-    if enforce_apn and not is_apn(F, tt):
+    if enforce_apn and not check_apn(F, tt):
         raise ValueError("The provided truth table is not a quadratic APN function")
 
     points = [(F.from_integer(i), F.from_integer(val)) for i, val in enumerate(tt)]
@@ -128,7 +128,7 @@ def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate', 
         [                  a^5 + 1                   a^2 + 1 a^5 + a^4 + a^3 + a^2 + 1             a^4 + a^2 + 1       a^4 + a^3 + a^2 + a                         0]
     """
     F = GF(2**n, 'a')
-    if enforce_apn and not is_apn(F, polynomial):
+    if enforce_apn and not check_apn(F, polynomial):
         raise ValueError("The provided polynomial is not a quadratic APN function")
 
     if basis is None:
@@ -197,7 +197,7 @@ def matrix_to_polynomial(n, M, basis=None):
             if CF[i,j] != 0:
                 polynomial += CF[i,j] * x**(2**i + 2**j)
 
-    if not is_apn(F, polynomial):
+    if not check_apn(F, polynomial):
         raise ValueError("The resulting polynomial is not a quadratic APN function")
 
     return polynomial
@@ -241,7 +241,7 @@ def polynomial_to_sequence(n, polynomial, basis=None, enforce_apn=True):
     if basis is None:
         basis = [(F.gen()**3)**(2**i) for i in range(n)]
 
-    if enforce_apn and not is_apn(F, polynomial):
+    if enforce_apn and not check_apn(F, polynomial):
         raise ValueError("The provided polynomial is not a quadratic APN function")
 
     M = polynomial_to_matrix(n, polynomial, basis)
@@ -288,3 +288,42 @@ def sequence_to_polynomial(n, sequence, basis=None, enforce_apn=True):
             M[i,j] =  M[j,i] = next(seq_iter)
 
     return matrix_to_polynomial(n, M, basis, enforce_apn)
+
+
+def univariate_to_bivariate(n, polynomial):
+    """
+    Convert a univariate polynomial representation of a quadratic APN function over GF(2^n) to a bivariate polynomial representation over GF(2).
+
+    INPUT:
+
+    - ``n`` -- the degree of the finite field extension GF(2^n)
+    - ``polynomial`` -- a univariate polynomial over GF(2^n)
+
+    EXAMPLES::
+
+    """
+    if n % 2 != 0:
+        raise ValueError("n must be even to convert to bivariate representation")
+    
+    F = GF(2**n, 'a')
+    m = n // 2
+    
+
+    
+
+def univariate_to_trivariate(n, polynomial):
+    """
+    Convert a univariate polynomial representation of a quadratic APN function over GF(2^n) to a trivariate polynomial representation over GF(2).
+
+    INPUT:
+
+    - ``n`` -- the degree of the finite field extension GF(2^n)
+    - ``polynomial`` -- a univariate polynomial over GF(2^n)
+
+    EXAMPLES::
+
+    """
+    if n % 3 != 0:
+        raise ValueError("n must be divisible by 3 to convert to trivariate representation")
+    
+    

@@ -10,7 +10,7 @@ def construct_truth_table(F, polynomial):
     """
     return [polynomial(F.from_integer(i)).to_integer() for i in range(F.order())]
 
-def is_apn(F, function):
+def check_apn(F, function):
     """
     Check if a given univariate polynomial or truth table over GF(2^n) is APN by evaluating the differential uniformity.
     """
@@ -21,7 +21,7 @@ def is_apn(F, function):
     else:
         raise ValueError("Input must be either a univariate polynomial or a truth table")
    
-    return SBox(tt).differential_uniformity() == 2
+    return SBox(tt).is_apn()
 
 def is_primitive_element(F, e):
     """
