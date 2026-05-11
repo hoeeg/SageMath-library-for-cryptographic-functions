@@ -37,10 +37,10 @@ def _membership_family1_2(n, p, poly):
 
         # Single term case
         if e_x == e_ux:
-            if set(terms) != {e_x}:
+            if set(terms) != {e_ux}:
                 continue
             # Add 1 to the coefficient of x^(2^s + 1) to get u^(2^k - 1)
-            u_power = terms.get(e_x, F(0)) + F(1) 
+            u_power = terms.get(e_ux, F(0)) + F(1) 
         
         # Two term case
         else:
@@ -59,7 +59,7 @@ def _membership_family1_2(n, p, poly):
         except ValueError:
             continue
 
-        primitive_roots = [r for r in all_roots if is_primitive_element(F, r)]
+        primitive_roots = [r for r in all_roots if r != 0 and is_primitive_element(F, r)]
         if not primitive_roots:
             continue
 
@@ -855,35 +855,37 @@ def membership_all(n, polynomial):
     EXAMPLES::
 
         sage: from cryptographicFunctionsLibrary import membership_all
-        sage: F.<a> = GF(2^12)
+        sage: F.<a> = GF(2^16)
         sage: R.<x> = PolynomialRing(F)
-        sage: membership_all(12, x^3)
-        Belong to Family 1: False
-        Belong to Family 2: False
-        Belong to Family 3: False
-        Belong to Family 4: False
-        Belong to Family 5: False
-        Belong to Family 6: False
-        Belong to Family 7_9: False
-        Belong to Family 11: False
-        Belong to Family 12: False
-        Belong to Family 13: False
-
+        sage: poly = (a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^2049
+        sage: membership_all(16, poly)
+        Belongs to Family 1: False
+        Belongs to Family 2: True
+        With parameters: {'s': 11, 'k': 4, 'u': [a^14 + a^13 + a^12 + a^11 + a^7 + a^6 + a^3 + a^2 + a, a^15 + a^14 + a^13 + a^10 + a^9 + a^8 + a^7 + a^4 + a^3 + a^2 + 1, a^15 + a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a, a^15 + a^10 + a^9 + a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a, a^14 + a^10 + a^7 + a^5 + a^4 + a^3 + a^2 + 1, a^15 + a^14 + a^9 + a^8 + a^6 + a^5 + a + 1, a^12 + a^11 + a^7 + a^3 + a^2 + 1, a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^4]}
+        Belongs to Family 3: False
+        Belongs to Family 4: False
+        Belongs to Family 5: False
+        Belongs to Family 6: False
+        Belongs to Family 7_9: False
+        Belongs to Family 11: False
+        Belongs to Family 12: False
+        Belongs to Family 13: False
+        
         sage: F.<a> = GF(2^6)
         sage: R.<x> = PolynomialRing(F)
         sage: poly = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
         sage: membership_all(6, poly)
-        Belong to Family 1: False
-        Belong to Family 2: False
-        Belong to Family 3: True
-        With params: {'q': 8, 'i': 1, 's': a, 'c': a}
-        Belong to Family 4: False
-        Belong to Family 5: False
-        Belong to Family 6: False
-        Belong to Family 7_9: False
-        Belong to Family 11: False
-        Belong to Family 12: False
-        Belong to Family 13: False
+        Belongs to Family 1: False
+        Belongs to Family 2: False
+        Belongs to Family 3: True
+        With parameters: {'q': 8, 'i': 1, 's': a, 'c': a}
+        Belongs to Family 4: False
+        Belongs to Family 5: False
+        Belongs to Family 6: False
+        Belongs to Family 7_9: False
+        Belongs to Family 11: False
+        Belongs to Family 12: False
+        Belongs to Family 13: False
     """
     for family_name, family_function in FAMILIES.items():
         try:
@@ -891,6 +893,6 @@ def membership_all(n, polynomial):
         except Exception:
             print(f"Belong to {family_name}: {False}")
             continue
-        print(f"Belong to {family_name}: {found}")
+        print(f"Belongs to {family_name}: {found}")
         if found:
-            print(f"With params: {params}")
+            print(f"With parameters: {params}")
