@@ -21,29 +21,30 @@ def _family_1_2(n, p, s, u):
     x = R.gen()
 
     if u is None: 
-        u = [u_val for u_val in F if  u_val != 0 and is_primitive_element(F, u_val)]
+        g = F.multiplicative_generator()
+        u_vals = (g**i for i in range(2**n - 1) if gcd(i, 2**n - 1) == 1)
     elif not is_primitive_element(F, u):
         raise TypeError("u must be a primitive element of GF(2^n)")
     else:
-        u = [u]
+        u_vals = (u,)
 
     if s is None:
-        s = [s_val for s_val in range(1, n) if gcd(s_val, 3 * k) == 1]
+        s_vals = tuple(s_val for s_val in range(1, n) if gcd(s_val, 3 * k) == 1)
     elif gcd(s, 3*k) != 1:
         raise TypeError("gcd(s, 3*k) must be 1")
     else:
-        s = [s]
+        s_vals = (s,)
 
     def _poly(s_val, u_val):
         i = (s_val * k) % p
         m = p - i
         e_x = (2**(i * k) + 2**(m * k + s_val)) % (2**n - 1)
-        return (x**(2**s_val + 1) + u_val**(2**k - 1) * x**e_x).mod(x**(2**n) - x)
+        return (x**(2**s_val + 1) + u_val**(2**k - 1) * x**e_x)
     
     pairs = (
         (_poly(s_val, u_val), {'s': s_val, 'u': u_val}) 
-        for u_val in u 
-        for s_val in s
+        for u_val in u_vals
+        for s_val in s_vals
     )
     return build_table(pairs)
 
@@ -119,29 +120,33 @@ def family_2(n, s=None, u=None):
         (a^15 + a^14 + a^13 + a^12 + a^10 + a^9 + a^8 + a^4 + a^2 + a + 1)*x^33
 
         sage: family_2(16, None, a^15 + a^14 + a^7 + a^6 + a^3 + a)
-        {(a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3: [{'s': 1, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
-        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^33: [{'s': 5, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
-        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^129: [{'s': 7, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
-        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^2049: [{'s': 11, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
-        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^8193: [{'s': 13, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}]}
+        {(a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3: 
+            [{'s': 1, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
+        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^33: 
+            [{'s': 5, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
+        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^129: 
+            [{'s': 7, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
+        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^2049: 
+            [{'s': 11, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
+        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^8193: 
+            [{'s': 13, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}]}
  
         sage: family_2(16, 1)
-        {(a^15 + 1)*x^3: [{'s': 1, 'u': a},
-            {'s': 1, 'u': a^11 + a^10 + a^8 + a^7 + a^6 + a^4 + a^3 + 1},
+        {(a^15 + 1)*x^3: 
+            [{'s': 1, 'u': a},
             ...
-            {'s': 1, 'u': a^14 + a^13 + a^12 + a^11 + a^4 + a^3 + a^2}],
+            {'s': 1, 'u': a^13 + a^11 + a^10 + a^6 + a^5 + a^4 + a^3 + a^2}],
         ...
-        (a^14 + a^12 + a^10 + a^8 + a^7 + a^6 + a^5 + a^4)*x^3: 
-            [{'s': 1, 'u': a^14 + a^13 + a^12 + a^11 + a^6 + a^5 + a^2 + a + 1},
+         (a^14 + a^12 + a^11 + a^10 + a^9 + a^7 + a^5 + a^4 + a^3 + a)*x^3:
+            [{'s': 1, 'u': a^13 + a^12 + a^11 + a^8 + a^4 + a},
             ...
-            {'s': 1, 'u': a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^9 + a^7 + a^5 + a^4 + a^3 + a^2 + a}]}
+            {'s': 1, 'u': a^15 + a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a}]}
         
         sage: result = family_2(16); list(result.keys())
         [(a^15 + 1)*x^3,
         (a^15 + 1)*x^33,
         ...
-        (a^14 + a^12 + a^10 + a^8 + a^7 + a^6 + a^5 + a^4)*x^8193
-        ]
+        (a^14 + a^12 + a^11 + a^10 + a^9 + a^7 + a^5 + a^4 + a^3 + a)*x^8193]
         
         sage: len(result)
         20480
@@ -204,49 +209,52 @@ def family_3(n, i=None, s=None, c=None):
     R = PolynomialRing(F, 'x')
     x = R.gen()
     K = GF(q)
+    g = F.gen()**(q - 1)
 
     if c is None:
-        c = [c_val for c_val in F]
+        c_vals = iter(F)
     elif c not in F:
         raise TypeError("c must be an element of GF(2^n)")
     else:
-        c = [c]
+        c_vals = (c,)
     
     if s is None:
-        s = [s_val for s_val in F if s_val not in K]
+        s_vals = tuple(s_val for s_val in F if s_val not in K)
     elif s in K or s not in F:
         raise TypeError("s must be in GF(2^n) but not in GF(q)")
     else:
-        s = [s]
-    
+        s_vals = (s,)
+
     if i is None:
-        i = [i_val for i_val in range(1, m) if gcd(i_val, m) == 1]
+        i_vals = (i_val for i_val in range(1, m) if gcd(i_val, m) == 1)
     elif gcd(i, m) != 1 or not (0 < i < m):
-        raise TypeError("gcd(i, m) must be 1 and 0 < i < m")
+        raise TypeError("gcd(i, m) must be 1")
     else:
-        i = [i]
+        i_vals = (i,)
 
     def _verify_root(i_val, c_val):
-        P = x**(2**i_val + 1) + c_val * x**(2**i_val) + c_val**q * x + 1
-        K_gen = F.gen()**(q - 1)
+        cq = c_val**q
         v = F(1)
+        i2 = 2**i_val
+
         for _ in range(q + 1):
-            if P(v) == 0:
+            vi = v**(i2)
+            if v*vi + c_val*vi + cq*v + 1 == 0:
                 return False
-            v *= K_gen
+            v *= g
         return True
     
-    pair_ic = ((i_val, c_val) for i_val in i for c_val in c if _verify_root(i_val, c_val))
+    ic_pair = ((i_val, c_val) for i_val in i_vals for c_val in c_vals if _verify_root(i_val, c_val))
     
     def _poly(i_val, s_val, c_val):
         e_xq = (q * (2**i_val + 1)) % (2**n - 1)
         e_c = (2**i_val * q + 1) % (2**n - 1)
-        return (s_val * x**(q + 1) + x**(2**i_val + 1) + x**e_xq + c_val * x**e_c + c_val**q * x**(2**i_val + q)).mod(x**(2**n) - x)
+        return (s_val * x**(q + 1) + x**(2**i_val + 1) + x**e_xq + c_val * x**e_c + c_val**q * x**(2**i_val + q))
     
     pairs = (
         (_poly(i_val, s_val, c_val), {'i': i_val, 's': s_val, 'c': c_val})
-        for i_val, c_val in pair_ic
-        for s_val in s
+        for i_val, c_val in ic_pair
+        for s_val in s_vals
     )
     return build_table(pairs)
 
