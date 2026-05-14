@@ -2,6 +2,7 @@ from sage.all import *
 from sage.crypto.sbox import SBox
 from sage.all import Polynomial
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from collections import defaultdict
 
 
 def construct_truth_table(F, polynomial):
@@ -69,15 +70,15 @@ def family12_conditions(F, i_val, b_val, c_val):
         return list(set(s))
 
     term = b_val**(2**(2 * i_val) - 2**i_val + 1) * c_val**(-1)
-    if term**q == term:
+    if term**q == term and 0 < 3 * i_val < n:
         s.append(3 * i_val)
     
     term = b_val**(2**i_val - 1) * c_val**(-(2**(2 * i_val)))
-    if term**q == term and (m - 2 * i_val) > 0:
+    if term**q == term and 0 < (m - 2 * i_val) < n:
         s.append(m - 2 * i_val)
 
     term = c_val * b_val**(2**i_val - 1)
-    if term**q == term:
+    if term**q == term and 0 < (m + 2 * i_val) < n:
         s.append(m + 2 * i_val)
 
     if c_val**q != c_val:
@@ -108,17 +109,17 @@ def family12_check_s(F, i_val, b_val, c_val, s_val):
     if is_cube(F, b_val):
         return False
 
-    if s_val == 3 * i_val:
+    if s_val == 3 * i_val and 0 < s_val < n:
         term = b_val**(2**(2*i_val) - 2**i_val + 1) * c_val**(-1)
         if term**q == term: 
             return True
     
-    if s_val == m - 2*i_val and s_val > 0:
+    if s_val == m - 2*i_val and 0 < s_val < n:
         term = b_val**(2**i_val - 1) * c_val**(-(2**(2*i_val)))
         if term**q == term:
             return True
     
-    if s_val == m + 2*i_val:
+    if s_val == m + 2*i_val and 0 < s_val < n:
         term = c_val * b_val**(2**i_val - 1)
         if term**q == term:
             return True
@@ -132,3 +133,19 @@ def family12_check_s(F, i_val, b_val, c_val, s_val):
             return True
     
     return False
+
+def build_table(pairs):
+    """
+    Build the result table from a list of (polynomial, parameters) pairs.    
+    """
+    table = defaultdict(list)
+    for poly, params in pairs:
+        table[poly].append(params)
+
+    if not table:
+        raise TypeError("No valid polynomials found")
+    
+    if len(table) == 1:
+        return next(iter(table))
+ 
+    return dict(table)

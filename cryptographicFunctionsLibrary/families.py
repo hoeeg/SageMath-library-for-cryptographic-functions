@@ -1,5 +1,5 @@
 from sage.all import *
-from helpers import is_primitive_element, family12_conditions, family12_check_s
+from helpers import is_primitive_element, family12_conditions, family12_check_s, build_table
 
 
 def _family_1_2(n, p, s, u):
@@ -40,15 +40,12 @@ def _family_1_2(n, p, s, u):
         e_x = (2**(i * k) + 2**(m * k + s_val)) % (2**n - 1)
         return (x**(2**s_val + 1) + u_val**(2**k - 1) * x**e_x).mod(x**(2**n) - x)
     
-    res = set()
-    for u_val in u:
-        for s_val in s:    
-            res.add(_poly(s_val, u_val))
-    
-    if not res:
-        raise TypeError("No valid polynomials found")
-    
-    return list(res) if len(res) > 1 else list(res)[0]
+    pairs = (
+        (_poly(s_val, u_val), {'s': s_val, 'u': u_val}) 
+        for u_val in u 
+        for s_val in s
+    )
+    return build_table(pairs)
 
 
 def family_1(n, s=None, u=None):
@@ -56,7 +53,7 @@ def family_1(n, s=None, u=None):
     Return the Budaghyan-Carlet-Leander construction from 2008 for `p = 3`.
     Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -72,18 +69,24 @@ def family_1(n, s=None, u=None):
         (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33
 
         sage: family_1(12, None, a^6 + a^5 + 1)
-        [x^2049 + (a^11 + a^9 + a^7 + a^6 + a^2)*x^264,
-        (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33,
-        (a^11 + a^9 + a^7 + a^6 + a^2)*x^528 + x^3,
-        x^129 + (a^11 + a^9 + a^7 + a^6 + a^2)*x^24]
+        {(a^11 + a^9 + a^7 + a^6 + a^2)*x^528 + x^3: [{'s': 1, 'u': a^6 + a^5 + 1}],
+        (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33: [{'s': 5, 'u': a^6 + a^5 + 1}],
+        x^129 + (a^11 + a^9 + a^7 + a^6 + a^2)*x^24: [{'s': 7, 'u': a^6 + a^5 + 1}],
+        x^2049 + (a^11 + a^9 + a^7 + a^6 + a^2)*x^264: [{'s': 11, 'u': a^6 + a^5 + 1}]}
 
         sage: family_1(12, 1)
-        [(a^9 + a^8 + a^7 + a^5 + 1)*x^528 + x^3,
-        (a^11 + a^9 + a^7 + a^4 + a^3 + a^2 + a)*x^528 + x^3,
+        {(a^10 + a^9 + a^8 + a^6 + a^4 + a^3)*x^528 + x^3: 
+            [{'s': 1, 'u': a},
+            {'s': 1, 'u': a^11 + a^10 + a^9 + a^5 + a^4 + a^3},
+            ...
+            {'s': 1, 'u': a^9 + a^7 + a^6 + a^5 + a^3}],
         ...
-        (a^8 + a^7 + a^6 + a^5 + a^4 + a)*x^528 + x^3]
+        (a^10 + a^9 + a^8 + a^5 + a^4 + a^3 + 1)*x^528 + x^3: 
+            [{'s': 1, 'u': a^11 + a^10 + a^9 + a^7 + a^3 + a^2},
+            ...
+            {'s': 1, 'u': a^11 + a^10 + a^9 + a^8 + a^5 + a^3 + a^2 + a}]}
 
-        sage: result = family_1(12); result
+        sage: result = family_1(12); list(result.keys())
         [(a^9 + a^6 + a^5 + a^4 + a^2 + 1)*x^768 + x^33,
         (a^11 + a^10 + a^8 + a^7 + a^6 + a^3 + a^2 + a)*x^768 + x^33,
         ...
@@ -100,7 +103,7 @@ def family_2(n, s=None, u=None):
     Return the Budaghyan-Carlet-Leander construction from 2008 for `p = 4`.
     Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -116,23 +119,29 @@ def family_2(n, s=None, u=None):
         (a^15 + a^14 + a^13 + a^12 + a^10 + a^9 + a^8 + a^4 + a^2 + a + 1)*x^33
 
         sage: family_2(16, None, a^15 + a^14 + a^7 + a^6 + a^3 + a)
-        [(a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3,
-        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^129,
-        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^8193,
-        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^2049,
-        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^33]
+        {(a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3: [{'s': 1, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
+        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^33: [{'s': 5, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
+        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^129: [{'s': 7, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
+        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^2049: [{'s': 11, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}],
+        (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^8193: [{'s': 13, 'u': a^15 + a^14 + a^7 + a^6 + a^3 + a}]}
  
         sage: family_2(16, 1)
-        [(a^15 + a^12 + a^11 + a^8 + a^7 + a^6 + a)*x^3,
-        (a^15 + a^14 + a^13 + a^12 + a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^3,
+        {(a^15 + 1)*x^3: [{'s': 1, 'u': a},
+            {'s': 1, 'u': a^11 + a^10 + a^8 + a^7 + a^6 + a^4 + a^3 + 1},
+            ...
+            {'s': 1, 'u': a^14 + a^13 + a^12 + a^11 + a^4 + a^3 + a^2}],
         ...
-        (a^15 + a^13 + a^10 + a^8 + a^6 + a^5 + a^3 + a^2)*x^3]
+        (a^14 + a^12 + a^10 + a^8 + a^7 + a^6 + a^5 + a^4)*x^3: 
+            [{'s': 1, 'u': a^14 + a^13 + a^12 + a^11 + a^6 + a^5 + a^2 + a + 1},
+            ...
+            {'s': 1, 'u': a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^9 + a^7 + a^5 + a^4 + a^3 + a^2 + a}]}
         
-        sage: result = family_2(16); result
-        [(a^15 + a^12 + a^11 + a^8 + a^7 + a^6 + a)*x^3,
-        (a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^2049,
+        sage: result = family_2(16); list(result.keys())
+        [(a^15 + 1)*x^3,
+        (a^15 + 1)*x^33,
         ...
-        (a^7 + a^6 + a^5 + a^3 + a^2)*x^129]
+        (a^14 + a^12 + a^10 + a^8 + a^7 + a^6 + a^5 + a^4)*x^8193
+        ]
         
         sage: len(result)
         20480
@@ -145,7 +154,7 @@ def family_3(n, i=None, s=None, c=None):
     Return the Budaghyan-Carlet construction from 2008.
     Defined by `f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -162,20 +171,25 @@ def family_3(n, i=None, s=None, c=None):
         x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
 
         sage: family_3(6, None, a^2 + a + 1, a^5 + a^4 + a^2 + a + 1)
-        [x^40 + (a^5 + a^4 + a^2 + a + 1)*x^33 + a*x^12 + (a^2 + a + 1)*x^9 + x^5,
-        x^24 + (a^5 + a^4 + a^2 + a + 1)*x^17 + a*x^10 + (a^2 + a + 1)*x^9 + x^3]
+        {x^24 + (a^5 + a^4 + a^2 + a + 1)*x^17 + a*x^10 + (a^2 + a + 1)*x^9 + x^3: 
+            [{'i': 1, 's': a^2 + a + 1, 'c': a^5 + a^4 + a^2 + a + 1}],
+        x^40 + (a^5 + a^4 + a^2 + a + 1)*x^33 + a*x^12 + (a^2 + a + 1)*x^9 + x^5: 
+            [{'i': 2, 's': a^2 + a + 1, 'c': a^5 + a^4 + a^2 + a + 1}]}
         
         sage: family_3(6, 1)
-        [x^24 + (a^4 + a^3 + a^2)*x^17 + (a^3 + a)*x^10 + (a^3 + 1)*x^9 + x^3,
-        x^24 + (a^5 + a^4 + a^3 + 1)*x^17 + (a^3 + a^2 + 1)*x^10 + (a^4 + a^3 + a^2 + a)*x^9 + x^3,
+        {x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + x^3: 
+            [{'i': 1, 's': 0, 'c': a}],
+        x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3: 
+            [{'i': 1, 's': a, 'c': a}],
         ...
-        x^24 + a^4*x^17 + (a^5 + a^4 + a)*x^10 + (a^5 + a^4 + a)*x^9 + x^3]
+        x^24 + (a^3 + a^2)*x^17 + (a^5 + a^4 + a^3)*x^10 + x^9 + x^3: 
+            [{'i': 1, 's': 1, 'c': a^3 + a^2}]}
 
-        sage: result = family_3(6); result
-        [x^24 + (a^4 + a^3 + a^2)*x^17 + (a^3 + a)*x^10 + (a^5 + a^4 + a^2)*x^9 + x^3,
-        x^24 + (a^3 + a)*x^17 + (a^4 + a^3 + a^2)*x^10 + (a^5 + a^4 + a^2)*x^9 + x^3,
+        sage: result = family_3(6); list(result.keys())
+        [x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + x^3,
+        x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3,
         ...
-        x^40 + (a^4 + a^2 + 1)*x^33 + a^5*x^12 + (a^5 + a^4 + a^3)*x^9 + x^5]
+        x^40 + (a^5 + a^3 + a^2 + a + 1)*x^33 + (a^4 + a^3 + a + 1)*x^12 + x^9 + x^5]
 
         sage: len(result)
         2304
@@ -207,37 +221,34 @@ def family_3(n, i=None, s=None, c=None):
     
     if i is None:
         i = [i_val for i_val in range(1, m) if gcd(i_val, m) == 1]
-    elif gcd(i, m) != 1:
-        raise TypeError("gcd(i, m) must be 1")
+    elif gcd(i, m) != 1 or not (0 < i < m):
+        raise TypeError("gcd(i, m) must be 1 and 0 < i < m")
     else:
         i = [i]
-    
-    def _poly(i_val, s_val, c_val):
+
+    def _verify_root(i_val, c_val):
         P = x**(2**i_val + 1) + c_val * x**(2**i_val) + c_val**q * x + 1
         K_gen = F.gen()**(q - 1)
         v = F(1)
         for _ in range(q + 1):
             if P(v) == 0:
-                raise TypeError("The polynomial x^{2^i+1} + cx^{2^i} + c^q x + 1 has a root satisfying x^{q+1} = 1")
+                return False
             v *= K_gen
-
+        return True
+    
+    pair_ic = ((i_val, c_val) for i_val in i for c_val in c if _verify_root(i_val, c_val))
+    
+    def _poly(i_val, s_val, c_val):
         e_xq = (q * (2**i_val + 1)) % (2**n - 1)
         e_c = (2**i_val * q + 1) % (2**n - 1)
         return (s_val * x**(q + 1) + x**(2**i_val + 1) + x**e_xq + c_val * x**e_c + c_val**q * x**(2**i_val + q)).mod(x**(2**n) - x)
     
-    res = set()
-    for i_val in i:
-        for s_val in s:
-            for c_val in c:
-                try:
-                    res.add(_poly(i_val, s_val, c_val))
-                except TypeError:
-                    continue
-
-    if not res:
-        raise TypeError("No valid polynomials found")
-    
-    return list(res) if len(res) > 1 else list(res)[0]
+    pairs = (
+        (_poly(i_val, s_val, c_val), {'i': i_val, 's': s_val, 'c': c_val})
+        for i_val, c_val in pair_ic
+        for s_val in s
+    )
+    return build_table(pairs)
 
 
 def family_4(n, a=None):
@@ -245,7 +256,7 @@ def family_4(n, a=None):
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9)`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -256,17 +267,17 @@ def family_4(n, a=None):
 
         sage: from cryptographicFunctionsLibrary import family_4
         sage: F.<a> = GF(2^9)
-        sage: family_4(9, a^8 + a^7 + a^5 + a^3 + 1)
-        (a^8 + a^7 + a^6 + a^4 + a^3)*x^288 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^260 + (a^8 + a^7 + a^5 + 1)*x^144 + (a^7 + a^6 + 1)*x^130 + (a^7 + a^6 + a^4 + a^2 + a + 1)*x^72 + (a^6 + a^5 + a^4 + a^2 + a)*x^65 + (a^7 + a^6 + a^4 + a^3 + a)*x^36 + (a^8 + a^6 + a^4 + a^3 + 1)*x^18 + (a^5 + a^4 + a^2 + 1)*x^9 + x^3
+        sage: family_4(9, a^2)
+        (a^7 + a^6 + a^3 + 1)*x^288 + a*x^260 + (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + 1)*x^65 + (a^7 + a^4 + a^3)*x^36 + (a^5 + a)*x^18 + a^4*x^9 + x^3
 
         sage: family_4(9, F(1))
         x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
 
-        sage: result = family4(9); result
-        [(a^6 + a^3 + 1)*x^288 + (a^7 + a^5 + a^2 + 1)*x^260 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^8 + a^5 + a^4)*x^72 + (a^8 + a^7 + a^4 + a)*x^65 + (a^6 + a^2)*x^36 + a^5*x^18 + a^2*x^9 + x^3,
-        (a^7 + a^6 + a^3 + 1)*x^288 + a*x^260 + (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + 1)*x^65 + (a^7 + a^4 + a^3)*x^36 + (a^5 + a)*x^18 + a^4*x^9 + x^3,
+        sage: result = family_4(9); list(result.keys())
+        [x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + x^3,
+        x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3,
         ...
-        x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3]
+        x^24 + (a^5 + a^4 + a^3)*x^17 + (a^3 + a^2)*x^10 + (a^5 + a^3 + a^2 + 1)*x^9 + x^3]
 
         sage: len(result)
         511
@@ -280,7 +291,11 @@ def family_4(n, a=None):
         return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
     
     if a is None:
-        return [_poly(a_val) for a_val in F if a_val != 0]
+        pairs = (
+            (_poly(a_val), {'a': a_val})
+            for a_val in F if a_val != 0
+        )
+        return build_table(pairs)
     elif a == 0 or a not in F:
         raise TypeError("a must be a nonzero element of GF(2^n)")
     
@@ -292,7 +307,7 @@ def family_5(n, a=None):
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18)`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -309,9 +324,10 @@ def family_5(n, a=None):
         sage: family_5(9, F(1))
         x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3
 
-        sage: result = family_5(9); result
+        sage: result = family_5(9); list(result.keys())
         [(a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^8 + a^5 + a^4)*x^72 + (a^8 + a^7 + a^4 + a)*x^65 + a^5*x^18 + a^2*x^9 + x^3,
-        (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + 1)*x^65 + (a^5 + a)*x^18 + a^4*x^9 + x^3,        ...
+        (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + 1)*x^65 + (a^5 + a)*x^18 + a^4*x^9 + x^3,
+        ...
         x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3]
         
         sage: len(result)
@@ -330,7 +346,11 @@ def family_5(n, a=None):
         return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
 
     if a is None:
-        return [_poly(a_val) for a_val in F if a_val != 0]
+        pairs = (
+            (_poly(a_val), {'a': a_val})
+            for a_val in F if a_val != 0
+        )
+        return build_table(pairs)
     elif a == 0 or a not in F:
         raise TypeError("a must be a nonzero element of GF(2^n)")
     
@@ -342,7 +362,7 @@ def family_6(n, a=None):
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36)`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -354,12 +374,12 @@ def family_6(n, a=None):
         sage: from cryptographicFunctionsLibrary import family_6
         sage: F.<a> = GF(2^9)
         sage: family_6(9, a^8 + a^5 + a^3 + 1)
-        (a^8 + a^7 + a^6 + a^4 + a^3 + a)*x^288 + (a^8 + a^7 + a^6 + a^2 + 1)*x^260 + (a^7 + a^6 + a^5 + a^4)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + 1)*x^36 + (a^8 + a^7 + a^5 + a^4 + a^2 + a + 1)*x^18 + x^3
+        (a^7 + a^6 + 1)*x^288 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a)*x^260 + (a^5 + a^4)*x^144 + (a^7 + a^5 + a^4 + a^3 + a^2)*x^130 + (a^8 + a^6 + a^4 + a^2 + a)*x^36 + (a^7 + a^6 + a^2 + 1)*x^18 + x^3
 
         sage: family_6(9, F(1))
         x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3
 
-        sage: result = family_6(9); result
+        sage: result = family_6(9); list(result.keys())
         [(a^6 + a^3 + 1)*x^288 + (a^7 + a^5 + a^2 + 1)*x^260 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^144 + (a^8 + a^7 + a^6 + a^5 + a^4 + a + 1)*x^130 + (a^6 + a^2)*x^36 + a^5*x^18 + x^3,
         (a^7 + a^6 + a^3 + 1)*x^288 + a*x^260 + (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^7 + a^4 + a^3)*x^36 + (a^5 + a)*x^18 + x^3,
         ...
@@ -381,7 +401,11 @@ def family_6(n, a=None):
         return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
 
     if a is None:
-        return [_poly(a_val) for a_val in F if a_val != 0]
+        pairs = (
+            (_poly(a_val), {'a': a_val})
+            for a_val in F if a_val != 0
+        )
+        return build_table(pairs)
     elif a == 0 or a not in F:
         raise TypeError("a must be a nonzero element of GF(2^n)")
     
@@ -393,7 +417,7 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
     Return the Bracken-Byrne-Markin-McGuire construction from 2011.
     Defined by `f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -407,40 +431,31 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
 
         sage: from cryptographicFunctionsLibrary import family_7_9
         sage: F.<a> = GF(2^12)
-        sage: u, v, w = a, a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1, a^10 + a^9 + a^8 + a^4 + a^3 + a^2
-        sage: family_7_9(12, 5, u, v, w)
-        (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^9 + a^6 + a^4 + a^2 + a)*x^544 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257 + a*x^33
+        sage: K = F.subfield(4)
+        sage: family_7_9(12, 5, a, K(1), K(0))
+        (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + x^257 + a*x^33
         
-        sage: v, w = a^11 + a^9 + a^8 + a^6 + a^3 + a + 1, a^10 + a^9 + a^6 + a^5 + a^3 + 1
+        sage: v, w = K.random_element(), K.random_element(); v, w
+        (a4^3 + a4 + 1, a4)
         sage: family_7_9(12, 11, None, v, w)
-        [(a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a)*x^2056 + (a^10 + a^9 + a^8 + a^6 + a^2 + 1)*x^2049 + (a^10 + a^8 + a^5 + a^4 + a^3 + a + 1)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
-        (a^10 + a^9 + a^7 + a^6 + a^4 + a^3)*x^2056 + (a^11 + a^10 + a^8 + a^6 + a^4 + a^3 + a^2 + a)*x^2049 + (a^11 + a^7 + a^6 + a^3)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
+        {(a^11 + a^10 + a^9 + a^6 + a^4 + a^2 + a)*x^2056 + a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + (a^10 + a^9 + a^6 + a^5 + a^3)*x^257: 
+            [{'s': 11, 'u': a, 'v': a4^3 + a4 + 1, 'w': a4}],
         ...
-        (a^7 + a^5 + a^4 + a^3 + a)*x^2056 + (a^11 + a^9 + a^6 + a^5 + a^4 + a + 1)*x^2049 + (a^9 + a^8 + a^7 + a^6 + a^2)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257]
-        
-        sage: family_7_9(12, 11, None, v)
-        [(a^11 + a^6 + a^4 + a^3 + a^2 + a)*x^2056 + (a^11 + a^9 + a^7 + a^5 + a^3 + a^2 + 1)*x^2049 + (a^11 + a^10 + a^8 + a^6 + a^4 + a^3)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
-        (a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^4 + 1)*x^2056 + (a^11 + a^10 + a^9 + a^8 + a^6 + a^4 + a^3 + a^2 + a)*x^2049 + (a^11 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257,
-        ...
-        (a^7 + a^5 + a^4 + a)*x^2056 + (a^11 + a^8 + a^3 + 1)*x^2049 + (a^11 + a^10 + a^7 + a^4 + 1)*x^264 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^257]
-
-        sage: family_7_9(12, 11, None, None, w)
-        [(a^10 + a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^2056 + (a^8 + a^7 + a^5 + a)*x^2049 + (a^10 + a^7 + a + 1)*x^264 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2 + 1)*x^257,
-        (a^10 + a^9 + a^6 + a^5 + a^4 + a^3 + a^2 + 1)*x^2056 + (a^8 + a^7 + a^3 + 1)*x^2049 + (a^11 + a^10 + a^6 + a^4 + a + 1)*x^264 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257,
-        ...
-        (a^11 + a^10 + a^8 + a^6 + a^5 + a^3)*x^2056 + (a^11 + a^8 + a^7 + a^6 + a^2)*x^2049 + (a^11 + a^10 + a^8 + a^7 + a^5 + a^2 + a + 1)*x^264 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2)*x^257]
+        (a^10 + a^7 + a^3 + a^2)*x^2056 + (a^11 + a^6 + a^5 + a^4 + a^2 + 1)*x^2049 + (a^10 + a^9 + a^7 + a^3 + a^2 + a)*x^264 + (a^10 + a^9 + a^6 + a^5 + a^3)*x^257: 
+            [{'s': 11, 'u': a^11 + a^6 + a^5 + a^4 + a^2 + 1, 'v': a4^3 + a4 + 1, 'w': a4}]}
 
         sage: family_7_9(12, 5, a)
-        [(a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^8 + a^7 + a^3 + a + 1)*x^544 + (a^8 + a^6 + a^5 + a^4 + a^2 + 1)*x^257 + a*x^33,
-        (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^9 + a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^544 + (a^11 + a^10 + a^8 + a^5 + a + 1)*x^257 + a*x^33
+        {((a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^10 + a^9 + a^3)*x^544 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257 + a*x^33,
+            [{'s': 5, 'u': a, 'v': a4^2, 'w': a4^3 + a4^2}])
         ...
-        (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^11 + a^10 + a^6 + a^4 + a + 1)*x^544 + a*x^33]
+        ((a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + (a^10 + a^9 + a^8 + a^7 + a^6 + a^4)*x^544 + (a^8 + a^6 + a^5 + a^4 + a^2 + 1)*x^257 + a*x^33,
+            [{'s': 5, 'u': a, 'v': a4^3, 'w': a4^2 + a4 + 1}])}
 
-        sage: result = family_7_9(12, 5); result
-        [(a^11 + a^9 + a^8 + a^7 + a^5 + a^2 + a + 1)*x^768 + (a^7 + a^3 + a)*x^544 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^257 + (a^10 + a^9 + a^8 + a^7 + a^4 + a^3 + a + 1)*x^33,
-        (a^11 + a^10 + a^3 + a^2)*x^768 + (a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^3 + a + 1)*x^544 + x^257 + (a^7 + a^4 + a^3 + a)*x^33,
+        sage: result = family_7_9(12, 5); list(result.keys())
+        [(a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^768 + a*x^33,
+        (a^11 + a^9 + a^7 + a^6 + a^2 + a)*x^768 + a^2*x^33
         ...
-        (a^11 + a^10 + a^9 + a^8 + a^4 + a^2 + a)*x^768 + (a^11 + a^10 + a^8 + a^7 + a^6 + a^4 + a^3 + a)*x^544 + (a^11 + a^10 + a^8 + a^5 + a)*x^257 + (a^9 + a^7 + a^6 + a)*x^33]
+        (a^10 + a^9 + a^7 + a^3 + a^2 + a)*x^768 + (a^7 + a + 1)*x^544 + x^257 + (a^11 + a^6 + a^5 + a^4 + a^2 + 1)*x^33]
         
         sage: len(result)
         416448
@@ -471,13 +486,12 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
 
     if v is not None and w is not None:
         if v * w == K(1):
-            raise TypeError("v and w must be elements of GF(2^k)")
-        pair = {(v, w)}
+            raise TypeError("v and w must satisfy v*w != 1")
+        pair_vw = [(v, w)]
     else:
         v_vals = K if v is None else [v]
         w_vals = K if w is None else [w]
-
-        pair = set((v_val, w_val) for v_val in v_vals for w_val in w_vals if v_val * w_val != K(1))
+        pair_vw = [(v_val, w_val) for v_val in v_vals for w_val in w_vals if v_val * w_val != K(1)]
 
     if s is None:
         s = [s_val for s_val in range(1, n) if (gcd(s_val, 3*k) == 1 and (k + s_val) % 3 == 0)]
@@ -486,22 +500,19 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
     else:
         s = [s]
         
-    def _poly(s_val, w_val, v_val, u_val):
+    def _poly(s_val, u_val, w_val, v_val):
         e_ux = (2**(n - k) + 2**(k + s_val)) % (2**n - 1)
         e_v = (2**(n - k) + 1) % (2**n - 1)
         e_wu = (2**s_val + 2**(k + s_val)) % (2**n - 1)
-        return (u_val * x**(2**s_val + 1) + u_val**(2**k) * x**e_ux + v_val * x**e_v + w_val * u_val**(2**k + 1) * x**e_wu).mod(x**(2**n) - x)
+        return (u_val * x**(2**s_val + 1) + u_val**(2**k) * x**e_ux + F(v_val) * x**e_v + F(w_val) * u_val**(2**k + 1) * x**e_wu).mod(x**(2**n) - x)
 
-    res = set()
-    for u_val in u:
-        for v_val, w_val in pair:
-            for s_val in s:
-                res.add(_poly(s_val, w_val, v_val, u_val))
-
-    if not res:
-        raise TypeError("No valid polynomials found")
-
-    return list(res) if len(res) > 1 else list(res)[0]
+    pairs = (
+        (_poly(s_val, u_val, w_val, v_val), {'s': s_val, 'u': u_val, 'v': v_val, 'w': w_val})
+        for s_val in s
+        for v_val, w_val in pair_vw
+        for u_val in u
+    )
+    return build_table(pairs)
 
 
 def family_11(n, k=None, i=None, a=None):
@@ -509,7 +520,7 @@ def family_11(n, k=None, i=None, a=None):
     Return the Budaghyan-Helleseth-Kaleyski construction from 2020.
     Defined by `f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -526,20 +537,26 @@ def family_11(n, k=None, i=None, a=None):
         x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3
 
         sage: family_11(10, 2, None, a^5 + a^3 + a)
-        [(a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3,
-        x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3,
-        x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3,
-        (a^5 + a^3 + a + 1)*x^132 + (a^5 + a^3 + a + 1)*x^96 + x^3]
+        {x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3: 
+            [{'k': 2, 'i': 9, 'a': a^5 + a^3 + a}],
+        x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3: 
+            [{'k': 2, 'i': 3, 'a': a^5 + a^3 + a}],
+        (a^5 + a^3 + a + 1)*x^132 + (a^5 + a^3 + a + 1)*x^96 + x^3: 
+            [{'k': 2, 'i': 5, 'a': a^5 + a^3 + a}],
+        (a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3: 
+            [{'k': 2, 'i': 7, 'a': a^5 + a^3 + a}]}
 
         sage: family_11(10, 2, 5)
-        [(a^5 + a^3 + a)*x^132 + (a^5 + a^3 + a)*x^96 + x^3,
-        (a^5 + a^3 + a + 1)*x^132 + (a^5 + a^3 + a + 1)*x^96 + x^3]
+        {(a^5 + a^3 + a + 1)*x^132 + (a^5 + a^3 + a + 1)*x^96 + x^3: 
+            [{'k': 2, 'i': 5, 'a': a2}],
+        (a^5 + a^3 + a)*x^132 + (a^5 + a^3 + a)*x^96 + x^3: 
+            [{'k': 2, 'i': 5, 'a': a2 + 1}]}
 
-        sage: result = family_11(10); result
-        [(a^5 + a^3 + a + 1)*x^576 + (a^5 + a^3 + a)*x^96 + x^18 + x^3,
-        (a^5 + a^3 + a)*x^516 + x^144 + (a^5 + a^3 + a + 1)*x^96 + x^3,
+        sage: result = family_11(10); list(result.keys())
+        [(a^5 + a^3 + a)*x^513 + (a^5 + a^3 + a + 1)*x^96 + x^48 + x^3
+        (a^5 + a^3 + a + 1)*x^513 + (a^5 + a^3 + a)*x^96 + x^48 + x^3
         ...
-        x^576 + (a^5 + a^3 + a)*x^96 + (a^5 + a^3 + a + 1)*x^18 + x^3]
+        (a^5 + a^3 + a + 1)*x^384 + (a^5 + a^3 + a)*x^96 + x^12 + x^3]
 
         sage: len(result)
         39
@@ -558,6 +575,8 @@ def family_11(n, k=None, i=None, a=None):
 
     if k is None:
         k = list(range(0, n))
+    elif not (0 <= k < n - 1):
+        raise TypeError("k must be a positive integer in {0, ... , n - 1}")
     else:
         k = [k]
     
@@ -566,39 +585,36 @@ def family_11(n, k=None, i=None, a=None):
         base = {m - 2, m, n - 1} if k_val % 2 == 0 else {m + 2, m}
 
         if i_arg is not None:
-            if i_arg not in base and (i_arg * p) % n != 1:
-                raise TypeError("i is not valid")
-            return [i_arg]
+            if i_arg in base or (gcd(p, n) == 1 and (i_arg * p) % n == 1):
+                return [i_arg]
+            return []
         
         inv_set = {pow(p, -1, n)} if gcd(p, n) == 1 else set()
         return base | inv_set
 
-    i = {k_val: _valid_i(i, k_val) for k_val in k}
+    pair_ik = [(k_val, i_val) for k_val in k for i_val in _valid_i(i, k_val)]
+    if len(pair_ik) == 0:
+        raise TypeError("No valid pairs of k and i")
     
     if a is None:
         a = [a_val for a_val in K if a_val != 0 and is_primitive_element(K, a_val)]
-    elif a == 0 or not is_primitive_element(K, a) or a not in K:
-        raise TypeError("a must be a primitive element of GF(2)")
+    elif a == 0 or a not in K or not is_primitive_element(K, a):
+        raise TypeError("a must be a primitive element of GF(2^2)")
     else:
         a = [a]
     
-    def _poly(k_val, i_val, a_val, b_val, c_val):
+    def _poly(k_val, i_val, a_val):
         e_a = (2**i_val + 1) * 2**k_val % (2**n - 1)
         e_b = 3 * 2**m
         e_c = ((2**(i_val + m) + 2**m) * 2**k_val) % (2**n - 1)
-        return (x**3 + a_val*x**e_a + b_val*x**e_b + c_val*x**e_c).mod(x**(2**n) - x)
+        return (x**3 + a_val*x**e_a + (a_val**2)*x**e_b + F(1)*x**e_c).mod(x**(2**n) - x)
 
-    res = set()
-    for a_val in a:
-        b_val, c_val = a_val**2, F(1)
-        for k_val in k:
-            for i_val in i[k_val]:
-                res.add(_poly(k_val, i_val, a_val, b_val, c_val))
-
-    if not res:
-        raise TypeError("No valid polynomials found")
-
-    return list(res) if len(res) > 1 else list(res)[0]
+    pairs = (
+        (_poly(k_val, i_val, a_val), {'k': k_val, 'i': i_val, 'a': a_val})
+        for k_val, i_val in pair_ik
+        for a_val in a
+    )
+    return build_table(pairs)
 
 
 def family_12(n, i=None, s=None, a=None, b=None, c=None):
@@ -606,7 +622,7 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
     Return the Zheng-Kan-Li-Peng-Tang construction from 2022.
     Defined by `f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -625,22 +641,30 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
         (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3
 
         sage: family_12(10, 1, 5, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1)
-        [(a^6 + a^3 + a^2 + a + 1)*x^96 + (a^9 + a^8 + a^7 + a^3 + a + 1)*x^33 + (a^9 + a^7 + a)*x^3,
-        (a^7 + a^6 + a^5 + 1)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^9 + a^4 + a^3 + a + 1)*x^3,
+        {(a^7 + a^4 + a^3 + a^2 + a)*x^96 + (a^8 + a^6 + a^4 + a^3 + a + 1)*x^33 + (a^9 + a^8 + a^5 + a^4 + a^2 + 1)*x^3: 
+            [{'i': 1, 's': 5, 'a': a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1, 'b': a, 'c': a},
+            ...
+            {'i': 1, 's': 5, 'a': a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1, 'b': a, 'c': a^9 + a^6 + a^4 + a}],
         ...
-        (a^9 + a^8 + a^6 + a^3 + a^2 + 1)*x^96 + (a^9 + a^6 + a^5 + a^2 + a)*x^33 + (a^9 + a^5 + a^3 + a + 1)*x^3]
+        (a^8 + a^6 + 1)*x^96 + (a^7 + a^6 + a^4 + a + 1)*x^33 + (a^9 + a^8 + a^7 + a^6 + a^5 + 1)*x^3: 
+            [{'i': 1, 's': 5, 'a': a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1, 'b': a^9 + a^5 + a^4 + a^2 + a + 1, 'c': a^7 + a^3 + a^2 + a + 1},
+            ...
+            {'i': 1, 's': 5, 'a': a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1, 'b': a^9 + a^5 + a^4 + a^2 + a + 1, 'c': a^9 + a^6 + a^5 + a^2}]}
 
-        sage: family_12(10, None, None, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
-        [(a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^129 + (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^36 + (a^7 + a^2 + a)*x^33,
-        (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3,
-        (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^288 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^9,
-        (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^513 + (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^48 + (a^7 + a^2 + a)*x^33]
-
-        sage: result = family_12(10, 1, None, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1); result
-        [(a^9 + a^8 + a^7 + a^3 + a^2)*x^96 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^33 + (a^8 + a^5 + a^3 + a^2)*x^3,
-        (a^7 + a^3)*x^129 + (a^6 + a^2 + a + 1)*x^96 + (a^8 + a^7 + a^5 + a^4 + a^2 + a)*x^36 + (a^9 + a^7 + a^5 + a^4 + a^3 + a + 1)*x^3,
+        sage: family_12(10, 1, None, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a)
+        {(a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^9 + a^7 + a^6 + a^4)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3: 
+            [{'i': 1, 's': 5, 'a': a^8 + a^5 + a^4 + a^3 + a^2, 'b': a^9 + a^8 + a^7 + a^3 + a^2 + a, 'c': a},
+            ...
+            {'i': 1, 's': 5, 'a': a^8 + a^5 + a^4 + a^3 + a^2, 'b': a^9 + a^8 + a^7 + a^3 + a^2 + a, 'c': a^9 + a^6 + a^4 + a}],
         ...
-        (a^9 + a^8 + a^5 + a^4 + a^3 + a + 1)*x^513 + (a^7 + a^3 + a^2 + a)*x^96 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^3)*x^48 + (a^8 + a^7 + a^2 + 1)*x^3]
+        (a^9 + a^5 + a^4 + a + 1)*x^288 + (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^9 + a^5 + a^4 + a + 1)*x^9 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3: 
+            [{'i': 1, 's': 3, 'a': a^8 + a^5 + a^4 + a^3 + a^2, 'b': a^9 + a^8 + a^7 + a^3 + a^2 + a, 'c': 1}]}
+
+        sage: result = family_12(10, 1, None, a^6 + a^4 + 1); list(result.keys())
+        [(a^8 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^9 + a^8 + a^7 + a^4 + a + 1)*x^33 + (a^7 + a^5 + a)*x^3,
+        (a^8 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^9 + a^3 + 1)*x^33 + (a^7 + a^5 + a)*x^3,
+        ...
+        (a^9 + a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^513 + (a^6 + a^4 + 1)*x^96 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^48 + (a^6 + a^4 + 1)*x^3]
 
         sage: len(result)
         137423
@@ -672,8 +696,23 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
     else:
         i = [i]
     
-    b = [b] if b is not None else [b_val for b_val in F if b_val != F(0)]
-    c = [c] if c is not None else [c_val for c_val in F if c_val != F(0)]
+    if b is None:
+        b = [b_val for b_val in F if b_val != F(0)]
+    elif b == 0 or b not in F:
+        raise TypeError("b must be a nonzero element of GF(2^n)")
+    else:
+        b = [b]
+    
+    if c is None:
+        c = [c_val for c_val in F if c_val != F(0)]
+    elif c == 0 or c not in F:
+        raise TypeError("c must be a nonzero element of GF(2^n)")
+    else:
+        c = [c]
+    
+    pair_ibcs = [(i_val, b_val, c_val, s_val) for i_val in i for b_val in b for c_val in c for s_val in (family12_conditions(F, i_val, b_val, c_val) if s is None else ([s] if family12_check_s(F, i_val, b_val, c_val, s) else []))]
+    if len(pair_ibcs) == 0:
+        raise ValueError("No valid combinations of i, b, c, s found")
 
     def _poly(i_val, a_val, b_val, c_val, s_val):
         e_x1 = (2**i_val + 1)
@@ -682,22 +721,12 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
         e_c = (q * e_x2) % (2**n - 1)
         return (a_val * b_val * x**e_x1 + a_val * b_val**q * x**e_b + a_val**q * c_val * x**e_x2 + a_val**q * c_val**q * x**e_c).mod(x**(2**n) - x)
     
-    res = set()
-    for a_val in a:
-        for i_val in i:
-            for b_val in b:
-                for c_val in c:
-                    if s is not None:
-                        if family12_check_s(F, i_val, b_val, c_val, s):
-                            res.add(_poly(i_val, a_val, b_val, c_val, s))
-                    else:
-                        for s_val in family12_conditions(F, i_val, b_val, c_val):
-                            res.add(_poly(i_val, a_val, b_val, c_val, s_val))
-                    
-    if not res:
-        raise TypeError("No valid polynomials found")
-    
-    return list(res) if len(res) > 1 else list(res)[0]
+    pairs = (
+        (_poly(i_val, a_val, b_val, c_val, s_val), {'i': i_val, 's': s_val, 'a': a_val, 'b': b_val, 'c': c_val})
+        for i_val, b_val, c_val, s_val in pair_ibcs
+        for a_val in a
+    )
+    return build_table(pairs)
 
 
 def family_13(n, s=None, v=None, mu=None):
@@ -705,7 +734,7 @@ def family_13(n, s=None, v=None, mu=None):
     Return the Li-Zhou-Li-Qu construction from 2022.
     Defined by `f(x) = L(z)^(2^m + 1) + cz^(2^m + 1)`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a list of all valid polynomials found.
+    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -723,42 +752,35 @@ def family_13(n, s=None, v=None, mu=None):
         x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10
 
         sage: family_13(9, 1, Fm(1))
-        [x^144 + (a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^130 + x^129 + (a^4 + a)*x^32 + x^24 + (a^7 + a^6 + a^5 + a^3 + 1)*x^18 + (a^4 + a)*x^17 + (a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^10,
-        x^144 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^130 + x^129 + (a^8 + a^7 + a^5 + a)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^18 + (a^8 + a^7 + a^5 + a)*x^17 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^10,
+        {x^144 + a^5*x^130 + x^129 + (a^5 + a^4 + a^2 + a)*x^32 + x^24 + (a^7 + a^6 + a^5 + a^4 + a + 1)*x^18 + (a^5 + a^4 + a^2 + a)*x^17 + a^5*x^10: 
+            [{'s': 1, 'mu': a^5, 'v': 1}],
         ...
-        x^144 + (a^7 + a^6 + a^5 + a^3 + a)*x^130 + x^129 + (a^3 + a^2 + a + 1)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^2)*x^18 + (a^3 + a^2 + a + 1)*x^17 + (a^7 + a^6 + a^5 + a^3 + a)*x^10]
-
+        x^144 + (a^6 + a)*x^130 + x^129 + (a^7 + a^5 + a^3 + a + 1)*x^32 + x^24 + (a^7 + a^6 + a^4 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a + 1)*x^17 + (a^6 + a)*x^10: 
+            [{'s': 1, 'mu': a^6 + a, 'v': 1}]}
+        
         sage: family_13(9, 1, None, a^7 + a^5 + a^3 + a + 1)
-        [x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10 + (a^8 + a^6 + a^3 + a^2)*x^9,
-        x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10 + (a^4 + a^3 + a^2 + 1)*x^9,
-        ...        
-        x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10]
+        {x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10 + (a^8 + a^6 + a^4 + 1)*x^9: 
+            [{'s': 1, 'mu': a^7 + a^5 + a^3 + a + 1, 'v': a^3}],
+        ...
+        x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10: 
+            [{'s': 1, 'mu': a^7 + a^5 + a^3 + a + 1, 'v': 1}]}
 
         sage: family_13(9, 1)
-        [x^144 + (a^3 + a^2)*x^130 + x^129 + (a^7 + a^5 + a^4 + a^2 + 1)*x^32 + x^24 + (a^8 + a^6 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^4 + a^2 + 1)*x^17 + (a^3 + a^2)*x^10 + (a^8 + a^6 + a^3 + a^2 + 1)*x^9,
-        x^144 + (a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^130 + x^129 + (a^6 + a^4 + a^3 + a^2 + 1)*x^32 + x^24 + (a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^6 + a^4 + a^3 + a^2 + 1)*x^17 + (a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^10 + (a^4 + a^3 + a^2)*x^9,
+        {x^144 + a^5*x^130 + x^129 + (a^5 + a^4 + a^2 + a)*x^32 + x^24 + (a^7 + a^6 + a^5 + a^4 + a + 1)*x^18 + (a^5 + a^4 + a^2 + a)*x^17 + a^5*x^10 + (a^8 + a^6 + a^4 + 1)*x^9: 
+            [{'s': 1, 'mu': a^5, 'v': a3}],
         ...
-        x^144 + (a^7 + a^5 + 1)*x^130 + x^129 + (a^7 + a^6 + a^4 + a^2)*x^32 + x^24 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + 1)*x^18 + (a^7 + a^6 + a^4 + a^2)*x^17 + (a^7 + a^5 + 1)*x^10 + (a^8 + a^6 + a^3 + a^2)*x^9]
+        x^144 + (a^6 + a)*x^130 + x^129 + (a^7 + a^5 + a^3 + a + 1)*x^32 + x^24 + (a^7 + a^6 + a^4 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a + 1)*x^17 + (a^6 + a)*x^10: 
+            [{'s': 1, 'mu': a^6 + a, 'v': 1}]}
 
-        sage: family_13(9)
-        [x^144 + (a^3 + a^2)*x^130 + x^129 + (a^7 + a^5 + a^4 + a^2 + 1)*x^32 + x^24 + (a^8 + a^6 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^4 + a^2 + 1)*x^17 + (a^3 + a^2)*x^10 + (a^8 + a^6 + a^3 + a^2 + 1)*x^9,
-        x^288 + (a^8 + a^3 + a^2 + a + 1)*x^260 + x^257 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^64 + x^40 + (a^8 + a^6 + a^5 + a + 1)*x^36 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^33 + (a^8 + a^3 + a^2 + a + 1)*x^12 + (a^8 + a^6 + a^4 + 1)*x^9,
+        sage: result = family_13(12); list(result.keys())
+        [x^544 + a*x^514 + x^513 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^64 + x^48 + (a^11 + a^10 + a^8 + a^7 + a^3 + a + 1)*x^34 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^33 + a*x^18 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2 + 1)*x^17,
+        x^544 + a*x^514 + x^513 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^64 + x^48 + (a^11 + a^10 + a^8 + a^7 + a^3 + a + 1)*x^34 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^33 + a*x^18 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a)*x^17,
         ...
-        x^288 + (a^7 + a^5 + a^4 + a^3 + a^2 + 1)*x^260 + x^257 + (a^7 + a^6 + a^3)*x^64 + x^40 + (a^8 + a^7 + a^5 + a + 1)*x^36 + (a^7 + a^6 + a^3)*x^33 + (a^7 + a^5 + a^4 + a^3 + a^2 + 1)*x^12 + (a^8 + a^6 + a^4 + 1)*x^9]
-
-        sage: result = family_13(12); result
-        [x^544 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^514 + x^513 + (a^7 + a^6 + a^4 + a^3 + a)*x^64 + x^48 + (a^11 + a^9 + a^5)*x^34 + (a^7 + a^6 + a^4 + a^3 + a)*x^33 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^17,
-        x^2176 + (a^10 + a^9 + a^5 + a^4 + a^3 + a^2)*x^2056 + x^2049 + (a^10 + a^8 + a^7 + a^6 + a^5 + a + 1)*x^256 + x^144 + (a^10 + a^8 + a^7 + a^5 + a^4 + a^3 + 1)*x^136 + (a^10 + a^8 + a^7 + a^6 + a^5 + a + 1)*x^129 + (a^10 + a^9 + a^5 + a^4 + a^3 + a^2)*x^24 + (a^8 + a^6 + a^5 + a^4 + a^2)*x^17,
-        ...
-        x^544 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^514 + x^513 + (a^9 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^64 + x^48 + (a^11 + a^8 + a^5 + a^3 + a^2)*x^34 + (a^9 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^33 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^18 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2)*x^17]
+        x^2176 + (a^10 + a^9 + a^8 + a^7 + a^4 + a^2 + a + 1)*x^2056 + x^2049 + (a^11 + a^9 + a^3 + a)*x^256 + x^144 + (a^9 + a^7 + a^5 + a^3 + a^2 + a)*x^136 + (a^11 + a^9 + a^3 + a)*x^129 + (a^10 + a^9 + a^8 + a^7 + a^4 + a^2 + a + 1)*x^24]
 
         sage: len(result)
         32760
-    """
-    def _permutes(s_val, mu_val):
-        L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
-        return L.gcd(x**(2**n) - x) == x
-        
+    """        
     if n % 3 != 0:
         raise TypeError("n must be divisible by 3")
 
@@ -787,21 +809,20 @@ def family_13(n, s=None, v=None, mu=None):
         raise TypeError("mu must be a nonzero element of GF(2^n) satisfying mu^(2^(2*m)+2^m+1) != 1")
     else:
         mu = [mu]
+    
+    def _permutes(s_val, mu_val):
+        L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
+        return L.gcd(x**(2**n) - x) == x
+
+    pair_smu = [(s_val, mu_val) for s_val in s for mu_val in mu if _permutes(s_val, mu_val)]
 
     def _poly(s_val, mu_val, v_val):
         L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
         return (L**(2**m + 1) + v_val*x**(2**m + 1)).mod(x**(2**n) - x)
-
-    res = set()
-
-    for mu_val in mu:
-        for s_val in s:
-            if not _permutes(s_val, mu_val):
-                continue
-            for v_val in v:
-                res.add(_poly(s_val, mu_val, v_val))
     
-    if not res:
-        raise TypeError("No valid polynomials found")
-    
-    return list(res) if len(res) > 1 else list(res)[0]
+    pairs = (
+        (_poly(s_val, mu_val, v_val), {'s': s_val, 'mu': mu_val, 'v': v_val})
+        for s_val, mu_val in pair_smu
+        for v_val in v
+    )
+    return build_table(pairs)
