@@ -1,4 +1,4 @@
-from sage import *
+from sage.all import *
 from helpers import construct_truth_table, construct_lagrange_polynomial
 
 
@@ -76,7 +76,7 @@ def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate'):
     - ``n`` -- the degree of the finite field extension GF(2^n)
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
     - ``basis`` -- (optional) basis of GF(2^n) over GF(2); if None, a normal basis is used
-    - ``output_format`` -- (optional) the format of the output matrix entries, either 'univariate' or 'power'; if None, 'univariate' is used
+    - ``output_format`` -- (optional) the format of the output matrix entries, either 'univariate' or 'power'; if None, defaults to 'univariate'
 
     EXAMPLES::
 
@@ -264,7 +264,7 @@ def sequence_to_polynomial(n, sequence, basis=None):
 def univariate_to_bivariate(n, polynomial):
     r"""
     Convert a polynomial from its univariate representation over GF(2^n) to its bivariate representation over GF(2^m).
-    Defined by `F(x, y) = (g(x, y), f(x, y))`.
+    Defined by `F(x, y) = (f(x, y), g(x, y))`.
 
     INPUT:
 
@@ -374,7 +374,7 @@ def bivariate_to_univariate(m, f, g):
 def univariate_to_trivariate(n, polynomial):
     r"""
     Convert a polynomial from its univariate representation over GF(2^n) to its trivariate representation over GF(2^m).
-    Defined by `F(x, y, z) = (g(x, y, z), f(x, y, z), h(x, y, z))`.
+    Defined by `F(x, y, z) = (f(x, y, z), g(x, y, z), h(x, y, z))`.
     
     INPUT:
 
@@ -388,9 +388,11 @@ def univariate_to_trivariate(n, polynomial):
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^8 + a^7 + a^3)*x^192 + (a^8 + a^7 + a^4 + 1)*x^136 + (a^8 + a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^129 + (a^8 + a^6 + a^3)*x^80 + (a^7 + a^6 + a^5 + a^4 + a^3 + a + 1)*x^66 + (a^7 + a^5 + a^4 + a^3)*x^24 + (a^4 + a^3 + a^2 + 1)*x^17 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^10 + (a^8 + a^7 + a^2 + a + 1)*x^3
         sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
-        (x^3 + (b^2)*x*y^2 + b*y^3 + (b^2 + b)*y^2*z + (b^2)*y*z^2 + b*z^3,
-        (b^2 + b + 1)*x*y^2 + y^3 + x^2*z + (b^2 + b)*y^2*z + (b^2 + b + 1)*y*z^2 + (b^2 + b + 1)*z^3,
-        x^2*y + (b + 1)*x*y^2 + (b^2)*y^3 + y^2*z + x*z^2 + (b + 1)*y*z^2 + b*z^3)
+        (x^3 + x^2*z + y*z^2, y^3 + x^2*z, x*y^2 + y^2*z + z^3)
+
+        polynomial = (a^7 + a^5 + a^3 + 1)*x^192 + (a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^136 + (a^7 + a^3 + 1)*x^129 + (a^6 + a^4 + 1)*x^80 + (a^8 + a^5 + a^3 + a)*x^66 + (a^8 + a^6 + a^5 + a + 1)*x^24 + (a^8 + a^6 + a^5 + a^2 + a + 1)*x^17 + (a^6 + a^5 + 1)*x^10 + (a^8 + a^7 + a^6 + a^5 + a)*x^3
+        sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
+        (x^3 + x*y^2 + y*z^2, x*y^2 + z^3, y^3 + x^2*z + y^2*z)
     """
     if n % 3 != 0:
         raise ValueError("n must be divisible by 3 to convert to trivariate representation")
@@ -466,11 +468,17 @@ def trivariate_to_univariate(m, f, g, h):
         sage: from cryptographicFunctionsLibrary import trivariate_to_univariate
         sage: F.<b> = GF(2^3)
         sage: R.<x, y, z> = PolynomialRing(F)
-        sage: f = x^3 + (b^2)*x*y^2 + b*y^3 + (b^2 + b)*y^2*z + (b^2)*y*z^2 + b*z^3
-        sage: g = (b^2 + b + 1)*x*y^2 + y^3 + x^2*z + (b^2 + b)*y^2*z + (b^2 + b + 1)*y*z^2 + (b^2 + b + 1)*z^3
-        sage: h = x^2*y + (b + 1)*x*y^2 + (b^2)*y^3 + y^2*z + x*z^2 + (b + 1)*y*z^2 + b*z^3
+        sage: f = x^3 + x^2*z + y*z^2
+        sage: g = y^3 + x^2*z
+        sage: h = x*y^2 + y^2*z + z^3
         sage: polynomial = trivariate_to_univariate(3, f, g, h); polynomial
-        (a^8 + a^7 + a^3)*x^192 + (a^8 + a^7 + a^4 + 1)*x^136 + (a^8 + a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^129 + (a^8 + a^6 + a^3)*x^80 + (a^7 + a^6 + a^5 + a^4 + a^3 + a + 1)*x^66 + (a^7 + a^5 + a^4 + a^3)*x^24 + (a^4 + a^3 + a^2 + 1)*x^17 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^10 + (a^8 + a^7 + a^2 + a + 1)*x^3
+        (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^192 + (a^8 + a^7 + a^6 + a^3 + a)*x^136 + (a^7 + a^6 + a^3 + a^2 + a)*x^129 + (a^6 + a^4 + a^3 + 1)*x^80 + (a^5 + a + 1)*x^66 + (a^8 + a^6 + a^4 + a^2 + a)*x^24 + (a^7 + a^5 + a^3 + a^2)*x^17 + (a^5 + a^3 + a^2 + a + 1)*x^10 + (a^8 + a^6 + a^2)*x^3
+        
+        sage: f = x^3 + x*y^2 + y*z^2
+        sage: g = x*y^2 + z^3
+        sage: h = y^3 + x^2*z + y^2*z
+        sage: polynomial = trivariate_to_univariate(3, f, g, h); polynomial
+        (a^7 + a^5 + a^3 + 1)*x^192 + (a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^136 + (a^7 + a^3 + 1)*x^129 + (a^6 + a^4 + 1)*x^80 + (a^8 + a^5 + a^3 + a)*x^66 + (a^8 + a^6 + a^5 + a + 1)*x^24 + (a^8 + a^6 + a^5 + a^2 + a + 1)*x^17 + (a^6 + a^5 + 1)*x^10 + (a^8 + a^7 + a^6 + a^5 + a)*x^3
     """
     n = 3 * m
     q = 2**m
