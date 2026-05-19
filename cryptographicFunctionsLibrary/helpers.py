@@ -5,6 +5,14 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from collections import defaultdict
 
 
+def construct_lagrange_polynomial(F, var, tt):
+    """
+    Construct the Lagrange polynomial interpolating the given truth table.
+    """
+    R = PolynomialRing(F, var)
+    points = [(F.from_integer(i), F.from_integer(val)) for i, val in enumerate(tt)]
+    return R.lagrange_polynomial(points)
+
 def construct_truth_table(F, polynomial):
     """
     Construct the truth table of a polynomial function over GF(2^n) by evaluating it at all field elements.

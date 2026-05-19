@@ -1,8 +1,5 @@
-from sage.rings.finite_rings.finite_field_constructor import GF
-from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
-from sage.all import SR
-from sage.matrix.constructor import Matrix
-from helpers import check_apn, construct_truth_table
+from sage import *
+from helpers import construct_truth_table, check_apn, construct_lagrange_polynomial
 
 
 def polynomial_to_truth_table(n, polynomial, enforce_apn=True):
@@ -75,13 +72,11 @@ def truth_table_to_polynomial(n, tt: list, enforce_apn=True):
         (a^7 + a^5 + a)*x^768 + (a^8 + a^6 + a^4 + a^3 + 1)*x^640 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^4 + a)*x^576 + (a^7 + a^6 + a^4 + a^2 + a + 1)*x^544 + (a^9 + a^8 + a^6 + a^5 + a^4 + a^2 + 1)*x^528 + (a^9 + a^8 + a^7 + a^5 + a^4 + a^3 + a^2 + 1)*x^520 + (a^8 + a^6 + a^3 + a)*x^516 + (a^6 + a^5 + a^4 + a^2 + a)*x^514 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^513 + (a^9 + a^7 + a^6 + a^3 + a^2 + a)*x^512 + (a^5 + a^4 + 1)*x^384 + (a^9 + a^7 + a^5 + a^4 + a + 1)*x^320 + (a^9 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^288 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^4 + a)*x^272 + (a^5 + a^4 + a)*x^264 + (a^8 + a^5 + a^3 + 1)*x^260 + (a^9 + a^8 + a^7 + a^4 + a^3 + 1)*x^258 + (a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^257 + (a^5 + a^4 + 1)*x^256 + (a^9 + a^8 + a^4 + 1)*x^192 + (a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^160 + (a^8 + a^6 + a^4 + a^2 + 1)*x^144 + (a^9 + a^7 + a^6)*x^136 + (a^8 + a^7 + a^6 + a^3 + a + 1)*x^132 + (a^9 + a^8 + a^7 + a^5 + a^4 + a^3 + a^2)*x^130 + (a^6 + a^5 + a^4 + a^3 + a)*x^129 + (a^8 + a^5 + a^4 + a + 1)*x^128 + (a^9 + a^8 + a^6 + a^5 + 1)*x^96 + (a^8 + a^7 + a^5 + a + 1)*x^80 + (a^9 + a^8 + a^4 + a^3 + 1)*x^72 + (a^6 + a^5 + a^4 + a^3 + 1)*x^68 + (a^9 + a^8 + a^7 + a^5 + a^4 + a^2 + 1)*x^66 + (a^9 + a^8 + a^6 + a^5 + a^4)*x^65 + (a^9 + a^7 + a^6 + 1)*x^64 + (a^8 + a^7 + a^6 + a^5)*x^48 + (a^9 + a^7 + a^6 + a^3)*x^40 + (a^9 + a^6 + a^5 + a)*x^36 + (a^8 + a^6 + 1)*x^34 + (a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^33 + (a^6 + a^4 + a^3 + 1)*x^32 + (a^7 + a^6 + a^4 + a^2 + a + 1)*x^24 + (a^8 + a^6 + a^5 + a^3 + 1)*x^20 + (a^7 + a^6 + a^4 + a^3)*x^18 + (a^9 + a^2 + a)*x^17 + (a^3 + a + 1)*x^16 + (a^8 + a^6 + a^4 + a^3 + a^2 + 1)*x^12 + (a^9 + a^8 + a^7 + a^6 + a^5 + a^4 + a)*x^10 + (a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^9 + (a^8 + a^4 + a^3 + a^2 + a)*x^8 + (a^7 + a^4)*x^6 + (a^7 + a^6 + a^5 + a^2 + 1)*x^5 + (a^9 + a^7 + a^6 + a^4 + a^2 + 1)*x^4 + (a^5 + a^4 + a^2)*x^3 + (a^7 + a^6 + a^5 + a^3 + a)*x^2 + (a^8 + 1)*x    
     """
     F = GF(2**n, 'a')
-    R = PolynomialRing(F, 'x')
 
     if enforce_apn and not check_apn(F, tt):
         raise ValueError("The provided truth table is not a quadratic APN function")
 
-    points = [(F.from_integer(i), F.from_integer(val)) for i, val in enumerate(tt)]
-    return R.lagrange_polynomial(points)
+    return construct_lagrange_polynomial(F, 'x', tt)
 
 
 def polynomial_to_matrix(n, polynomial, basis=None, output_format='univariate', enforce_apn=True):
@@ -291,39 +286,236 @@ def sequence_to_polynomial(n, sequence, basis=None, enforce_apn=True):
 
 
 def univariate_to_bivariate(n, polynomial):
-    """
-    Convert a univariate polynomial representation of a quadratic APN function over GF(2^n) to a bivariate polynomial representation over GF(2).
+    r"""
+    Convert a polynomial from its univariate representation over GF(2^n) to its bivariate representation over GF(2^m).
+    Defined by `F(x, y) = (g(x, y), f(x, y))`.
 
     INPUT:
 
-    - ``n`` -- the degree of the finite field extension GF(2^n)
+    - ``n`` -- the degree of the finite field extension GF(2^n); must be even
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
 
+        sage: from cryptographicFunctionsLibrary import univariate_to_bivariate
+        sage: F.<a> = GF(2^6)
+        sage: R.<x> = PolynomialRing(F)
+        sage: polynomial = (a^4 + a^3 + 1)*x^17 + (a + 1)*x^8 + (a^4 + a^3)*x^3 + x
+        sage: f, g = univariate_to_bivariate(6, polynomial); f, g
+        (x^3 + x*y^2, x^2*y + y^3 + x)
     """
     if n % 2 != 0:
         raise ValueError("n must be even to convert to bivariate representation")
     
-    F = GF(2**n, 'a')
     m = n // 2
-    
+    q = 2**m
 
-    
+    F = GF(2**n, 'a')
+    a = F.gen()
+    F_sub, hom = F.subfield(m, 'b', map=True)
+    hom_inv = hom.section()
 
-def univariate_to_trivariate(n, polynomial):
-    """
-    Convert a univariate polynomial representation of a quadratic APN function over GF(2^n) to a trivariate polynomial representation over GF(2).
+    univariate_tt = construct_truth_table(F, polynomial)
+    delta = a + a**q
+
+    # Build the two bivariate truth tables, indexed by integer codes of (x, y).
+    f_tt = [[0] * q for _ in range(q)]
+    g_tt = [[0] * q for _ in range(q)]
+    for i in range(q):
+        FX = hom(F_sub.from_integer(i))
+        for j in range(q):
+            FY = hom(F_sub.from_integer(j))
+            X = FX + a * FY
+            c = F.from_integer(univariate_tt[X.to_integer()])
+            # Solve the system of equations: c = f + a*g, c^q = f + a^q*g
+            c1 = (c + c**q) / delta
+            c0 = c + a * c1
+            f_tt[i][j] = hom_inv(c0).to_integer()
+            g_tt[i][j] = hom_inv(c1).to_integer()
+
+    R = PolynomialRing(F_sub, ['x', 'y'])
+    x, y = R.gens()
+
+    # Construct the bivariate polynomials via Lagrange interpolation on the bivariate truth tables, using the isomorphism hom to read off coefficients.
+    def interpolate(tt):
+        layer_y = [construct_lagrange_polynomial(F_sub, 'y', tt[i]) for i in range(q)]
+
+        result = R(0)
+        for j in range(q):
+            coeff_tt = [layer_y[i][j].to_integer() for i in range(q)]
+            poly_in_x = construct_lagrange_polynomial(F_sub, 'x', coeff_tt)
+            for e, c in enumerate(poly_in_x.list()):
+                if c != 0:
+                    result += c * x**e * y**j
+        return result
+
+    return interpolate(f_tt), interpolate(g_tt)
+
+
+def bivariate_to_univariate(m, f, g):
+    r"""
+    Convert a pair of polynomials from their bivariate representation over GF(2^m) to their univariate representation over GF(2^n).
+    Defined by `F(x) = f(x) + a*g(x)`, where `a` is a generator of GF(2^n) and `f(x), g(x)` are the bivariate polynomials evaluated at the coordinates of `x` under the isomorphism between GF(2^n) and GF(2^m)^2.
 
     INPUT:
 
-    - ``n`` -- the degree of the finite field extension GF(2^n)
+    - ``m`` -- the degree of the finite field extension GF(2^m)
+    - ``f`` -- a bivariate polynomial over GF(2^m)
+    - ``g`` -- a bivariate polynomial over GF(2^m)
+
+    EXAMPLES::
+
+        sage: from cryptographicFunctionsLibrary import bivariate_to_univariate
+        sage: F.<b> = GF(2^3)
+        sage: R.<x, y> = PolynomialRing(F)
+        sage: f = x^3 + x*y^2
+        sage: g = x^2*y + y^3 + x
+        sage: polynomial = bivariate_to_univariate(3, f, g); polynomial
+        (a^4 + a^3 + 1)*x^17 + (a + 1)*x^8 + (a^4 + a^3)*x^3 + x
+    """
+    n = 2 * m
+    q = 2**m
+    
+    F = GF(2**n, 'a')
+    a = F.gen()
+    F_sub, hom = F.subfield(m, 'b', map=True)
+    
+    # Iterate over all pairs (x, y) in the small field, evaluate f, g, and fill in the univariate truth table via the isomorphism hom.
+    univariate_tt = [0] * (q ** 2)
+    for i in range(q):
+        x_sub = F_sub.from_integer(i)
+        for j in range(q):
+            y_sub = F_sub.from_integer(j)
+            X = hom(x_sub) + a * hom(y_sub)
+            f_val = hom(f(x_sub, y_sub))
+            g_val = hom(g(x_sub, y_sub))
+            FX = f_val + a * g_val
+            univariate_tt[X.to_integer()] = FX.to_integer()
+    
+    return construct_lagrange_polynomial(F, 'x', univariate_tt)
+
+
+def univariate_to_trivariate(n, polynomial):
+    r"""
+    Convert a polynomial from its univariate representation over GF(2^n) to its trivariate representation over GF(2^m).
+    Defined by `F(x, y, z) = (g(x, y, z), f(x, y, z), h(x, y, z))`.
+    
+    INPUT:
+
+    - ``n`` -- the degree of the finite field extension GF(2^n); must be divisible by 3
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
 
+        sage: from cryptographicFunctionsLibrary import univariate_to_trivariate
+        sage: F.<a> = GF(2^9)
+        sage: R.<x> = PolynomialRing(F)
+        sage: polynomial = (a^8 + a^7 + a^3)*x^192 + (a^8 + a^7 + a^4 + 1)*x^136 + (a^8 + a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^129 + (a^8 + a^6 + a^3)*x^80 + (a^7 + a^6 + a^5 + a^4 + a^3 + a + 1)*x^66 + (a^7 + a^5 + a^4 + a^3)*x^24 + (a^4 + a^3 + a^2 + 1)*x^17 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^10 + (a^8 + a^7 + a^2 + a + 1)*x^3
+        sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
+        (x^3 + (b^2)*x*y^2 + b*y^3 + (b^2 + b)*y^2*z + (b^2)*y*z^2 + b*z^3,
+        (b^2 + b + 1)*x*y^2 + y^3 + x^2*z + (b^2 + b)*y^2*z + (b^2 + b + 1)*y*z^2 + (b^2 + b + 1)*z^3,
+        x^2*y + (b + 1)*x*y^2 + (b^2)*y^3 + y^2*z + x*z^2 + (b + 1)*y*z^2 + b*z^3)
     """
     if n % 3 != 0:
         raise ValueError("n must be divisible by 3 to convert to trivariate representation")
     
+    m = n // 3
+    q = 2**m
+
+    F = GF(2**n, 'a')
+    a = F.gen()
+    F_sub, hom = F.subfield(m, 'b', map=True)
+    hom_inv = hom.section()
+
+    univariate_tt = construct_truth_table(F, polynomial)
+
+    # The matrix M and its inverse M_inv are used to solve the system of equations to recover the trivariate truth tables from the univariate truth table
+    M_inv = Matrix(F, [[F(1), a,         a**2       ],
+                       [F(1), a**q,      a**(2*q)   ],
+                       [F(1), a**(q**2), a**(2*q**2)]]).inverse()
+
+    f_tt = [[[0]*q for _ in range(q)] for _ in range(q)]
+    g_tt = [[[0]*q for _ in range(q)] for _ in range(q)]
+    h_tt = [[[0]*q for _ in range(q)] for _ in range(q)]
+
+    # Construct the trivariate polynomials via Lagrange interpolation on the trivariate truth tables, using the isomorphism hom to read off coefficients.
+    for i in range(q):
+        FX = hom(F_sub.from_integer(i))
+        for j in range(q):
+            FY = hom(F_sub.from_integer(j))
+            for k in range(q):
+                FZ = hom(F_sub.from_integer(k))
+                X = FX + a * FY + a**2 * FZ
+                c = F.from_integer(univariate_tt[X.to_integer()])
+                c0, c1, c2 = M_inv * vector(F, [c, c**q, c**(q**2)])
+                f_tt[i][j][k] = hom_inv(c0).to_integer()
+                g_tt[i][j][k] = hom_inv(c1).to_integer()
+                h_tt[i][j][k] = hom_inv(c2).to_integer()
+
+    R = PolynomialRing(F_sub, ['x', 'y', 'z'])
+    x, y, z = R.gens()
+
+    # Construct the trivariate polynomials via Lagrange interpolation on the trivariate truth tables, using the isomorphism hom to read off coefficients.
+    def interpolate(tt):
+        layer_z = [[construct_lagrange_polynomial(F_sub, 'z', tt[i][j]) for j in range(q)] for i in range(q)]
+        layer_yz = [[construct_lagrange_polynomial(F_sub, 'y', [layer_z[i][j][dz].to_integer() for j in range(q)]) for dz in range(q)] for i in range(q)]
+        
+        result = R(0)
+        for dz in range(q):
+            for dy in range(q):
+                coeff_tt = [layer_yz[i][dz][dy].to_integer() for i in range(q)]
+                poly_in_x = construct_lagrange_polynomial(F_sub, 'x', coeff_tt)
+                for dx, c in enumerate(poly_in_x.list()):
+                    if c != 0:
+                        result += c * x**dx * y**dy * z**dz
+        return result
+
+    return interpolate(f_tt), interpolate(g_tt), interpolate(h_tt)
+
     
+def trivariate_to_univariate(m, f, g, h):
+    r"""
+    Convert a triplet of polynomials from their trivariate representation over GF(2^m) to their univariate representation over GF(2^n).
+    Defined by `F(x) = f(x) + a*g(x) + a^2*h(x)`, where `a` is a generator of GF(2^n) and `f(x), g(x), h(x)` are the trivariate polynomials evaluated at the coordinates of `x` under the isomorphism between GF(2^n) and GF(2^m)^3.
+
+    INPUT:
+
+    - ``m`` -- the degree of the finite field extension GF(2^m)
+    - ``f`` -- a trivariate polynomial over GF(2^m)
+    - ``g`` -- a trivariate polynomial over GF(2^m)
+    - ``h`` -- a trivariate polynomial over GF(2^m)
+
+    EXAMPLES::
+
+        sage: from cryptographicFunctionsLibrary import trivariate_to_univariate
+        sage: F.<b> = GF(2^3)
+        sage: R.<x, y, z> = PolynomialRing(F)
+        sage: f = x^3 + (b^2)*x*y^2 + b*y^3 + (b^2 + b)*y^2*z + (b^2)*y*z^2 + b*z^3
+        sage: g = (b^2 + b + 1)*x*y^2 + y^3 + x^2*z + (b^2 + b)*y^2*z + (b^2 + b + 1)*y*z^2 + (b^2 + b + 1)*z^3
+        sage: h = x^2*y + (b + 1)*x*y^2 + (b^2)*y^3 + y^2*z + x*z^2 + (b + 1)*y*z^2 + b*z^3
+        sage: polynomial = trivariate_to_univariate(3, f, g, h); polynomial
+        (a^8 + a^7 + a^3)*x^192 + (a^8 + a^7 + a^4 + 1)*x^136 + (a^8 + a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^129 + (a^8 + a^6 + a^3)*x^80 + (a^7 + a^6 + a^5 + a^4 + a^3 + a + 1)*x^66 + (a^7 + a^5 + a^4 + a^3)*x^24 + (a^4 + a^3 + a^2 + 1)*x^17 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^10 + (a^8 + a^7 + a^2 + a + 1)*x^3
+    """
+    n = 3 * m
+    q = 2**m
+    
+    F = GF(2**n, 'a')
+    a = F.gen()
+    F_sub, hom = F.subfield(m, 'b', map=True)
+    
+    # Iterate over all triples (x, y, z) in the small field, evaluate f, g, h, and fill in the univariate truth table via the isomorphism hom.
+    univariate_tt = [0] * (q ** 3)
+    for i in range(q):
+        x_sub = F_sub.from_integer(i)
+        for j in range(q):
+            y_sub = F_sub.from_integer(j)
+            for k in range(q):
+                z_sub = F_sub.from_integer(k)
+                X = hom(x_sub) + a * hom(y_sub) + a**2 * hom(z_sub)
+                f_val = hom(f(x_sub, y_sub, z_sub))
+                g_val = hom(g(x_sub, y_sub, z_sub))
+                h_val = hom(h(x_sub, y_sub, z_sub))
+                FX = f_val + a * g_val + a**2 * h_val
+                univariate_tt[X.to_integer()] = FX.to_integer()
+    
+    return construct_lagrange_polynomial(F, 'x', univariate_tt)
