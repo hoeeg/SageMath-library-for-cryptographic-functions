@@ -1,7 +1,4 @@
 from sage.all import *
-from sage.crypto.sbox import SBox
-from sage.all import Polynomial
-from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from collections import defaultdict
 
 
@@ -18,19 +15,6 @@ def construct_truth_table(F, polynomial):
     Construct the truth table of a polynomial function over GF(2^n) by evaluating it at all field elements.
     """
     return [polynomial(F.from_integer(i)).to_integer() for i in range(F.order())]
-
-def check_apn(F, function):
-    """
-    Check if a given univariate polynomial or truth table over GF(2^n) is APN by evaluating the differential uniformity.
-    """
-    if isinstance(function, list):
-        tt = function
-    elif isinstance(function, Polynomial):
-        tt = construct_truth_table(F, function)
-    else:
-        raise ValueError("Input must be either a univariate polynomial or a truth table")
-   
-    return SBox(tt).is_apn()
 
 def is_primitive_element(F, e):
     """
