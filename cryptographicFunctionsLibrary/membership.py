@@ -1,14 +1,11 @@
 from sage.all import *
-from sage.rings.finite_rings.finite_field_constructor import GF
-from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
-from helpers import is_primitive_element, get_terms, family12_check_s
+from helpers import is_primitive_element, get_terms, family12_validates_s
 
 
 def _membership_family1_2(n, p, poly):
     """
     Shared implementation for Family 1 (p=3) and Family 2 (p=4).
     """
-    # If the degree is less than 12, the polynomial can collapse to a simpler form that does not fit the family structure
     if n < 12:
         return False, {}
     
@@ -266,10 +263,6 @@ def membership_family_4(n, poly):
         sage: membership_family_4(7, poly)
         (True, {'a': a^3 + a^2 + a + 1})
     """
-    # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
-    if n <= 6:
-        return False, {}
-
     F = GF(2**n, 'a')
 
     # Get the terms of the polynomial reduced modulo x^(2^n) - x
@@ -331,10 +324,6 @@ def membership_family_5(n, poly):
         sage: membership_family_5(12, poly)
         (True, {'a': a^10 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2})
     """
-    # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
-    if n <= 6:
-        return False, {}
-    
     if n % 3 != 0:
         return False, {}
     
@@ -403,10 +392,6 @@ def membership_family_6(n, poly):
         sage: membership_family_6(12, poly)
         (True, {'a': a^11 + a^10 + a^9 + a^8 + a^7 + a^5 + a^4 + a})
     """
-    # If the degree is less than or equal to 6, the polynomial can collapse to a simpler form that does not fit the family structure
-    if n <= 6:
-        return False, {}
-    
     if n % 3 != 0:
         return False, {}
     
@@ -490,10 +475,6 @@ def membership_family_7_9(n, poly):
         'v': a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1,
         'w': a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1})
     """ 
-    # If the degree is less than 12, the polynomial can collapse to a simpler form that does not fit the family structure
-    if n < 12:
-        return False, {}
-    
     if n % 3 != 0:
         return False, {}
     
@@ -586,6 +567,7 @@ def membership_family_11(n, poly):
         return False, {}
 
     if terms.get(3, F(0)) != F(1):
+        print("test 1 failed")
         return False, {}
     
     def _make_i_set(ref, base):
@@ -722,7 +704,7 @@ def membership_family_12(n, poly):
                     c_list = [c_can]
 
                 for c in c_list:
-                    if family12_check_s(F, i, b, c, s):
+                    if family12_validates_s(F, i, b, c, s):
                         return True, {'i': i, 's': s, 'a': a, 'b': b, 'c': c}
     
     return False, {}
@@ -837,7 +819,7 @@ FAMILIES = {
     "Family 4": membership_family_4,
     "Family 5": membership_family_5,
     "Family 6": membership_family_6,
-    "Family 7_9": membership_family_7_9,
+    "Family 7-9": membership_family_7_9,
     "Family 11": membership_family_11,
     "Family 12": membership_family_12,
     "Family 13": membership_family_13
@@ -857,42 +839,24 @@ def membership_all(n, polynomial):
         sage: from cryptographicFunctionsLibrary import membership_all
         sage: F.<a> = GF(2^16)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^2049
-        sage: membership_all(16, poly)
-        Belongs to Family 1: False
-        Belongs to Family 2: True
-        With parameters: {'s': 11, 'k': 4, 'u': [a^14 + a^13 + a^12 + a^11 + a^7 + a^6 + a^3 + a^2 + a, a^15 + a^14 + a^13 + a^10 + a^9 + a^8 + a^7 + a^4 + a^3 + a^2 + 1, a^15 + a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a, a^15 + a^10 + a^9 + a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a, a^14 + a^10 + a^7 + a^5 + a^4 + a^3 + a^2 + 1, a^15 + a^14 + a^9 + a^8 + a^6 + a^5 + a + 1, a^12 + a^11 + a^7 + a^3 + a^2 + 1, a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^4]}
-        Belongs to Family 3: False
-        Belongs to Family 4: False
-        Belongs to Family 5: False
-        Belongs to Family 6: False
-        Belongs to Family 7_9: False
-        Belongs to Family 11: False
-        Belongs to Family 12: False
-        Belongs to Family 13: False
+        sage: polynomial = (a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^2049
+        sage: membership_all(16, polynomial)
+        Belongs to Family 2, with parameters: 
+            {'s': 11, 'k': 4, 'u': 
+                [a^14 + a^13 + a^12 + a^11 + a^7 + a^6 + a^3 + a^2 + a, 
+                ...
+                a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^4]}
         
         sage: F.<a> = GF(2^6)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
-        sage: membership_all(6, poly)
-        Belongs to Family 1: False
-        Belongs to Family 2: False
-        Belongs to Family 3: True
-        With parameters: {'q': 8, 'i': 1, 's': a, 'c': a}
-        Belongs to Family 4: False
-        Belongs to Family 5: False
-        Belongs to Family 6: False
-        Belongs to Family 7_9: False
-        Belongs to Family 11: False
-        Belongs to Family 12: False
-        Belongs to Family 13: False
+        sage: polynomial = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
+        sage: membership_all(6, polynomial)
+        Belongs to Family 3, with parameters: {'q': 8, 'i': 1, 's': a, 'c': a}
     """
-    for family_name, family_function in FAMILIES.items():
+    for name, function in FAMILIES.items():
         try:
-            found, params = family_function(n, polynomial)
+            found, params = function(n, polynomial)
         except Exception:
-            print(f"Belong to {family_name}: {False}")
             continue
-        print(f"Belongs to {family_name}: {found}")
         if found:
-            print(f"With parameters: {params}")
+            print(f"Belongs to {name}, with parameters: {params}")

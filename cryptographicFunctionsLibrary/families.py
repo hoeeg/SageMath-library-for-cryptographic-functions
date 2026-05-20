@@ -1,5 +1,5 @@
 from sage.all import *
-from helpers import is_primitive_element, family12_conditions, family12_check_s, build_table
+from helpers import aggregate_results, is_primitive_element, family12_s_candidates, family12_validates_s
 
 
 def _family_1_2(n, p, s, u):
@@ -46,7 +46,7 @@ def _family_1_2(n, p, s, u):
         for u_val in u_vals
         for s_val in s_vals
     )
-    return build_table(pairs)
+    return aggregate_results(pairs)
 
 
 def family_1(n, s=None, u=None):
@@ -256,7 +256,7 @@ def family_3(n, i=None, s=None, c=None):
         for i_val, c_val in ic_pair
         for s_val in s_vals
     )
-    return build_table(pairs)
+    return aggregate_results(pairs)
 
 
 def family_4(n, a=None):
@@ -275,9 +275,9 @@ def family_4(n, a=None):
 
         sage: from cryptographicFunctionsLibrary import family_4
         sage: F.<a> = GF(2^9)
-        sage: family_4(9, a^2)
-        (a^7 + a^6 + a^3 + 1)*x^288 + a*x^260 + (a^8 + a^5 + a^3 + a^2)*x^144 + (a^8 + a^6 + a^4 + a^3 + a)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^2 + a)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + 1)*x^65 + (a^7 + a^4 + a^3)*x^36 + (a^5 + a)*x^18 + a^4*x^9 + x^3
-
+        sage: family_4(9, a^5 + 1)
+        (a^2 + a)*x^288 + (a^7 + a^2)*x^260 + (a^7 + a^3 + a^2 + 1)*x^144 + a*x^130 + (a^8 + a^3 + a^2)*x^72 + (a^7 + a^2 + 1)*x^65 + (a^8 + a^6 + a)*x^36 + (a^7 + a^6 + a^5 + a^2 + 1)*x^18 + (a^5 + a + 1)*x^9 + x^3
+        
         sage: family_4(9, F(1))
         x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
 
@@ -293,21 +293,25 @@ def family_4(n, a=None):
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()
+
+    exponents = tuple((3 * 2**i, (9 * 2**i) % (2**n - 1)) for i in range(n))
   
     def _poly(a_val):
-        trace = sum(a_val**(3 * 2**i) * x**((9 * 2**i) % (2**(n) - 1)) for i in range(n))
-        return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
+        trace = sum(a_val**e_a * x**e_x for e_a, e_x in exponents)
+        return x**3 + (F(1) / a_val) * trace
     
     if a is None:
-        pairs = (
-            (_poly(a_val), {'a': a_val})
-            for a_val in F if a_val != 0
-        )
-        return build_table(pairs)
+        a_vals = (a_val for a_val in F if a_val != 0)
     elif a == 0 or a not in F:
         raise TypeError("a must be a nonzero element of GF(2^n)")
+    else:
+        a_vals = (a,)
     
-    return _poly(a)
+    pairs = (
+        (_poly(a_val), {'a': a_val})
+        for a_val in a_vals
+    )
+    return aggregate_results(pairs)
 
 
 def family_5(n, a=None):
@@ -324,7 +328,7 @@ def family_5(n, a=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family5
+        sage: from cryptographicFunctionsLibrary import family_5
         sage: F.<a> = GF(2^9)
         sage: family_5(9, a^6 + a^5)
         (a^3 + a^2 + 1)*x^144 + (a^8 + a^5 + a^3 + a^2)*x^130 + (a^4 + a^3 + a + 1)*x^72 + (a^3 + a + 1)*x^65 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a)*x^9 + x^3
@@ -349,20 +353,24 @@ def family_5(n, a=None):
     R = PolynomialRing(F, 'x')
     x = R.gen()
 
+    exponents = tuple((3 * 2**(3*i),  (9  * 2**(3*i)) % (2**n - 1), 6 * 2**(3*i),  (18 * 2**(3*i)) % (2**n - 1)) for i in range(k))
+
     def _poly(a_val):
-        trace = sum(a_val**(3 * 2**(3 * i)) * x**((9 * 2**(3 * i)) % (2**(n) - 1))+ a_val**(6 * 2**(3 * i)) * x**((18 * 2**(3 * i) % (2**(n) - 1))) for i in range(k))
-        return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
+        trace = sum(a_val**e_a1 * x**e_x1 + a_val**e_a2 * x**e_x2 for e_a1, e_x1, e_a2, e_x2 in exponents)
+        return x**3 + (F(1) / a_val) * trace
 
     if a is None:
-        pairs = (
-            (_poly(a_val), {'a': a_val})
-            for a_val in F if a_val != 0
-        )
-        return build_table(pairs)
+        a_vals = (a_val for a_val in F if a_val != 0)
     elif a == 0 or a not in F:
         raise TypeError("a must be a nonzero element of GF(2^n)")
+    else:
+        a_vals = (a,)
     
-    return _poly(a)
+    pairs = (
+        (_poly(a_val), {'a': a_val})
+        for a_val in a_vals
+    )
+    return aggregate_results(pairs)
 
 
 def family_6(n, a=None):
@@ -404,20 +412,24 @@ def family_6(n, a=None):
     R = PolynomialRing(F, 'x')
     x = R.gen()
 
+    exponents = tuple((6  * 2**(3*i), (18 * 2**(3*i)) % (2**n - 1), 12 * 2**(3*i), (36 * 2**(3*i)) % (2**n - 1)) for i in range(k))
+
     def _poly(a_val):
-        trace = sum(a_val**(6 * 2**(3 * i)) * x**((18 * 2**(3 * i)) % (2**(n) - 1))+ a_val**(12 * 2**(3 * i)) * x**((36 * 2**(3 * i)) % (2**(n) - 1)) for i in range(k))
-        return (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
+        trace = sum(a_val**e_a1 * x**e_x1 + a_val**e_a2 * x**e_x2 for e_a1, e_x1, e_a2, e_x2 in exponents)
+        return x**3 + (F(1) / a_val) * trace
 
     if a is None:
-        pairs = (
-            (_poly(a_val), {'a': a_val})
-            for a_val in F if a_val != 0
-        )
-        return build_table(pairs)
+        a_vals = (a_val for a_val in F if a_val != 0)
     elif a == 0 or a not in F:
         raise TypeError("a must be a nonzero element of GF(2^n)")
+    else:
+        a_vals = (a,)
     
-    return _poly(a)
+    pairs = (
+        (_poly(a_val), {'a': a_val})
+        for a_val in a_vals
+    )
+    return aggregate_results(pairs)
 
 
 def family_7_9(n, s=None, u=None, v=None, w=None):
@@ -481,11 +493,12 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
     K = F.subfield(k)
 
     if u is None: 
-        u = [u_val for u_val in F if  u_val != 0 and is_primitive_element(F, u_val)]
+        g = F.multiplicative_generator()
+        u_vals = (g**i for i in range(2**n - 1) if gcd(i, 2**n - 1) == 1)
     elif not is_primitive_element(F, u) or u == 0:
         raise TypeError("u must be a primitive element of GF(2^n)")
     else:
-        u = [u]
+        u_vals = (u,)
 
     if v is not None and v not in K:
         raise TypeError("v must be an element of GF(2^k)")
@@ -495,32 +508,32 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
     if v is not None and w is not None:
         if v * w == K(1):
             raise TypeError("v and w must satisfy v*w != 1")
-        pair_vw = [(v, w)]
+        pair_vw = ((v, w),)
     else:
-        v_vals = K if v is None else [v]
-        w_vals = K if w is None else [w]
-        pair_vw = [(v_val, w_val) for v_val in v_vals for w_val in w_vals if v_val * w_val != K(1)]
+        v_vals = K if v is None else (v,)
+        w_vals = K if w is None else (w,)
+        pair_vw = tuple((v_val, w_val) for v_val in v_vals for w_val in w_vals if v_val * w_val != K(1))
 
     if s is None:
-        s = [s_val for s_val in range(1, n) if (gcd(s_val, 3*k) == 1 and (k + s_val) % 3 == 0)]
+        s_vals = tuple(s_val for s_val in range(1, n) if (gcd(s_val, 3*k) == 1 and (k + s_val) % 3 == 0))
     elif gcd(s, 3*k) != 1 or (k + s) % 3 != 0:
         raise TypeError("s must satisfy gcd(s, 3k) = 1 and 3|(k+s)")
     else:
-        s = [s]
+        s_vals = (s,)
         
     def _poly(s_val, u_val, w_val, v_val):
         e_ux = (2**(n - k) + 2**(k + s_val)) % (2**n - 1)
-        e_v = (2**(n - k) + 1) % (2**n - 1)
-        e_wu = (2**s_val + 2**(k + s_val)) % (2**n - 1)
-        return (u_val * x**(2**s_val + 1) + u_val**(2**k) * x**e_ux + F(v_val) * x**e_v + F(w_val) * u_val**(2**k + 1) * x**e_wu).mod(x**(2**n) - x)
+        e_v = 2**(n - k) + 1
+        e_wu = 2**s_val + 2**(k + s_val)
+        return u_val * x**(2**s_val + 1) + u_val**(2**k) * x**e_ux + F(v_val) * x**e_v + F(w_val) * u_val**(2**k + 1) * x**e_wu
 
     pairs = (
         (_poly(s_val, u_val, w_val, v_val), {'s': s_val, 'u': u_val, 'v': v_val, 'w': w_val})
-        for s_val in s
+        for u_val in u_vals
+        for s_val in s_vals
         for v_val, w_val in pair_vw
-        for u_val in u
     )
-    return build_table(pairs)
+    return aggregate_results(pairs)
 
 
 def family_11(n, k=None, i=None, a=None):
@@ -582,47 +595,48 @@ def family_11(n, k=None, i=None, a=None):
     K = F.subfield(2)
 
     if k is None:
-        k = list(range(0, n))
-    elif not (0 <= k < n - 1):
-        raise TypeError("k must be a positive integer in {0, ... , n - 1}")
+        k_vals = range(n)
+    elif not (0 <= k < n):
+        raise TypeError("k must be in {0, ... , n - 1}")
     else:
-        k = [k]
+        k_vals = (k,)
     
-    def _valid_i(i_arg, k_val):
+    def _valid_i(i_val, k_val):
         p = (m - 2) if k_val % 2 == 0 else (m + 2)
         base = {m - 2, m, n - 1} if k_val % 2 == 0 else {m + 2, m}
 
-        if i_arg is not None:
-            if i_arg in base or (gcd(p, n) == 1 and (i_arg * p) % n == 1):
-                return [i_arg]
-            return []
+        if i_val is not None:
+            if i_val in base or (gcd(p, n) == 1 and (i_val * p) % n == 1):
+                return (i_val,)
+            return ()
         
         inv_set = {pow(p, -1, n)} if gcd(p, n) == 1 else set()
-        return base | inv_set
+        return tuple(base | inv_set)
 
-    pair_ik = [(k_val, i_val) for k_val in k for i_val in _valid_i(i, k_val)]
-    if len(pair_ik) == 0:
+    pair_ki = [(k_val, i_val) for k_val in k_vals for i_val in _valid_i(i, k_val)]
+    if not pair_ki:
         raise TypeError("No valid pairs of k and i")
     
     if a is None:
-        a = [a_val for a_val in K if a_val != 0 and is_primitive_element(K, a_val)]
-    elif a == 0 or a not in K or not is_primitive_element(K, a):
+        g = K.multiplicative_generator()
+        a_vals = (g, g**2)
+    elif a == 0 or not is_primitive_element(K, a):
         raise TypeError("a must be a primitive element of GF(2^2)")
     else:
-        a = [a]
+        a_vals = (a,)
     
     def _poly(k_val, i_val, a_val):
-        e_a = (2**i_val + 1) * 2**k_val % (2**n - 1)
+        e_a = ((2**i_val + 1) * 2**k_val) % (2**n - 1)
         e_b = 3 * 2**m
         e_c = ((2**(i_val + m) + 2**m) * 2**k_val) % (2**n - 1)
-        return (x**3 + a_val*x**e_a + (a_val**2)*x**e_b + F(1)*x**e_c).mod(x**(2**n) - x)
+        return x**3 + a_val * x**e_a + a_val**2 * x**e_b + F(1) * x**e_c
 
     pairs = (
         (_poly(k_val, i_val, a_val), {'k': k_val, 'i': i_val, 'a': a_val})
-        for k_val, i_val in pair_ik
-        for a_val in a
+        for k_val, i_val in pair_ki
+        for a_val in a_vals
     )
-    return build_table(pairs)
+    return aggregate_results(pairs)
 
 
 def family_12(n, i=None, s=None, a=None, b=None, c=None):
@@ -643,11 +657,12 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family12
+        sage: from cryptographicFunctionsLibrary import family_12
         sage: F.<a> = GF(2^10)
-        sage: family_12(10, 1, 5, a^8 + a^5 + a^4 + a^3 + a^2,  a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
+        sage: e, b, c = a^8 + a^5 + a^4 + a^3 + a^2, a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a
+        sage: family_12(10, 1, 5, e, b, c)
         (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3
-
+        
         sage: family_12(10, 1, 5, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1)
         {(a^7 + a^4 + a^3 + a^2 + a)*x^96 + (a^8 + a^6 + a^4 + a^3 + a + 1)*x^33 + (a^9 + a^8 + a^5 + a^4 + a^2 + 1)*x^3: 
             [{'i': 1, 's': 5, 'a': a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1, 'b': a, 'c': a},
@@ -676,6 +691,15 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
 
         sage: len(result)
         137423
+
+        sage: result = family_12(6); list(result.keys())
+        [(a^5 + a^4 + a^2 + 1)*x^24 + (a^5 + a^2 + a)*x^9 + a^2*x^3,
+        (a^5 + a^4 + 1)*x^24 + (a^3 + a^2 + 1)*x^9 + a^3*x^3,
+        ...
+        (a^5 + a^4 + a^2 + a)*x^33 + x^12 + (a^5 + a^3 + a^2)*x^9]
+
+        sage: len(result)
+        12432
     """
     if n % 2 != 0:
         raise TypeError("n must be even")
@@ -691,50 +715,50 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
     x = R.gen()
 
     if a is None:
-        a = [a_val for a_val in F if a_val not in Q and a_val + a_val**q != F(0)]
-    elif a not in F or a in Q:
+        a_vals = tuple(a_val for a_val in F if a_val not in Q and a_val + a_val**q != F(0))
+    elif a not in F or a in Q or a + a**q == F(0):
         raise TypeError("a must be an element of GF(2^n) not in GF(q) with a + a^q != 0")
     else:
-        a = [a]
+        a_vals = (a,)
     
     if i is None:
-        i = [i_val for i_val in range(1, n) if gcd(i_val, n) == 1]
+        i_vals = tuple(i_val for i_val in range(1, n) if gcd(i_val, n) == 1)
     elif gcd(i, n) != 1:
         raise TypeError("i must satisfy gcd(i, n) = 1")
     else:
-        i = [i]
+        i_vals = (i,)
     
     if b is None:
-        b = [b_val for b_val in F if b_val != F(0)]
+        b_vals = tuple(b_val for b_val in F if b_val != F(0))
     elif b == 0 or b not in F:
         raise TypeError("b must be a nonzero element of GF(2^n)")
     else:
-        b = [b]
+        b_vals = (b,)
     
     if c is None:
-        c = [c_val for c_val in F if c_val != F(0)]
+        c_vals = tuple(c_val for c_val in F if c_val != F(0))
     elif c == 0 or c not in F:
         raise TypeError("c must be a nonzero element of GF(2^n)")
     else:
-        c = [c]
+        c_vals = (c,)
     
-    pair_ibcs = [(i_val, b_val, c_val, s_val) for i_val in i for b_val in b for c_val in c for s_val in (family12_conditions(F, i_val, b_val, c_val) if s is None else ([s] if family12_check_s(F, i_val, b_val, c_val, s) else []))]
-    if len(pair_ibcs) == 0:
+    pair_ibcs = [(i_val, b_val, c_val, s_val) for i_val in i_vals for b_val in b_vals for c_val in c_vals for s_val in (family12_s_candidates(F, i_val, b_val, c_val) if s is None else ([s] if family12_validates_s(F, i_val, b_val, c_val, s) else []))]
+    if not pair_ibcs:
         raise ValueError("No valid combinations of i, b, c, s found")
 
-    def _poly(i_val, a_val, b_val, c_val, s_val):
-        e_x1 = (2**i_val + 1)
+    def _poly(i_val, s_val, a_val, b_val, c_val):
+        e_x1 = 2**i_val + 1
         e_b = (q * e_x1) % (2**n - 1)
-        e_x2 = (2**s_val + 1)
+        e_x2 = 2**s_val + 1
         e_c = (q * e_x2) % (2**n - 1)
-        return (a_val * b_val * x**e_x1 + a_val * b_val**q * x**e_b + a_val**q * c_val * x**e_x2 + a_val**q * c_val**q * x**e_c).mod(x**(2**n) - x)
+        return a_val * b_val * x**e_x1 + a_val * b_val**q * x**e_b + a_val**q * c_val * x**e_x2 + a_val**q * c_val**q * x**e_c
     
     pairs = (
-        (_poly(i_val, a_val, b_val, c_val, s_val), {'i': i_val, 's': s_val, 'a': a_val, 'b': b_val, 'c': c_val})
+        (_poly(i_val, s_val, a_val, b_val, c_val), {'i': i_val, 's': s_val, 'a': a_val, 'b': b_val, 'c': c_val})
         for i_val, b_val, c_val, s_val in pair_ibcs
-        for a_val in a
+        for a_val in a_vals
     )
-    return build_table(pairs)
+    return aggregate_results(pairs)
 
 
 def family_13(n, s=None, v=None, mu=None):
@@ -755,30 +779,30 @@ def family_13(n, s=None, v=None, mu=None):
 
         sage: from cryptographicFunctionsLibrary import family_13
         sage: F.<a> = GF(2^9)
-        sage: Fm = F.subfield(3)
-        sage: family_13(9, 1, Fm(1), a^7 + a^5 + a^3 + a + 1)
+        sage: M = F.subfield(3)
+        sage: family_13(9, 1, M(1), a^7 + a^5 + a^3 + a + 1)
         x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10
-
-        sage: family_13(9, 1, Fm(1))
+        
+        sage: family_13(9, 1, M(1))
         {x^144 + a^5*x^130 + x^129 + (a^5 + a^4 + a^2 + a)*x^32 + x^24 + (a^7 + a^6 + a^5 + a^4 + a + 1)*x^18 + (a^5 + a^4 + a^2 + a)*x^17 + a^5*x^10: 
-            [{'s': 1, 'mu': a^5, 'v': 1}],
+            [{'s': 1, 'v': 1, 'mu': a^5}],
         ...
         x^144 + (a^6 + a)*x^130 + x^129 + (a^7 + a^5 + a^3 + a + 1)*x^32 + x^24 + (a^7 + a^6 + a^4 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a + 1)*x^17 + (a^6 + a)*x^10: 
-            [{'s': 1, 'mu': a^6 + a, 'v': 1}]}
+            [{'s': 1, 'v': 1, 'mu': a^6 + a}]}
         
         sage: family_13(9, 1, None, a^7 + a^5 + a^3 + a + 1)
         {x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10 + (a^8 + a^6 + a^4 + 1)*x^9: 
-            [{'s': 1, 'mu': a^7 + a^5 + a^3 + a + 1, 'v': a^3}],
+            [{'s': 1, 'v': a^3, 'mu': a^7 + a^5 + a^3 + a + 1}],
         ...
         x^144 + (a^7 + a^5 + a^3 + a + 1)*x^130 + x^129 + (a^8 + a^7 + a^5 + a^2 + 1)*x^32 + x^24 + (a^7 + a^6 + a^5)*x^18 + (a^8 + a^7 + a^5 + a^2 + 1)*x^17 + (a^7 + a^5 + a^3 + a + 1)*x^10: 
-            [{'s': 1, 'mu': a^7 + a^5 + a^3 + a + 1, 'v': 1}]}
+            [{'s': 1, 'v': 1, 'mu': a^7 + a^5 + a^3 + a + 1}]}
 
         sage: family_13(9, 1)
         {x^144 + a^5*x^130 + x^129 + (a^5 + a^4 + a^2 + a)*x^32 + x^24 + (a^7 + a^6 + a^5 + a^4 + a + 1)*x^18 + (a^5 + a^4 + a^2 + a)*x^17 + a^5*x^10 + (a^8 + a^6 + a^4 + 1)*x^9: 
-            [{'s': 1, 'mu': a^5, 'v': a3}],
+            [{'s': 1, 'v': 1, 'mu': a^5}],
         ...
         x^144 + (a^6 + a)*x^130 + x^129 + (a^7 + a^5 + a^3 + a + 1)*x^32 + x^24 + (a^7 + a^6 + a^4 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a + 1)*x^17 + (a^6 + a)*x^10: 
-            [{'s': 1, 'mu': a^6 + a, 'v': 1}]}
+            [{'s': 1, 'v': 1, 'mu': a^6 + a}]}
 
         sage: result = family_13(12); list(result.keys())
         [x^544 + a*x^514 + x^513 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^64 + x^48 + (a^11 + a^10 + a^8 + a^7 + a^3 + a + 1)*x^34 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^33 + a*x^18 + (a^10 + a^9 + a^8 + a^4 + a^3 + a^2 + 1)*x^17,
@@ -796,41 +820,42 @@ def family_13(n, s=None, v=None, mu=None):
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()
-    Fm = F.subfield(m)
+    M = F.subfield(m)
 
     if v is None:
-        v = [v_val for v_val in Fm if v_val != 0]
-    elif v == 0 or v not in Fm:
+        v_vals = tuple(v_val for v_val in M if v_val != 0)
+    elif v == 0 or v not in M:
         raise TypeError("v must be a nonzero element of GF(2^m)")
     else:
-        v = [v]
+        v_vals = (v,)
 
-    if s is not None:
-        if gcd(s, m) != 1:
-            raise TypeError("gcd(s, m) must be 1")
-    
-    s = [s_val for s_val in range(1, m + 1) if gcd(s_val, m) == 1] if s is None else [s]
+    if s is None:
+        s_vals = tuple(s_val for s_val in range(1, m + 1) if gcd(s_val, m) == 1)    
+    elif gcd(s, m) != 1:
+        raise TypeError("gcd(s, m) must be 1")
+    else:
+        s_vals = (s,)
     
     if mu is None:
-        mu = [mu_val for mu_val in F if mu_val != 0 and mu_val**(2**(2*m) + 2**m + 1) != 1]
+        mu_vals = tuple(mu_val for mu_val in F if mu_val != 0 and mu_val**(2**(2*m) + 2**m + 1) != 1)
     elif mu not in F or mu == 0 or mu**(2**(2*m) + 2**m + 1) == 1:
         raise TypeError("mu must be a nonzero element of GF(2^n) satisfying mu^(2^(2*m)+2^m+1) != 1")
     else:
-        mu = [mu]
+        mu_vals = (mu,)
     
     def _permutes(s_val, mu_val):
-        L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
+        L = x**(2**(m + s_val)) + mu_val * x**(2**s_val) + x
         return L.gcd(x**(2**n) - x) == x
 
-    pair_smu = [(s_val, mu_val) for s_val in s for mu_val in mu if _permutes(s_val, mu_val)]
+    pair_smu = tuple((s_val, mu_val) for mu_val in mu_vals for s_val in s_vals if _permutes(s_val, mu_val))
 
-    def _poly(s_val, mu_val, v_val):
-        L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
-        return (L**(2**m + 1) + v_val*x**(2**m + 1)).mod(x**(2**n) - x)
+    def _poly(s_val, v_val, mu_val):
+        L = (x**(2**(m + s_val)) + mu_val * x**(2**s_val) + x) % (x**(2**n) - x)
+        return L**(2**m + 1) + v_val * x**(2**m + 1)
     
     pairs = (
-        (_poly(s_val, mu_val, v_val), {'s': s_val, 'mu': mu_val, 'v': v_val})
+        (_poly(s_val, v_val, mu_val), {'s': s_val, 'v': v_val, 'mu': mu_val})
         for s_val, mu_val in pair_smu
-        for v_val in v
+        for v_val in v_vals
     )
-    return build_table(pairs)
+    return aggregate_results(pairs)

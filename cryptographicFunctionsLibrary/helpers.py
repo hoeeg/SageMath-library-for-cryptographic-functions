@@ -2,7 +2,7 @@ from sage.all import *
 from collections import defaultdict
 
 
-def construct_lagrange_polynomial(F, var, tt):
+def interpolate_truth_table(F, var, tt):
     """
     Construct the Lagrange polynomial interpolating the given truth table.
     """
@@ -10,17 +10,21 @@ def construct_lagrange_polynomial(F, var, tt):
     points = [(F.from_integer(i), F.from_integer(val)) for i, val in enumerate(tt)]
     return R.lagrange_polynomial(points)
 
-def construct_truth_table(F, polynomial):
+def aggregate_results(pairs):
     """
-    Construct the truth table of a polynomial function over GF(2^n) by evaluating it at all field elements.
+    Aggregate results into a dictionary mapping each polynomial to a list of parameter dictionaries.
     """
-    return [polynomial(F.from_integer(i)).to_integer() for i in range(F.order())]
+    table = defaultdict(list)
+    for poly, params in pairs:
+        table[poly].append(params)
 
-def is_primitive_element(F, e):
-    """
-    Check if an element e is a primitive element of the finite field F.
-    """
-    return e != 0 and e.multiplicative_order() == F.order() - 1
+    if not table:
+        raise TypeError("No valid polynomials found")
+    
+    if len(table) == 1:
+        return next(iter(table))
+ 
+    return dict(table)
 
 def get_terms(n, poly):
     """
@@ -31,6 +35,12 @@ def get_terms(n, poly):
     x = R.gen()
     poly_reduced = R(poly).mod(x**(2**n) - x)
     return dict(zip(poly_reduced.exponents(), poly_reduced.coefficients())) if poly_reduced != 0 else {}
+
+def is_primitive_element(F, e):
+    """
+    Check if an element e is a primitive element of the finite field F.
+    """
+    return e != 0 and e.multiplicative_order() == F.order() - 1
 
 def is_cube(F, x):
     """
@@ -44,10 +54,9 @@ def is_cube(F, x):
         return True
     return x**(order // 3) == F(1)
 
-def family12_conditions(F, i_val, b_val, c_val):
+def family12_s_candidates(F, i_val, b_val, c_val):
     """
-    Conditions for s in family 12, given F, i, b and c. 
-    Returns a list of s values that satisfy the conditions.
+    Return all s that satisfy the conditions for the given (i, b, c).
     """
     n = F.degree()
     m = n // 2
@@ -84,7 +93,7 @@ def family12_conditions(F, i_val, b_val, c_val):
     
     return list(set(s))
 
-def family12_check_s(F, i_val, b_val, c_val, s_val):
+def family12_validates_s(F, i_val, b_val, c_val, s_val):
     """
     True if s satisfies the conditions for the given (i, b, c).
     """
@@ -125,19 +134,3 @@ def family12_check_s(F, i_val, b_val, c_val, s_val):
             return True
     
     return False
-
-def build_table(pairs):
-    """
-    Build the result table from a list of (polynomial, parameters) pairs.    
-    """
-    table = defaultdict(list)
-    for poly, params in pairs:
-        table[poly].append(params)
-
-    if not table:
-        raise TypeError("No valid polynomials found")
-    
-    if len(table) == 1:
-        return next(iter(table))
- 
-    return dict(table)
