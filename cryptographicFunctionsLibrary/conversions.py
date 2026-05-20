@@ -279,6 +279,10 @@ def univariate_to_bivariate(n, polynomial):
         sage: polynomial = (a^4 + a^3 + 1)*x^17 + (a + 1)*x^8 + (a^4 + a^3)*x^3 + x
         sage: f, g = univariate_to_bivariate(6, polynomial); f, g
         (x^3 + x*y^2, x^2*y + y^3 + x)
+
+        sage: polynomial = (a^4 + a^3 + 1)*x^16 + (a^4 + a^2 + a)*x^9 + (a^3 + a^2 + a)*x^2 + a
+        sage: f, g = univariate_to_bivariate(6, polynomial); f, g
+        (x^2 + x*y + y^2, y^2 + 1)
     """
     if n % 2 != 0:
         raise ValueError("n must be even to convert to bivariate representation")
@@ -294,7 +298,7 @@ def univariate_to_bivariate(n, polynomial):
     univariate_tt = construct_truth_table(F, polynomial)
     delta = a + a**q
 
-    # Build the two bivariate truth tables, indexed by integer codes of (x, y).
+    # Build the two bivariate truth tables, indexed by integer codes of (x, y)
     f_tt = [[0] * q for _ in range(q)]
     g_tt = [[0] * q for _ in range(q)]
     for i in range(q):
@@ -303,7 +307,7 @@ def univariate_to_bivariate(n, polynomial):
             FY = hom(F_sub.from_integer(j))
             X = FX + a * FY
             c = F.from_integer(univariate_tt[X.to_integer()])
-            # Solve the system of equations: c = f + a*g, c^q = f + a^q*g
+            # Solve the system of equations
             c1 = (c + c**q) / delta
             c0 = c + a * c1
             f_tt[i][j] = hom_inv(c0).to_integer()
@@ -312,7 +316,7 @@ def univariate_to_bivariate(n, polynomial):
     R = PolynomialRing(F_sub, ['x', 'y'])
     x, y = R.gens()
 
-    # Construct the bivariate polynomials via Lagrange interpolation on the bivariate truth tables, using the isomorphism hom to read off coefficients.
+    # Construct the bivariate polynomials via Lagrange interpolation on the bivariate truth tables, using the isomorphism hom to read off coefficients
     def interpolate(tt):
         layer_y = [construct_lagrange_polynomial(F_sub, 'y', tt[i]) for i in range(q)]
 
@@ -348,6 +352,11 @@ def bivariate_to_univariate(m, f, g):
         sage: g = x^2*y + y^3 + x
         sage: polynomial = bivariate_to_univariate(3, f, g); polynomial
         (a^4 + a^3 + 1)*x^17 + (a + 1)*x^8 + (a^4 + a^3)*x^3 + x
+
+        sage: f = x^2 + x*y + y^2
+        sage: g = y^2 + 1
+        sage: polynomial = bivariate_to_univariate(3, f, g); polynomial
+        (a^4 + a^3 + 1)*x^16 + (a^4 + a^2 + a)*x^9 + (a^3 + a^2 + a)*x^2 + a
     """
     n = 2 * m
     q = 2**m
@@ -356,7 +365,7 @@ def bivariate_to_univariate(m, f, g):
     a = F.gen()
     F_sub, hom = F.subfield(m, 'b', map=True)
     
-    # Iterate over all pairs (x, y) in the small field, evaluate f, g, and fill in the univariate truth table via the isomorphism hom.
+    # Iterate over all pairs (x, y) in the small field, evaluate f, g, and fill in the univariate truth table via the isomorphism hom
     univariate_tt = [0] * (q ** 2)
     for i in range(q):
         x_sub = F_sub.from_integer(i)
@@ -386,11 +395,10 @@ def univariate_to_trivariate(n, polynomial):
         sage: from cryptographicFunctionsLibrary import univariate_to_trivariate
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
-        sage: polynomial = (a^8 + a^7 + a^3)*x^192 + (a^8 + a^7 + a^4 + 1)*x^136 + (a^8 + a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^129 + (a^8 + a^6 + a^3)*x^80 + (a^7 + a^6 + a^5 + a^4 + a^3 + a + 1)*x^66 + (a^7 + a^5 + a^4 + a^3)*x^24 + (a^4 + a^3 + a^2 + 1)*x^17 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^10 + (a^8 + a^7 + a^2 + a + 1)*x^3
-        sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
+        sage: polynomial = (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^192 + (a^8 + a^7 + a^6 + a^3 + a)*x^136 + (a^7 + a^6 + a^3 + a^2 + a)*x^129 + (a^6 + a^4 + a^3 + 1)*x^80 + (a^5 + a + 1)*x^66 + (a^8 + a^6 + a^4 + a^2 + a)*x^24 + (a^7 + a^5 + a^3 + a^2)*x^17 + (a^5 + a^3 + a^2 + a + 1)*x^10 + (a^8 + a^6 + a^2)*x^3        sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
         (x^3 + x^2*z + y*z^2, y^3 + x^2*z, x*y^2 + y^2*z + z^3)
 
-        polynomial = (a^7 + a^5 + a^3 + 1)*x^192 + (a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^136 + (a^7 + a^3 + 1)*x^129 + (a^6 + a^4 + 1)*x^80 + (a^8 + a^5 + a^3 + a)*x^66 + (a^8 + a^6 + a^5 + a + 1)*x^24 + (a^8 + a^6 + a^5 + a^2 + a + 1)*x^17 + (a^6 + a^5 + 1)*x^10 + (a^8 + a^7 + a^6 + a^5 + a)*x^3
+        sage: polynomial = (a^7 + a^5 + a^3 + 1)*x^192 + (a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^136 + (a^7 + a^3 + 1)*x^129 + (a^6 + a^4 + 1)*x^80 + (a^8 + a^5 + a^3 + a)*x^66 + (a^8 + a^6 + a^5 + a + 1)*x^24 + (a^8 + a^6 + a^5 + a^2 + a + 1)*x^17 + (a^6 + a^5 + 1)*x^10 + (a^8 + a^7 + a^6 + a^5 + a)*x^3
         sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
         (x^3 + x*y^2 + y*z^2, x*y^2 + z^3, y^3 + x^2*z + y^2*z)
     """
@@ -406,17 +414,14 @@ def univariate_to_trivariate(n, polynomial):
     hom_inv = hom.section()
 
     univariate_tt = construct_truth_table(F, polynomial)
+    a1, a2 = a + a**q, a**q + a**(q**2)
+    b1, b2 = a**2 + a**(2*q), a**(2*q) + a**(2*q**2)
+    delta = a1 * b2 + a2 * b1
 
-    # The matrix M and its inverse M_inv are used to solve the system of equations to recover the trivariate truth tables from the univariate truth table
-    M_inv = Matrix(F, [[F(1), a,         a**2       ],
-                       [F(1), a**q,      a**(2*q)   ],
-                       [F(1), a**(q**2), a**(2*q**2)]]).inverse()
-
+    # Build the three trivariate truth tables, indexed by integer codes of (x, y, z)
     f_tt = [[[0]*q for _ in range(q)] for _ in range(q)]
     g_tt = [[[0]*q for _ in range(q)] for _ in range(q)]
     h_tt = [[[0]*q for _ in range(q)] for _ in range(q)]
-
-    # Construct the trivariate polynomials via Lagrange interpolation on the trivariate truth tables, using the isomorphism hom to read off coefficients.
     for i in range(q):
         FX = hom(F_sub.from_integer(i))
         for j in range(q):
@@ -425,7 +430,10 @@ def univariate_to_trivariate(n, polynomial):
                 FZ = hom(F_sub.from_integer(k))
                 X = FX + a * FY + a**2 * FZ
                 c = F.from_integer(univariate_tt[X.to_integer()])
-                c0, c1, c2 = M_inv * vector(F, [c, c**q, c**(q**2)])
+                # Solve the system of equations
+                c2 = (a2 * (c + c**q) + a1 * (c**q + c**(q**2))) / delta
+                c1 = ((c + c**q) + c2 * b1) / a1
+                c0 = c + a * c1 + a**2 * c2
                 f_tt[i][j][k] = hom_inv(c0).to_integer()
                 g_tt[i][j][k] = hom_inv(c1).to_integer()
                 h_tt[i][j][k] = hom_inv(c2).to_integer()
@@ -433,7 +441,7 @@ def univariate_to_trivariate(n, polynomial):
     R = PolynomialRing(F_sub, ['x', 'y', 'z'])
     x, y, z = R.gens()
 
-    # Construct the trivariate polynomials via Lagrange interpolation on the trivariate truth tables, using the isomorphism hom to read off coefficients.
+    # Construct the trivariate polynomials via Lagrange interpolation on the trivariate truth tables, using the isomorphism hom to read off coefficients
     def interpolate(tt):
         layer_z = [[construct_lagrange_polynomial(F_sub, 'z', tt[i][j]) for j in range(q)] for i in range(q)]
         layer_yz = [[construct_lagrange_polynomial(F_sub, 'y', [layer_z[i][j][dz].to_integer() for j in range(q)]) for dz in range(q)] for i in range(q)]
