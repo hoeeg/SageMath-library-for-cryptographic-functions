@@ -522,7 +522,7 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
         s_vals = (s,)
         
     def _poly(s_val, u_val, w_val, v_val):
-        e1 = (2**s_val + 1) % (2**n - 1)
+        e1 = (2**s_val + 1)
         e2 = (2**(n - k) + 2**(k + s_val)) % (2**n - 1)
         e3 = (2**(n - k) + 1) % (2**n - 1)
         e4 = (2**s_val + 2**(k + s_val)) % (2**n - 1)

@@ -453,7 +453,7 @@ def membership_family_7_9(n, poly):
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^10 + a^6 + a^5 + a^3 + a)*x^768 + (a^9 + a^8 + a^6 + a^5 + a^2)*x^544 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257 + (a^7 + a^5 + a^3 + a^2 + 1)*x^33
         sage: membership_family_7_9(12, poly)
-        (True, {'s': 5, 'u': a^7 + a^5 + a^3 + a^2 + 1, 'v': a^10 + a^9 + a^6 + a^5 + a^3 + 1, 'w': a^10 + a^9 + a^6 + a^5 + a^3 + 1})
+        (True, {'s': 5, 'u': a^7 + a^5 + a^3 + a^2 + 1, 'v': a4^3 + a4, 'w': a4^3 + a4})
 
         sage: poly = a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + x^257
         sage: membership_family_7_9(12, poly)
@@ -461,7 +461,7 @@ def membership_family_7_9(n, poly):
 
         sage: poly =  (a^10 + a^3 + a^2 + 1)*x^2056 + a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257
         sage: membership_family_7_9(12, poly)
-        (True, {'s': 11, 'u': a, 'v': a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1, 'w': a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1})
+        (True, {'s': 11, 'u': a, 'v': a4^2, 'w': a4^2})
     """ 
     if n % 3 != 0:
         return False, {}
@@ -481,29 +481,28 @@ def membership_family_7_9(n, poly):
         if gcd(s, 3*k) != 1 or (k + s) % 3 != 0:
             continue
 
-        e_u = 2**s + 1                                          # exponent of ux^(2^s + 1)
-        e_ux = (2**(n - k) + 2**(k + s)) % (2**n - 1)           # exponent of u^(2^k) * x^(2^-k + 2^(k + s))
-        e_v = (2**(n - k) + 1) % (2**n - 1)                     # exponent of vx^(2^-k + 1)
-        e_wu = (2**s + 2**(k + s)) % (2**n - 1)                 # exponent of wu^(2^k + 1)
+        e1 = (2**s + 1)
+        e2 = (2**(n - k) + 2**(k + s)) % (2**n - 1)
+        e3 = (2**(n - k) + 1) % (2**n - 1)
+        e4 = (2**s + 2**(k + s)) % (2**n - 1)
 
-        if not set(terms).issubset({e_u, e_ux, e_v, e_wu}):
+        if not set(terms).issubset({e1, e2, e3, e4}):
             continue
 
-        u = terms.get(e_u,  F(0))
-        uk = terms.get(e_ux, F(0))
-        v = terms.get(e_v,  F(0))
-        wu = terms.get(e_wu,  F(0))
+        u = terms.get(e1,  F(0))
+        uk = terms.get(e2, F(0))
+        v = terms.get(e3,  F(0))
+        wu = terms.get(e4,  F(0))
 
         if u == F(0) or not is_primitive_element(F, u):
             continue
-        if uk != u**(2**k):
-            continue
+ 
         
         w = wu / (u**(2**k + 1))
-        if v * w == K(1):
+        if v * w == K(1) or v not in K or w not in K:
             continue
 
-        return True, {'s': s, 'u': u, 'v': v, 'w': w}
+        return True, {'s': s, 'u': u, 'v': K(v), 'w': K(w)}
 
     return False, {}
 
