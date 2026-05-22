@@ -268,12 +268,12 @@ def membership_family_4(n, poly):
     # Get the terms of the polynomial reduced modulo x^(2^n) - x
     terms = get_terms(n, poly)
     if not terms:
-        return False, {}
+        return False, {}    
     
-    # x^3 must be present with coefficient 1
-    if terms.get(3, F(0)) != F(1):
+    # x^3 must be present
+    if 3 not in terms:
         return False, {}
-    
+
     # All exponents must be 3 or of the form 9*2^i mod (2^n - 1)
     e_9 = {(9 * 2**i) % (2**n - 1) for i in range(n)}
     if not set(terms).issubset({3} | e_9):
@@ -284,16 +284,15 @@ def membership_family_4(n, poly):
     if a_square == F(0):
         return False, {}
     a = a_square**(2**(n - 1))
-    if a == F(0):
-        return False, {}
     
     # Verify all n terms match the expected form a^(3 * 2^i - 1)
-    for i in range(n):
-        a_9 = (9 * 2**i) % (2**n - 1)
-        if terms.get(a_9, F(0)) != a ** (3 * 2**i - 1):
-            return False, {}
+    if all(
+        terms.get((9 * 2**i) % (2**n - 1), F(0)) == a ** (3  * 2**i - 1)
+        for i in range(n)
+    ):
+        return True, {'a': a}
 
-    return True, {'a': a}
+    return False, {}
 
 
 def membership_family_5(n, poly):
@@ -335,8 +334,8 @@ def membership_family_5(n, poly):
     if not terms:
         return False, {}
 
-    # x^3 must be present with coefficient 1
-    if terms.get(3, F(0)) != F(1):
+    # x^3 must be present
+    if 3 not in terms:
         return False, {}
     
     # All exponents must be 3 or of the form 9*2^3i mod (2^n - 1) or 18*2^3i mod (2^n - 1)
@@ -350,17 +349,16 @@ def membership_family_5(n, poly):
     if a_square == F(0):
         return False, {}
     a = a_square**(2**(n - 1))
-    if a == F(0):
-        return False, {}
     
-    # Verify x^(9 * 2^(3i)) terms: coeff = a^(3 * 2^(3i) - 1) and x^(18 * 2^(3i)) terms: coeff = a^(6 * 2^(3i) - 1)
-    for i in range(k):
-        a_9  = (9  * 2**(3*i)) % (2**n - 1)
-        a_18 = (18 * 2**(3*i)) % (2**n - 1)
-        if terms.get(a_9, F(0)) != a ** (3 * 2**(3*i) - 1) or terms.get(a_18, F(0)) != a ** (6 * 2**(3*i) - 1):
-            return False, {}
+    # Verify x^(9 * 2^(3i)) terms: coeff = a^(3 * 2^(3i) - 1) and x^(18 * 2^(3i)) terms: coeff = a^(6 * 2^(3i) - 1)        
+    if all(
+        terms.get((9 * 2**(3*i)) % (2**n - 1), F(0)) == a ** (3  * 2**(3*i) - 1) and
+        terms.get((18 * 2**(3*i)) % (2**n - 1), F(0)) == a ** (6 * 2**(3*i) - 1)
+        for i in range(k)
+    ):
+        return True, {'a': a}
 
-    return True, {'a': a}
+    return False, {}
 
 
 def membership_family_6(n, poly):
