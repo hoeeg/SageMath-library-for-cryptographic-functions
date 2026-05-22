@@ -453,25 +453,15 @@ def membership_family_7_9(n, poly):
         sage: R.<x> = PolynomialRing(F)
         sage: poly = (a^10 + a^6 + a^5 + a^3 + a)*x^768 + (a^9 + a^8 + a^6 + a^5 + a^2)*x^544 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257 + (a^7 + a^5 + a^3 + a^2 + 1)*x^33
         sage: membership_family_7_9(12, poly)
-        (True,
-        {'s': 5,
-        'k': 4,
-        'u': a^7 + a^5 + a^3 + a^2 + 1,
-        'v': a^10 + a^9 + a^6 + a^5 + a^3 + 1,
-        'w': a^10 + a^9 + a^6 + a^5 + a^3 + 1})
+        (True, {'s': 5, 'u': a^7 + a^5 + a^3 + a^2 + 1, 'v': a^10 + a^9 + a^6 + a^5 + a^3 + 1, 'w': a^10 + a^9 + a^6 + a^5 + a^3 + 1})
 
         sage: poly = a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + x^257
         sage: membership_family_7_9(12, poly)
-        (True, {'s': 11, 'k': 4, 'u': a, 'v': 1, 'w': 0})
+        (True, {'s': 11, 'u': a, 'v': 1, 'w': 0})
 
         sage: poly =  (a^10 + a^3 + a^2 + 1)*x^2056 + a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257
         sage: membership_family_7_9(12, poly)
-        (True,
-        {'s': 11,
-        'k': 4,
-        'u': a,
-        'v': a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1,
-        'w': a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1})
+        (True, {'s': 11, 'u': a, 'v': a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1, 'w': a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1})
     """ 
     if n % 3 != 0:
         return False, {}
@@ -513,7 +503,7 @@ def membership_family_7_9(n, poly):
         if v * w == K(1):
             continue
 
-        return True, {'s': s, 'k': k, 'u': u, 'v': v, 'w': w}
+        return True, {'s': s, 'u': u, 'v': v, 'w': w}
 
     return False, {}
 
