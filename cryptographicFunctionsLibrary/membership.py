@@ -264,15 +264,13 @@ def membership_family_4(n, poly):
         (True, {'a': a^3 + a^2 + a + 1})
     """
     F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()
 
     # Get the terms of the polynomial reduced modulo x^(2^n) - x
     terms = get_terms(n, poly)
     if not terms:
         return False, {}    
-    
-    # x^3 must be present
-    if 3 not in terms:
-        return False, {}
 
     # All exponents must be 3 or of the form 9*2^i mod (2^n - 1)
     e_9 = {(9 * 2**i) % (2**n - 1) for i in range(n)}
@@ -285,13 +283,13 @@ def membership_family_4(n, poly):
         return False, {}
     a = a_square**(2**(n - 1))
     
-    # Verify all n terms match the expected form a^(3 * 2^i - 1)
-    if all(
-        terms.get((9 * 2**i) % (2**n - 1), F(0)) == a ** (3  * 2**i - 1)
-        for i in range(n)
-    ):
-        return True, {'a': a}
+    # Verify the reduced polynomial matches the expected form
+    trace = sum(a**(3 * 2**i) * x**((9 * 2**i) % (2**n - 1)) for i in range(n))
+    expected = (x**3 + (F(1) / a) * trace).mod(x**(2**n) - x)
+    reduced = R(poly).mod(x**(2**n) - x)
 
+    if reduced == expected:
+        return True, {'a': a}
     return False, {}
 
 
