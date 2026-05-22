@@ -522,10 +522,11 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
         s_vals = (s,)
         
     def _poly(s_val, u_val, w_val, v_val):
-        e_ux = (2**(n - k) + 2**(k + s_val)) % (2**n - 1)
-        e_v = 2**(n - k) + 1
-        e_wu = 2**s_val + 2**(k + s_val)
-        return u_val * x**(2**s_val + 1) + u_val**(2**k) * x**e_ux + F(v_val) * x**e_v + F(w_val) * u_val**(2**k + 1) * x**e_wu
+        e1 = (2**s_val + 1) % (2**n - 1)
+        e2 = (2**(n - k) + 2**(k + s_val)) % (2**n - 1)
+        e3 = (2**(n - k) + 1) % (2**n - 1)
+        e4 = (2**s_val + 2**(k + s_val)) % (2**n - 1)
+        return (u_val * x**e1 + u_val**(2**k) * x**e2 + F(v_val) * x**e3 + F(w_val) * u_val**(2**k + 1) * x**e4)
 
     pairs = (
         (_poly(s_val, u_val, w_val, v_val), {'s': s_val, 'u': u_val, 'v': v_val, 'w': w_val})
@@ -629,6 +630,7 @@ def family_11(n, k=None, i=None, a=None):
         e_a = ((2**i_val + 1) * 2**k_val) % (2**n - 1)
         e_b = 3 * 2**m
         e_c = ((2**(i_val + m) + 2**m) * 2**k_val) % (2**n - 1)
+        print(f"e_a: {a_val * x**e_a}, e_b: {a_val**2 * x**e_b}, e_c: {x**e_c}")
         return x**3 + a_val * x**e_a + a_val**2 * x**e_b + F(1) * x**e_c
 
     pairs = (
