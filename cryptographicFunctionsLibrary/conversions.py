@@ -1,5 +1,5 @@
 from sage.all import *
-from helpers import interpolate_truth_table
+from .helpers import interpolate_truth_table
 
 
 def polynomial_to_truth_table(n, polynomial):

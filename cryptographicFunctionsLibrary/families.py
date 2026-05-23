@@ -1,5 +1,5 @@
 from sage.all import *
-from helpers import aggregate_results, is_primitive_element, family12_s_candidates, family12_validates_s
+from .helpers import aggregate_results, is_primitive_element, family12_s_candidates, family12_validates_s
 
 
 def _family_1_2(n, p, s, u):

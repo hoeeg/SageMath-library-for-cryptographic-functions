@@ -1,5 +1,5 @@
 from sage.all import *
-from helpers import is_primitive_element, get_terms
+from .helpers import is_primitive_element, get_terms
 
 
 def _membership_family1_2(n, p, poly):
