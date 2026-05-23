@@ -1,17 +1,14 @@
 from sage.all import *
-from helpers import is_primitive_element, get_terms, family12_validates_s
+from helpers import is_primitive_element, get_terms
 
 
 def _membership_family1_2(n, p, poly):
     """
     Shared implementation for Family 1 (p=3) and Family 2 (p=4).
     """
-    if n < 12:
+    if n < 12 or n % p != 0 :
         return False, {}
-    
-    if n % p != 0:
-        return False, {}
-    
+      
     k = n // p
     if gcd(k, 3) != 1:
         return False, {}
@@ -22,45 +19,46 @@ def _membership_family1_2(n, p, poly):
     if not terms:
         return False, {}
 
-    for s in range(1, n):
-        if gcd(s, 3 * k) != 1:
+    for s_val in range(1, n):
+        if gcd(s_val, 3 * k) != 1:
             continue
-  
-        i = (s * k) % p
+        i = (s_val * k) % p
         m = p - i
 
-        e_x = 2**s + 1                                                  # exponent of x^(2^s + 1)
-        e_ux = (2**(i * k) + 2**(m * k + s)) % (2**n - 1)               # exponent of x^(2^(ik) + 2^(mk + s)) mod 2^n - 1
+        e1 = 2**s_val + 1
+        e2 = (2**(i * k) + 2**(m * k + s_val)) % (2**n - 1)
 
-        # Single term case
-        if e_x == e_ux:
-            if set(terms) != {e_ux}:
+        # Single-term case: both exponents coincide
+        if e1 == e2:
+            if set(terms) != {e2}:
                 continue
-            # Add 1 to the coefficient of x^(2^s + 1) to get u^(2^k - 1)
-            u_power = terms.get(e_ux, F(0)) + F(1) 
+            # Combined coeff = 1 + u^(2^k-1), so u^(2^k-1) = coeff + 1
+            u_power = terms.get(e2, F(0)) + F(1) 
         
-        # Two term case
+        # Two term case: exponents are distinct
         else:
-            if set(terms) != {e_x, e_ux}:
+            if set(terms) != {e1, e2}:
                 continue
             # Extract the coefficients for each term, defaulting to 0 if the term is not present
-            if terms.get(e_x, F(0)) != F(1):
+            if terms.get(e1, F(0)) != F(1):
                 continue
-            u_power = terms.get(e_ux)
+            u_power = terms.get(e2, F(0))
         
         if u_power == F(0):
             continue
-
+        
+        # Recover u from u^(2^k - 1)
         try:
             all_roots = u_power.nth_root(2**k - 1, all=True)
         except ValueError:
             continue
-
-        primitive_roots = [r for r in all_roots if r != 0 and is_primitive_element(F, r)]
-        if not primitive_roots:
+        
+        # u must be a primitive element of GF(2^n)
+        u_vals = [u_val for u_val in all_roots if u_val != 0 and is_primitive_element(F, u_val)]
+        if not u_vals:
             continue
 
-        return True, {'s': s, 'k': k, 'u': primitive_roots}
+        return True, {'s': s_val, 'u': u_vals}
     
     return False, {}
 
@@ -80,41 +78,37 @@ def membership_family_1(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_1
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33
-        sage: membership_family_1(12, poly)
-        (True,
-        {'s': 5,
-        'k': 4,
-        'u': [a^11 + a^8 + a^6 + a^3 + a + 1,
-        a^11 + a^8 + a^5 + a^3 + a^2 + a,
-        a^11 + a^8 + a^6 + a^3 + a^2 + a + 1,
-        a^10 + a^8 + a^7 + a^5 + a^4 + a^2 + 1,
-        a^6 + a^5 + 1,
-        a^11 + a^10 + a^7 + a^6 + a^5 + a^4 + a^3 + a,
-        a^10 + a^8 + a^7 + a^6 + a^4,
-        a^2,
-        a^11 + a^8 + a^5 + a^3 + a,
-        a^10 + a^8 + a^7 + a^6 + a^4 + a^2,
-        a^11 + a^10 + a^7 + a^4 + a^3 + a^2 + a + 1,
-        a^10 + a^8 + a^7 + a^5 + a^4 + 1]})
+        sage: polynomial = (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33
+        sage: membership_family_1(12, polynomial)
+        (True, {'s': 5, 'u': 
+            [a^11 + a^8 + a^6 + a^3 + a + 1,
+            a^11 + a^8 + a^5 + a^3 + a^2 + a,
+            a^11 + a^8 + a^6 + a^3 + a^2 + a + 1,
+            a^10 + a^8 + a^7 + a^5 + a^4 + a^2 + 1,
+            a^6 + a^5 + 1,
+            a^11 + a^10 + a^7 + a^6 + a^5 + a^4 + a^3 + a,
+            a^10 + a^8 + a^7 + a^6 + a^4,
+            a^2,
+            a^11 + a^8 + a^5 + a^3 + a,
+            a^10 + a^8 + a^7 + a^6 + a^4 + a^2,
+            a^11 + a^10 + a^7 + a^4 + a^3 + a^2 + a + 1,
+            a^10 + a^8 + a^7 + a^5 + a^4 + 1]})
         
-        sage: poly = x^129 + (a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^4)*x^24
-        sage: membership_family_1(12, poly)
-        (True,
-        {'s': 7,
-        'k': 4,
-        'u': [a^11 + a^6 + a^4 + a^3 + a^2,
-        a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1,
-        a^11 + a^10 + a^9 + a^8 + a^4 + a^2 + a,
-        a^11 + a^10 + a^8 + a^6 + a^5 + a^2,
-        a^10 + a^7 + a^6 + a^5 + a^4 + a^3 + a + 1,
-        a^9 + a^6 + a^5 + a^4 + a,
-        a^11 + a^10 + a^9 + a^7 + a^6 + a^4 + a^2 + 1,
-        a^10 + a^9 + a^8 + a^6 + a^3 + a,
-        a^11 + a^10 + a^7 + a^5 + a^2 + a + 1,
-        a^11 + a^8 + a^7 + a^4 + a^3 + a^2 + a + 1,
-        a^8 + a^7 + a^6 + a + 1,
-        a^11 + a^9 + a^5 + a^3 + a^2 + a]})
+        sage: polynomial = x^129 + (a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^4)*x^24
+        sage: membership_family_1(12, polynomial)
+        (True, {'s': 5, 'u': 
+            [a^11 + a^8 + a^6 + a^3 + a + 1,
+            a^11 + a^8 + a^5 + a^3 + a^2 + a,
+            a^11 + a^8 + a^6 + a^3 + a^2 + a + 1,
+            a^10 + a^8 + a^7 + a^5 + a^4 + a^2 + 1,
+            a^6 + a^5 + 1,
+            a^11 + a^10 + a^7 + a^6 + a^5 + a^4 + a^3 + a,
+            a^10 + a^8 + a^7 + a^6 + a^4,
+            a^2,
+            a^11 + a^8 + a^5 + a^3 + a,
+            a^10 + a^8 + a^7 + a^6 + a^4 + a^2,
+            a^11 + a^10 + a^7 + a^4 + a^3 + a^2 + a + 1,
+            a^10 + a^8 + a^7 + a^5 + a^4 + 1]})
     """
     return _membership_family1_2(n, 3, poly)
 
@@ -134,33 +128,29 @@ def membership_family_2(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_2
         sage: F.<a> = GF(2^16)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3
-        sage: membership_family_2(16, poly)
-        (True,
-        {'s': 1,
-        'k': 4,
-        'u': [a^12 + a^8 + a^6 + a^5 + a^4 + a^3 + a^2,
-        a^15 + a^14 + a^7 + a^6 + a^3 + a,
-        a^11 + a^10 + a^9 + a^8 + a^7 + a^3 + a + 1,
-        a^13 + a^11 + a^10 + a^7 + a^4 + a + 1,
-        a^15 + a^14 + a^12 + a^11 + a^10 + a^9 + a^5 + a^4 + a^3 + a^2 + 1,
-        a^15 + a^14 + a^13 +	a^12 +	a^9 +	a^7 +	a^5 +	a^3 +	a^2 +	a,
-       	a^15 +	a^14 +	a^13 +	a^12 +	a^11 +	a^10 +	a^8 +
-        a^13 + a^12 + a^11 + a^10 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a + 1]})
+        sage: polynomial = (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3
+        sage: membership_family_2(16, polynomial)
+        (True, {'s': 1, 'u': 
+            [a^12 + a^8 + a^6 + a^5 + a^4 + a^3 + a^2,
+            a^15 + a^14 + a^7 + a^6 + a^3 + a,
+            a^11 + a^10 + a^9 + a^8 + a^7 + a^3 + a + 1,
+            a^13 + a^11 + a^10 + a^7 + a^4 + a + 1,
+            a^15 + a^14 + a^12 + a^11 + a^10 + a^9 + a^5 + a^4 + a^3 + a^2 + 1,
+            a^15 + a^14 + a^13 + a^12 + a^9 + a^7 + a^5 + a^3 + a^2 + a,
+            a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^8 + a^5 + a^2 + 1,
+            a^13 + a^12 + a^11 + a^10 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a + 1]})
 
-        sage: poly = (a^15 + a^14 + a^12 + a^8 + a^7 + a^5 + a^4 + a^3 + a^2)*x^2049
-        sage: membership_family_2(16, poly)
-        (True,
-        {'s': 11,
-        'k': 4,
-        'u': [a^14 + a^9 + a + 1,
-        a^13 + a^12 + a^11 + a^10 + a^4 + a + 1,
-        a^14 + a^11 + a^10 + a^9 + a^5 + a^4 + a^3 + a^2 + 1,
-        a^11 + a^10 + a^9 + a^4 + a^2 + a,
-        a^13 + a^12 + a^5 + a^3 + a^2 + 1,
-        a^13 + a^12 + a^11 + a^10 + a^9 + a^5 + a^4 + a^3 + a + 1,
-        a^14 + a^13 + a^12 + a^2 + a,
-        a^14 + a^11 + a^10 + a^4 + a^2 + 1]})
+        sage: polynomial = (a^15 + a^14 + a^12 + a^8 + a^7 + a^5 + a^4 + a^3 + a^2)*x^2049
+        sage: membership_family_2(16, polynomial)
+        (True, {'s': 11, 'u': 
+            [a^14 + a^9 + a + 1,
+            a^13 + a^12 + a^11 + a^10 + a^4 + a + 1,
+            a^14 + a^11 + a^10 + a^9 + a^5 + a^4 + a^3 + a^2 + 1,
+            a^11 + a^10 + a^9 + a^4 + a^2 + a,
+            a^13 + a^12 + a^5 + a^3 + a^2 + 1,
+            a^13 + a^12 + a^11 + a^10 + a^9 + a^5 + a^4 + a^3 + a + 1,
+            a^14 + a^13 + a^12 + a^2 + a,
+            a^14 + a^11 + a^10 + a^4 + a^2 + 1]})
     """
     return _membership_family1_2(n, 4, poly)
 
@@ -180,13 +170,13 @@ def membership_family_3(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_3
         sage: F.<a> = GF(2^6)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
-        sage: membership_family_3(6, poly)
-        (True, {'q': 8, 'i': 1, 's': a, 'c': a})  
+        sage: polynomial = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
+        sage: membership_family_3(6, polynomial)
+        (True, {'i': 1, 's': a, 'c': a})  
 
-        sage: poly = x^40 + (a^5 + a^4 + a^2 + a + 1)*x^33 + a*x^12 + (a^2 + a + 1)*x^9 + x^5
-        sage: membership_family_3(6, poly)
-        (True, {'q': 8, 'i': 2, 's': a^2 + a + 1, 'c': a^5 + a^4 + a^2 + a + 1})
+        sage: polynomial = x^40 + (a^5 + a^4 + a^2 + a + 1)*x^33 + a*x^12 + (a^2 + a + 1)*x^9 + x^5
+        sage: membership_family_3(6, polynomial)
+        (True, {'i': 2, 's': a^2 + a + 1, 'c': a^5 + a^4 + a^2 + a + 1})
     """
     if n % 2 != 0:
         return False, {}
@@ -195,41 +185,41 @@ def membership_family_3(n, poly):
     q = 2**m
 
     F = GF(2**n, 'a')
+    K = GF(q)
 
     terms = get_terms(n, poly)
     if not terms:
         return False, {}
     
-    for i in range(1, m): 
-        if gcd(i, m) != 1:
+    for i_val in range(1, m): 
+        if gcd(i_val, m) != 1:
             continue
 
-        e_s   = q + 1                                               # exponent of sx^(q + 1)
-        e_x  = 2**i + 1                                             # exponent of x^(2^i + 1)  
-        e_xq  = (q * (2**i + 1)) % (2**n - 1)                       # exponent of x^(q * (2^i + 1))
-        e_c   = (2**i * q + 1) % (2**n - 1)                         # exponent of cx^(2^i * q + 1)
-        e_cq  = 2**i + q                                            # exponent of x^(2^i + q)
+        e1 = q + 1
+        e2 = 2**i_val + 1
+        e3 = (q * (2**i_val + 1)) % (2**n - 1)
+        e4 = (2**i_val * q + 1) % (2**n - 1)
+        e5 = 2**i_val + q
 
-        if not set(terms).issubset({e_s, e_x, e_xq, e_c, e_cq}):
+        if not set(terms).issubset({e1, e2, e3, e4, e5}):
             continue
 
-        if terms.get(e_x) != F(1):
-            continue
-        if terms.get(e_xq) != F(1):
+        if terms.get(e2) != F(1) or terms.get(e3) != F(1):
             continue
 
-        # Extract the coefficients for each term, defaulting to 0 if the term is not present
-        s = terms.get(e_s, F(0))
-        c = terms.get(e_c, F(0))
-        cq = terms.get(e_cq, F(0))
+        s_val = terms.get(e1, F(0))
+        c_val = terms.get(e4, F(0))
+        cq = terms.get(e5, F(0))
 
-        if c**q != cq:
+        # Coeff at e_cq must equal c^q
+        if c_val**q != cq:
+            continue
+        
+        # s must be in GF(2^n) but not in the subfield GF(q)
+        if s_val in K:
             continue
 
-        if s not in F or s in GF(q):
-            continue
-
-        return True, {'q': q, 'i': i, 's': s, 'c': c}
+        return True, {'i': i_val, 's': s_val, 'c': c_val}
 
     return False, {}
 
@@ -249,47 +239,46 @@ def membership_family_4(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_4
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^8 + a^3 + a)*x^288 + (a^8 + a^6 + a^5 + a^4 + a)*x^260 + (a^7 + a^4 + a^3 + a^2 + a)*x^144 + (a^8 + a^6 + a^2 + a)*x^130 + (a^6 + a^5 + a^4)*x^72 + (a^7 + a^6 + a^4 + a^3)*x^65 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^36 + (a^8 + a^4 + a^2 + 1)*x^18 + (a^5 + a^3 + a)*x^9 + x^3
-        sage: membership_family_4(9, poly)
+        sage: polynomial = (a^8 + a^3 + a)*x^288 + (a^8 + a^6 + a^5 + a^4 + a)*x^260 + (a^7 + a^4 + a^3 + a^2 + a)*x^144 + (a^8 + a^6 + a^2 + a)*x^130 + (a^6 + a^5 + a^4)*x^72 + (a^7 + a^6 + a^4 + a^3)*x^65 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^36 + (a^8 + a^4 + a^2 + 1)*x^18 + (a^5 + a^3 + a)*x^9 + x^3
+        sage: membership_family_4(9, polynomial)
         (True, {'a': a^8 + a^6 + a^5 + a^3 + a})
 
-        poly = x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
-        sage: membership_family_4(9, poly)
+        sage: polynomial = x^288 + x^260 + x^144 + x^130 + x^72 + x^65 + x^36 + x^18 + x^9 + x^3
+        sage: membership_family_4(9, polynomial)
         (True, {'a': 1})
 
         sage: F.<a> = GF(2^7)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^6 + a^5 + a^3 + a^2 + a + 1)*x^72 + (a^5 + a^4 + a^2 + 1)*x^68 + (a^5 + a^4 + a^3 + 1)*x^36 + (a^3 + a^2 + 1)*x^34 + (a^6 + a^5 + a^4 + a)*x^18 + (a^5 + a^3 + a^2 + a)*x^17 + (a^6 + a^4 + a^2 + 1)*x^9 + x^3
-        sage: membership_family_4(7, poly)
+        sage: polynomial = (a^6 + a^5 + a^3 + a^2 + a + 1)*x^72 + (a^5 + a^4 + a^2 + 1)*x^68 + (a^5 + a^4 + a^3 + 1)*x^36 + (a^3 + a^2 + 1)*x^34 + (a^6 + a^5 + a^4 + a)*x^18 + (a^5 + a^3 + a^2 + a)*x^17 + (a^6 + a^4 + a^2 + 1)*x^9 + x^3
+        sage: membership_family_4(7, polynomial)
         (True, {'a': a^3 + a^2 + a + 1})
     """
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()
 
-    # Get the terms of the polynomial reduced modulo x^(2^n) - x
     terms = get_terms(n, poly)
     if not terms:
         return False, {}    
 
-    # All exponents must be 3 or of the form 9*2^i mod (2^n - 1)
+    # All exponents must lie in the orbit {9 * 2^i mod (2^n-1)} ∪ {3}
     e_9 = {(9 * 2**i) % (2**n - 1) for i in range(n)}
     if not set(terms).issubset({3} | e_9):
         return False, {}
 
-    # Recover a by square root, x^9 = a^(3-1) = a^2
+    # Coeff of x^9 is a^2; recover a via square root
     a_square = terms.get(9 % (2**n - 1), F(0))
     if a_square == F(0):
         return False, {}
-    a = a_square**(2**(n - 1))
+    a_val = a_square**(2**(n - 1))
     
     # Verify the reduced polynomial matches the expected form
-    trace = sum(a**(3 * 2**i) * x**((9 * 2**i) % (2**n - 1)) for i in range(n))
-    expected = (x**3 + (F(1) / a) * trace).mod(x**(2**n) - x)
+    trace = sum(a_val**(3 * 2**i) * x**((9 * 2**i) % (2**n - 1)) for i in range(n))
+    expected = (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
     reduced = R(poly).mod(x**(2**n) - x)
 
     if reduced == expected:
-        return True, {'a': a}
+        return True, {'a': a_val}
     return False, {}
 
 
@@ -307,55 +296,52 @@ def membership_family_5(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_5
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
-        sage: sage: poly = (a^8 + a^4 + a)*x^144 + (a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^130 + (a^6 + a^4 + a^3 + a^2 + a + 1)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^65 + (a^7 + a^3 + a^2)*x^18 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3)*x^9 + x^3
-        sage: membership_family_5(9, poly)
+        sage: polynomial = (a^8 + a^4 + a)*x^144 + (a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^130 + (a^6 + a^4 + a^3 + a^2 + a + 1)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^65 + (a^7 + a^3 + a^2)*x^18 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3)*x^9 + x^3
+        sage: membership_family_5(9, polynomial)
         (True, {'a': a^7 + a^6 + a^4 + a^3 + 1})
 
-        sage: poly = x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3
-        sage: membership_family_5(9, poly)
+        sage: polynomial = x^144 + x^130 + x^72 + x^65 + x^18 + x^9 + x^3
+        sage: membership_family_5(9, polynomial)
         (True, {'a': 1})
 
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^11 + a^10 + a^9 + a^8 + a^7 + a^3 + a^2)*x^1152 + (a^10 + a^9 + a^7 + a^3 + a^2)*x^1026 + (a^11 + a^8 + a^6 + a^3 + 1)*x^576 + (a^11 + a^10 + a^6 + a^5 + a^4 + a)*x^513 + (a^10 + a^8 + a^5 + a^3 + a^2 + 1)*x^144 + (a^9 + a^8 + a^5 + a^4 + a^3 + 1)*x^72 + (a^9 + a^8 + a^7 + a^5 + a^3 + 1)*x^18 + (a^11 + a^5 + a^4 + a^2 + 1)*x^9 + x^3
-        sage: membership_family_5(12, poly)
+        sage: polynomial = (a^11 + a^10 + a^9 + a^8 + a^7 + a^3 + a^2)*x^1152 + (a^10 + a^9 + a^7 + a^3 + a^2)*x^1026 + (a^11 + a^8 + a^6 + a^3 + 1)*x^576 + (a^11 + a^10 + a^6 + a^5 + a^4 + a)*x^513 + (a^10 + a^8 + a^5 + a^3 + a^2 + 1)*x^144 + (a^9 + a^8 + a^5 + a^4 + a^3 + 1)*x^72 + (a^9 + a^8 + a^7 + a^5 + a^3 + 1)*x^18 + (a^11 + a^5 + a^4 + a^2 + 1)*x^9 + x^3
+        sage: membership_family_5(12, polynomial)
         (True, {'a': a^10 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2})
     """
     if n % 3 != 0:
         return False, {}
     
     k = n // 3
-    F = GF(2**n, 'a')
 
-    # Get the terms of the polynomial reduced modulo x^(2^n) - x
+    F = GF(2**n, 'a')
+    R = PolynomialRing(F, 'x')
+    x = R.gen()
+
     terms = get_terms(n, poly)
     if not terms:
         return False, {}
 
-    # x^3 must be present
-    if 3 not in terms:
-        return False, {}
-    
-    # All exponents must be 3 or of the form 9*2^3i mod (2^n - 1) or 18*2^3i mod (2^n - 1)
+    # All exponents must lie in the orbit {9 * 2^(3*i) mod (2^n-1)} ∪ {18 * 2^(3*i) mod (2^n-1)} ∪ {3} 
     e_9 = {(9 * 2**(3*i)) % (2**n - 1) for i in range(k)}
     e_18 = {(18 * 2**(3*i)) % (2**n - 1) for i in range(k)}
     if not set(terms).issubset({3} | e_9 | e_18):
         return False, {}
     
-    # Recover a by square root, x^9 = a^(3-1) = a^2
+    # Coeff of x^9 is a^2; recover a via square root
     a_square = terms.get(9 % (2**n - 1), F(0))
     if a_square == F(0):
         return False, {}
-    a = a_square**(2**(n - 1))
-    
-    # Verify x^(9 * 2^(3i)) terms: coeff = a^(3 * 2^(3i) - 1) and x^(18 * 2^(3i)) terms: coeff = a^(6 * 2^(3i) - 1)        
-    if all(
-        terms.get((9 * 2**(3*i)) % (2**n - 1), F(0)) == a ** (3  * 2**(3*i) - 1) and
-        terms.get((18 * 2**(3*i)) % (2**n - 1), F(0)) == a ** (6 * 2**(3*i) - 1)
-        for i in range(k)
-    ):
-        return True, {'a': a}
+    a_val = a_square**(2**(n - 1))
 
+    # Verify the reduced polynomial matches the expected form
+    trace = sum(a_val**(3 * 2**(3*i)) * x**((9 * 2**(3*i)) % (2**n - 1)) + (a_val**(6 * 2**(3*i)) * x**((18 * 2**(3*i)) % (2**n - 1))) for i in range(k))
+    expected = (x**3 + (F(1) / a_val) * trace).mod(x**(2**n) - x)
+    reduced = R(poly).mod(x**(2**n) - x)       
+
+    if reduced == expected:
+        return True, {'a': a_val}
     return False, {}
 
 
@@ -374,62 +360,60 @@ def membership_family_6(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_6
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^7 + a^5 + a^3)*x^288 + (a^8 + a^4 + a^3)*x^260 + (a^6 + a^5 + a^3 + a^2)*x^144 + (a^7 + a^2 + 1)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^36 + (a^8 + a^4 + a^3 + a^2 + 1)*x^18 + x^3
-        sage: membership_family_6(9,  poly)
+        sage: polynomial = (a^7 + a^5 + a^3)*x^288 + (a^8 + a^4 + a^3)*x^260 + (a^6 + a^5 + a^3 + a^2)*x^144 + (a^7 + a^2 + 1)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^36 + (a^8 + a^4 + a^3 + a^2 + 1)*x^18 + x^3
+        sage: membership_family_6(9,  polynomial)
         (True, {'a': a^8 + a^7 + a^2})
 
-        sage: poly = x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3
-        sage: membership_family_6(9,  poly)
+        sage: polynomial = x^288 + x^260 + x^144 + x^130 + x^36 + x^18 + x^3
+        sage: membership_family_6(9,  polynomial)
         (True, {'a': 1})
 
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^2304 + (a^11 + a^7 + a^6 + a^5 + a^4 + a^3)*x^2052 + (a^10 + a^7 + a^6 + a^4 + a + 1)*x^1152 + (a^10 + a^8 + a^7 + a^6 + a^3 + 1)*x^1026 + (a^11 + a^8 + a^5 + a^2 + a)*x^288 + (a^10 + a^8 + a^6 + a^5 + a^4 + a^3 + a^2)*x^144 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + a)*x^36 + (a^9 + a^7 + a^6 + a^5 + a^3 + a^2)*x^18 + x^3
-        sage: membership_family_6(12, poly)
+        sage: polynomial = (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^2304 + (a^11 + a^7 + a^6 + a^5 + a^4 + a^3)*x^2052 + (a^10 + a^7 + a^6 + a^4 + a + 1)*x^1152 + (a^10 + a^8 + a^7 + a^6 + a^3 + 1)*x^1026 + (a^11 + a^8 + a^5 + a^2 + a)*x^288 + (a^10 + a^8 + a^6 + a^5 + a^4 + a^3 + a^2)*x^144 + (a^9 + a^8 + a^5 + a^4 + a^3 + a^2 + a)*x^36 + (a^9 + a^7 + a^6 + a^5 + a^3 + a^2)*x^18 + x^3
+        sage: membership_family_6(12, polynomial)
         (True, {'a': a^11 + a^10 + a^9 + a^8 + a^7 + a^5 + a^4 + a})
     """
     if n % 3 != 0:
         return False, {}
     
     k = n // 3
+
     F = GF(2**n, 'a')
 
-    # Get the terms of the polynomial reduced modulo x^(2^n) - x
     terms = get_terms(n, poly)
     if not terms:
         return False, {}
     
-    # x^3 must be present with coefficient 1
-    if terms.get(3, F(0)) != F(1):
+    # x^3 must be present
+    if 3 not in terms:
         return False, {}
     
-    # All exponents must be 3 or of the form 18*2^3i mod (2^n - 1) or 36*2^3i mod (2^n - 1)
+    # All exponents must lie in the orbit {18 * 2^(3*i) mod (2^n-1)} ∪ {36 * 2^(3*i) mod (2^n-1)} ∪ {3} 
     e_18 = {(18 * 2**(3*i)) % (2**n - 1) for i in range(k)}
     e_36 = {(36 * 2**(3*i)) % (2**n - 1) for i in range(k)}
     if not set(terms).issubset({3} | e_18 | e_36):
         return False, {}
     
-    # Recover a by fifth root, x^18 = a^(6-1) = a^5
+    # Coeff of x^18 is a^(6-1) = a^5; recover a via fifth root
     a_fifth = terms.get(18 % (2**n - 1), F(0))
     if a_fifth == F(0):
         return False, {}
-    
     try:
         all_roots = a_fifth.nth_root(5, all=True)
     except ValueError:
         return False, {}
     
-    # Verify all fifth roots to find a valid a such that all x^(18 * 2^(3i)) terms: coeff = a^(6 * 2^(3i) - 1) and x^(36 * 2^(3i)) terms: coeff = a^(12 * 2**(3i) - 1)
-    for a in all_roots:
-        if a == F(0):
+    # Verify all fifth roots to find a valid a
+    for a_val in all_roots:
+        if a_val == F(0):
             continue
-        
         if all(
-            terms.get((18 * 2**(3*i)) % (2**n - 1), F(0)) == a ** (6  * 2**(3*i) - 1) and
-            terms.get((36 * 2**(3*i)) % (2**n - 1), F(0)) == a ** (12 * 2**(3*i) - 1)
+            terms.get((18 * 2**(3*i)) % (2**n - 1), F(0)) == a_val ** (6  * 2**(3*i) - 1) and
+            terms.get((36 * 2**(3*i)) % (2**n - 1), F(0)) == a_val ** (12 * 2**(3*i) - 1)
             for i in range(k)
         ):
-            return True, {'a': a}
+            return True, {'a': a_val}
 
     return False, {}
 
@@ -449,18 +433,18 @@ def membership_family_7_9(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_7_9
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^10 + a^6 + a^5 + a^3 + a)*x^768 + (a^9 + a^8 + a^6 + a^5 + a^2)*x^544 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257 + (a^7 + a^5 + a^3 + a^2 + 1)*x^33
-        sage: membership_family_7_9(12, poly)
+        sage: polynomial = (a^10 + a^6 + a^5 + a^3 + a)*x^768 + (a^9 + a^8 + a^6 + a^5 + a^2)*x^544 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257 + (a^7 + a^5 + a^3 + a^2 + 1)*x^33
+        sage: membership_family_7_9(12, polynomial)
         (True, {'s': 5, 'u': a^7 + a^5 + a^3 + a^2 + 1, 'v': a4^3 + a4, 'w': a4^3 + a4})
 
-        sage: poly = a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + x^257
-        sage: membership_family_7_9(12, poly)
+        sage: polynomial = a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + x^257
+        sage: membership_family_7_9(12, polynomial)
         (True, {'s': 11, 'u': a, 'v': 1, 'w': 0})
 
-        sage: poly =  (a^10 + a^3 + a^2 + 1)*x^2056 + a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257
-        sage: membership_family_7_9(12, poly)
+        sage: polynomial = (a^10 + a^3 + a^2 + 1)*x^2056 + a*x^2049 + (a^11 + a^10 + a^9 + a^7 + a^5 + a^4)*x^264 + (a^11 + a^9 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^257
+        sage: membership_family_7_9(12, polynomial)
         (True, {'s': 11, 'u': a, 'v': a4^2, 'w': a4^2})
-    """ 
+    """
     if n % 3 != 0:
         return False, {}
     
@@ -475,32 +459,36 @@ def membership_family_7_9(n, poly):
     if not terms:
         return False, {}
     
-    for s in range(1, n):
-        if gcd(s, 3*k) != 1 or (k + s) % 3 != 0:
+    for s_val in range(1, n):
+        if gcd(s_val, 3*k) != 1 or (k + s_val) % 3 != 0:
             continue
 
-        e1 = (2**s + 1)
-        e2 = (2**(n - k) + 2**(k + s)) % (2**n - 1)
+        e1 = (2**s_val + 1)
+        e2 = (2**(n - k) + 2**(k + s_val)) % (2**n - 1)
         e3 = (2**(n - k) + 1) % (2**n - 1)
-        e4 = (2**s + 2**(k + s)) % (2**n - 1)
+        e4 = (2**s_val + 2**(k + s_val)) % (2**n - 1)
 
         if not set(terms).issubset({e1, e2, e3, e4}):
             continue
 
-        u = terms.get(e1,  F(0))
+        u_val = terms.get(e1,  F(0))
         uk = terms.get(e2, F(0))
-        v = terms.get(e3,  F(0))
+        v_val = terms.get(e3,  F(0))
         wu = terms.get(e4,  F(0))
 
-        if u == F(0) or not is_primitive_element(F, u):
+        # u must be primitive in GF(2^n)
+        if u_val == F(0) or not is_primitive_element(F, u_val):
             continue
- 
+        # Coeff at e2 must equal u^(2^k)
+        if uk != u_val**(2**k):
+            continue
         
-        w = wu / (u**(2**k + 1))
-        if v * w == K(1) or v not in K or w not in K:
+        # Recover w from w * u^(2^k+1) and verify subfield membership and vw ≠ 1
+        w_val = wu / (u_val**(2**k + 1))
+        if v_val * w_val == K(1) or v_val not in K or w_val not in K:
             continue
 
-        return True, {'s': s, 'u': u, 'v': K(v), 'w': K(w)}
+        return True, {'s': s_val, 'u': u_val, 'v': K(v_val), 'w': K(w_val)}
 
     return False, {}
 
@@ -520,24 +508,19 @@ def membership_family_11(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_11
         sage: F.<a> = GF(2^10)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly =  (a^5 + a^3 + a)*x^576 + (a^5 + a^3 + a + 1)*x^96 + x^18 + x^3
-        sage: membership_family_11(10, poly)
+        sage: polynomial =  (a^5 + a^3 + a)*x^576 + (a^5 + a^3 + a + 1)*x^96 + x^18 + x^3
+        sage: membership_family_11(10, polynomial)
         (True, {'k': 6, 'i': 3, 'a': a^5 + a^3 + a, 'b': a^5 + a^3 + a + 1, 'c': 1})
 
-        sage: poly = x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3
-        sage: membership_family_11(10, poly)
+        sage: polynomial = x^192 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^6 + x^3
+        sage: membership_family_11(10, polynomial)
         (True, {'k': 2, 'i': 9, 'a': a^5 + a^3 + a, 'b': a^5 + a^3 + a + 1, 'c': 1})
 
         sage: F.<a> = GF(2^14)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = x^768 + (a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a + 1)*x^384 + (a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^6 + x^3
-        sage: membership_family_11(14, poly)
-        (True,
-        {'k': 2,
-        'i': 13,
-        'a': a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a,
-        'b': a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a + 1,
-        'c': 1})
+        sage: polynomial = x^768 + (a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a + 1)*x^384 + (a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a)*x^6 + x^3
+        sage: membership_family_11(14, polynomial)
+        (True, {'k': 2, 'i': 13, 'a': a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a, 'b': a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a + 1, 'c': 1})
     """
     if n % 2 != 0:
         return False, {}
@@ -547,49 +530,51 @@ def membership_family_11(n, poly):
         return False, {}
     
     F = GF(2**n, 'a')
+    K = F.subfield(2)
+
     terms = get_terms(n, poly)
     if not terms:
         return False, {}
 
-    if terms.get(3, F(0)) != F(1):
-        print("test 1 failed")
+    # x^3 must be present
+    if 3 not in terms:
         return False, {}
     
-    def _make_i_set(ref, base):
-        inv_set = {pow(ref, -1, n)} if gcd(ref, n) == 1 else set()
-        return base | inv_set
+    def _valid_i(k_val):
+        p = (m - 2) if k_val % 2 == 0 else (m + 2)
+        base = {m - 2, m, n - 1} if k_val % 2 == 0 else {m + 2, m}
+        inv_set = {pow(p, -1, n)} if gcd(p, n) == 1 else set()
+        return tuple(base | inv_set)
+    
+    pair_ki = [(k_val, i_val) for k_val in range(n) for i_val in _valid_i(k_val)]
 
-    i_list_even = _make_i_set(m - 2, {m - 2, m, n - 1})
-    i_list_odd  = _make_i_set(m + 2, {m + 2, m})
+    for k_val, i_val in pair_ki:
+        e1 = ((2**i_val + 1) * 2**k_val) % (2**n - 1)
+        e2 = (3 * 2**m)
+        e3 = ((2**(i_val + m) + 2**m) * 2**k_val) % (2**n - 1)
+
+        if not set(terms).issubset({3, e1, e2, e3}):
+            continue
+        
+        # Single-term case: a and c exponents coincide
+        if e1 == e3:
+            a_val = terms.get(e1, F(0)) + F(1)
+            c_val = F(1)
+        # Two-term case: exponents are distinct
+        else:
+            a_val = terms.get(e1, F(0))
+            c_val = terms.get(e3, F(0))
+        
+        b_val = terms.get(e2, F(0))
+        # Require b = a^2 and c = 1
+        if b_val != a_val**2 or c_val != F(1):
+            continue
     
-    for k in range(0, n):
-        i_list = i_list_even if k % 2 == 0 else i_list_odd
-        for i in i_list:
-            e_a = ((2**i + 1) * 2**k) % (2**n - 1)                  # exponent of a(x^2^i + 1)^2^k
-            e_b = (3 * 2**m)                                        # exponent of bx^(3 * 2^m)
-            e_c = ((2**(i + m) + 2**m) * 2**k) % (2**n - 1)         # exponent of c(x^(2^(i + m) + 2^m))^2^k
-    
-            if not set(terms).issubset({3, e_a, e_b, e_c}):
-                continue
-            
-            # Single term case
-            if e_a == e_c:
-                a = terms.get(e_a, F(0)) + F(1)
-                c = F(1)
-            # Two term case
-            else:
-                a = terms.get(e_a, F(0))
-                c = terms.get(e_c, F(0))
-            
-            b = terms.get(e_b, F(0))
-            if b != a**2 or c != F(1):
-                continue
-       
-            # a must be a primitive element of GF(2^2)
-            if a == F(0) or not is_primitive_element(F.subfield(2), a):
-                continue
-            
-            return True, {'k': k, 'i': i, 'a': a, 'b': b, 'c': c}
+        # a must be a primitive element of GF(4)
+        if a_val == F(0) or not is_primitive_element(K, a_val):
+            continue
+        
+        return True, {'k': k_val, 'i': i_val, 'a': a_val, 'b': b_val, 'c': c_val}
         
     return False, {}
 
@@ -609,23 +594,13 @@ def membership_family_12(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_12
         sage: F.<a> = GF(2^10)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = (a^8 + a^6 + a^4 + a^3 + 1)*x^96 + (a^9 + a^7 + a^6 + a^4)*x^33 + (a^8 + a^6 + a^5 + a^3)*x^3
-        sage: membership_family_12(10, poly)
-        (True,
-        {'i': 1,
-        's': 5,
-        'a': a^8 + a^5 + a^4 + a^3 + a^2,
-        'b': a^8 + a^6 + a^5 + a^4 + a^3 + a + 1,
-        'c': a})
+        sage: polynomial = (a^8 + a^6 + a^4 + a^3 + 1)*x^96 + (a^9 + a^7 + a^6 + a^4)*x^33 + (a^8 + a^6 + a^5 + a^3)*x^3
+        sage: membership_family_12(10, polynomial)
+        (True, {'i': 1, 's': 5, 'a': a^8 + a^5 + a^4 + a^3 + a^2, 'b': a^8 + a^6 + a^5 + a^4 + a^3 + a + 1, 'c': a})
 
-        sage: poly = a^3*x^513 + (a^8 + a^7 + a^2 + a + 1)*x^48 + (a^3 + a^2 + 1)*x^33
-        sage: membership_family_12(10, poly)
-        (True,
-        {'i': 9,
-        's': 5,
-        'a': a^9 + a^6 + a^2 + a + 1,
-        'b': a^6 + a^5 + a^3,
-        'c': a^9 + a^7 + a^6 + a^4 + a^3 + a})
+        sage: polynomial = a^3*x^513 + (a^8 + a^7 + a^2 + a + 1)*x^48 + (a^3 + a^2 + 1)*x^33
+        sage: membership_family_12(10, polynomial)
+        (True, {'i': 9, 's': 5, 'a': a^9 + a^6 + a^2 + a + 1, 'b': a^6 + a^5 + a^3, 'c': a^9 + a^7 + a^6 + a^4 + a^3 + a})
     """
     if n % 2 != 0:
         return False, {}
@@ -638,59 +613,91 @@ def membership_family_12(n, poly):
     F = GF(2**n, 'a')
     Q = GF(q)
 
-    # Get the terms of the polynomial reduced modulo x^(2^n) - x
     terms = get_terms(n, poly)
     if not terms:
         return False, {}
     
-    for i in range(1, n):
-        if gcd(i, n) != 1:
+    def _terms_match(i_val, s_val, a_val, b_val, c_val):
+        # Build the expected coefficient dict and compare with terms
+        e1 = (2**i_val + 1)
+        e2 = (q * e1) % (2**n - 1)
+        e3 = (2**s_val + 1)
+        e4 = (q * e3) % (2**n - 1)
+        expected = {}
+        for e, coeff in [(e1, a_val*b_val), (e2, a_val*b_val**q), (e3, a_val**q*c_val), (e4, a_val**q*c_val**q)]:
+            expected[e] = expected.get(e, F(0)) + coeff
+        return {e: v for e, v in expected.items() if v != F(0)} == terms
+        
+    for i_val in range(1, n):
+        if gcd(i_val, n) != 1:
             continue
 
-        for s in range(1, n):
-            if i == s:
+        for s_val in range(1, n):
+            e1 = (2**i_val + 1)
+            e2 = (q * e1) % (2**n - 1)
+            e3 = (2**s_val + 1)
+            e4 = (q * e3) % (2**n - 1)
+
+            if not set(terms).issubset({e1, e2, e3, e4}):
                 continue
 
-            e_x1 = (2**i + 1)
-            e_b = (q * e_x1) % (2**n - 1)
-            e_x2 = (2**s + 1)
-            e_c = (q * e_x2) % (2**n - 1)
+            c1 = terms.get(e1, F(0))
+            c2 = terms.get(e2, F(0))
 
-            if not set(terms).issubset({e_x1, e_b, e_x2, e_c}):
-                continue
+            # Single-term case: i and s exponents coincide
+            if i_val == s_val:
+                if c1 == F(0) and c2 == F(0):
+                    continue
+                for a in F:
+                    if a == F(0) or a in Q or a + a**q == F(0):
+                        continue
+                    # c^q = (c2 + c1^q * a^(1-q)) / (a^(2-q) + a^q)
+                    denom = a**(2 - q) + a**q
+                    if denom == F(0):
+                        continue
+                    cq = (c2 + c1**q * a**(1 - q)) / denom
+                    if cq== F(0):
+                        continue
+                    # c = (c^q)^q since (c^q)^q = c^(q^2) = c
+                    c_val = cq**q
+                    b_val = (c1 + a**q * c_val) / a
+                    if b_val == F(0):
+                        continue
 
-            c1 = terms.get(e_x1, F(0))
-            c2 = terms.get(e_b, F(0))
-            c3 = terms.get(e_x2, F(0))
-
-            if c1 == F(0) or c2 == F(0) or c3 == F(0):
-                continue
-
-            # Recover a^(q-1) = c1^q / c2
-            try:
-                all_roots = (c1**q / c2).nth_root(q - 1, all=True)
-            except ValueError:
-                continue
-
-            for a in all_roots:
-                if a == F(0) or a in Q:
+                    if _terms_match(i_val, s_val, a, b_val, c_val):
+                        return True, {'i': i_val, 's': s_val, 'a': a, 'b': b_val, 'c': c_val}
+        
+            # Two-term case: i and s exponents are distinct
+            else:
+                if c1 == F(0) or c2 == F(0):
+                    continue
+                c3 = terms.get(e3, F(0))
+                try:
+                    all_roots = (c1**q / c2).nth_root(q - 1, all=True)
+                except ValueError:
                     continue
             
-                b = c1 / a
-                if b == F(0) or a*b**q != c2:
-                    continue
+                for a_val in all_roots:
+                    if a_val == F(0) or a_val in Q or a_val + a_val**q == F(0):
+                        continue
+                
+                    b_val = c1 / a_val
+                    if b_val == F(0) or a_val*b_val**q != c2:
+                        continue
 
-                c_can = c3 / a**q
-                if e_x2 == e_c:
-                    c_list = [c for c in F if c != F(0) and c**q + c == c_can]
-                elif c_can == F(0):
-                    continue
-                else:
-                    c_list = [c_can]
+                    c_can = c3 / a_val**q
+                    if e3 == e4:
+                        c_vals = [c for c in F if c != F(0) and c**q + c == c_can]
+                    elif c_can == F(0):
+                        continue
+                    else:
+                        c_vals = [c_can]
 
-                for c in c_list:
-                    if family12_validates_s(F, i, b, c, s):
-                        return True, {'i': i, 's': s, 'a': a, 'b': b, 'c': c}
+                    for c_val in c_vals:
+                        if c_val == F(0):
+                            continue
+                        if _terms_match(i_val, s_val, a_val, b_val, c_val):
+                            return True, {'i': i_val, 's': s_val, 'a': a_val, 'b': b_val, 'c': c_val}
     
     return False, {}
 
@@ -710,31 +717,29 @@ def membership_family_13(n, poly):
         sage: from cryptographicFunctionsLibrary import membership_family_13
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = x^144 + (a^8 + a^7 + a^3 + a^2 + a)*x^130 + x^129 + (a^8 + a^2)*x^32 + x^24 + (a^7 + a^6 + a^4 + a^3 + a)*x^18 + (a^8 + a^2)*x^17 + (a^8 + a^7 + a^3 + a^2 + a)*x^10 + (a^4 + a^3 + a^2 + 1)*x^9
-        sage: membership_family_13(9, poly)
+        sage: polynomial = x^144 + (a^8 + a^7 + a^3 + a^2 + a)*x^130 + x^129 + (a^8 + a^2)*x^32 + x^24 + (a^7 + a^6 + a^4 + a^3 + a)*x^18 + (a^8 + a^2)*x^17 + (a^8 + a^7 + a^3 + a^2 + a)*x^10 + (a^4 + a^3 + a^2 + 1)*x^9
+        sage: membership_family_13(9, polynomial)
         (True, {'s': 1, 'v': a^4 + a^3 + a^2, 'mu': a^8 + a^7 + a^3 + a^2 + a})
 
-        sage: poly = x^288 + (a^8 + a^7 + a^6 + a^3 + a^2)*x^260 + x^257 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^64 + x^40 + (a^7 + a^3 + a^2)*x^36 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^33 + (a^8 + a^7 + a^6 + a^3 + a^2)*x^12
-        sage: membership_family_13(9, poly)
+        sage: polynomial = x^288 + (a^8 + a^7 + a^6 + a^3 + a^2)*x^260 + x^257 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^64 + x^40 + (a^7 + a^3 + a^2)*x^36 + (a^8 + a^7 + a^5 + a^3 + a^2 + a + 1)*x^33 + (a^8 + a^7 + a^6 + a^3 + a^2)*x^12
+        sage: membership_family_13(9, polynomial)
         (True, {'s': 2, 'v': 1, 'mu': a^8 + a^7 + a^6 + a^3 + a^2})
 
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
-        sage: poly = x^544 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^514 + x^513 + (a^7 + a^6 + a^4 + a^3 + a)*x^64 + x^48 + (a^11 + a^9 + a^5)*x^34 + (a^7 + a^6 + a^4 + a^3 + a)*x^33 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^17
-        sage: membership_family_13(12, poly)
-        (True,
-        {'s': 1,
-        'v': a^11 + a^9 + a^8 + a^6 + a^3 + a,
-        'mu': a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1})
+        sage: polynomial = x^544 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^514 + x^513 + (a^7 + a^6 + a^4 + a^3 + a)*x^64 + x^48 + (a^11 + a^9 + a^5)*x^34 + (a^7 + a^6 + a^4 + a^3 + a)*x^33 + (a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1)*x^18 + (a^11 + a^9 + a^8 + a^6 + a^3 + a + 1)*x^17
+        sage: membership_family_13(12, polynomial)
+        (True, {'s': 1, 'v': a^11 + a^9 + a^8 + a^6 + a^3 + a, 'mu': a^10 + a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + 1})
     """
     if n % 3 != 0:
         return False, {}
     
     m = n // 3
+
     F = GF(2**n, 'a')
     R = PolynomialRing(F, 'x')
     x = R.gen()
-    Fm = F.subfield(m)
+    M = F.subfield(m)
 
     terms = get_terms(n, poly)
     if not terms:
@@ -744,55 +749,51 @@ def membership_family_13(n, poly):
         if gcd(s_val, m) != 1:
             continue
 
-        P = 2**(2*m + s_val)
-        Q = 2**(m + s_val)
-        Rp = 2**m
-        B = 2**s_val
+        P, Q, Rp, B = 2**(2*m + s_val), 2**(m + s_val), 2**m, 2**s_val
 
-        e_PQ = (P + Q) % (2**n - 1)
-        e_PB = (P + B) % (2**n - 1)
-        e_P1 = (P + 1) % (2**n - 1)
-        e_2Q = (2 * Q) % (2**n - 1)
-        e_QB = (Q + B) % (2**n - 1)
-        e_Q1 = (Q + 1) % (2**n - 1)
-        e_RQ = (Rp + Q) % (2**n - 1)
-        e_RB = (Rp + B) % (2**n - 1)
-        e_R1 = (Rp + 1) % (2**n - 1)
+        ePQ = (P + Q) % (2**n - 1)
+        ePB = (P + B) % (2**n - 1)
+        eP1 = (P + 1) % (2**n - 1)
+        e2Q = (2 * Q) % (2**n - 1)
+        eQB = (Q + B) % (2**n - 1)
+        eQ1 = (Q + 1) % (2**n - 1)
+        eRQ = (Rp + Q) % (2**n - 1)
+        eRB = (Rp + B) % (2**n - 1)
+        eR1 = (Rp + 1) % (2**n - 1)
 
-        expected = {e_PQ, e_PB, e_P1, e_2Q, e_QB, e_Q1, e_RQ, e_RB, e_R1}
+        expected = {ePQ, ePB, eP1, e2Q, eQB, eQ1, eRQ, eRB, eR1}
         if not set(terms).issubset(expected):
             continue
 
         # Recover mu from x^(P+B)
-        mu = terms.get(e_PB, F(0))
-        if mu == F(0):
+        mu_val = terms.get(ePB, F(0))
+        if mu_val == F(0):
             continue
 
-        if terms.get(e_PQ, F(0)) != F(1) or terms.get(e_P1, F(0)) != F(1) or terms.get(e_RQ, F(0)) != F(1):
+        if terms.get(ePQ, F(0)) != F(1) or terms.get(eP1, F(0)) != F(1) or terms.get(eRQ, F(0)) != F(1):
             continue
-        if terms.get(e_RB, F(0)) != mu:
+        if terms.get(eRB, F(0)) != mu_val:
             continue
-        mu_q = mu**(2**m)
-        if terms.get(e_2Q, F(0)) != mu_q or terms.get(e_Q1, F(0)) != mu_q:
+        mu_q = mu_val**(2**m)
+        if terms.get(e2Q, F(0)) != mu_q or terms.get(eQ1, F(0)) != mu_q:
             continue
-        if terms.get(e_QB, F(0)) != mu_q * mu:
-            continue
-
-        # v from x^(R+1) coefficient = 1 + v
-        v = terms.get(e_R1, F(0)) + F(1)
-        if v == F(0) or v not in Fm:
+        if terms.get(eQB, F(0)) != mu_q * mu_val:
             continue
 
-        # mu^(q^2 + q + 1) != 1
-        if mu**(2**(2*m) + 2**m + 1) == F(1):
+        # Recover v from x^(R+1) coefficient = 1 + v
+        v_val = terms.get(eR1, F(0)) + F(1)
+        if v_val == F(0) or v_val not in M:
+            continue
+
+        if mu_val**(2**(2*m) + 2**m + 1) == F(1):
             continue
 
         # L permutes F
-        L = x**(2**(m + s_val)) + mu*x**(2**s_val) + x
+        L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
         if L.gcd(x**(2**n) - x) != x:
             continue
 
-        return True, {'s': s_val, 'v': v, 'mu': mu}
+        return True, {'s': s_val, 'v': v_val, 'mu': mu_val}
 
     return False, {}
 
@@ -826,17 +827,16 @@ def membership_all(n, polynomial):
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^2049
         sage: membership_all(16, polynomial)
-        Belongs to Family 2, with parameters: 
-            {'s': 11, 'k': 4, 'u': 
-                [a^14 + a^13 + a^12 + a^11 + a^7 + a^6 + a^3 + a^2 + a, 
-                ...
-                a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^4]}
+        Belongs to Family 2, with parameters: {'s': 11, 'u': 
+            [a^14 + a^13 + a^12 + a^11 + a^7 + a^6 + a^3 + a^2 + a, 
+            ...
+            a^15 + a^14 + a^13 + a^12 + a^11 + a^10 + a^9 + a^8 + a^4]}
         
         sage: F.<a> = GF(2^6)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
         sage: membership_all(6, polynomial)
-        Belongs to Family 3, with parameters: {'q': 8, 'i': 1, 's': a, 'c': a}
+        Belongs to Family 3, with parameters: {'i': 1, 's': a, 'c': a}
     """
     for name, function in FAMILIES.items():
         try:

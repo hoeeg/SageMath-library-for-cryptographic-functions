@@ -630,7 +630,6 @@ def family_11(n, k=None, i=None, a=None):
         e_a = ((2**i_val + 1) * 2**k_val) % (2**n - 1)
         e_b = 3 * 2**m
         e_c = ((2**(i_val + m) + 2**m) * 2**k_val) % (2**n - 1)
-        print(f"e_a: {a_val * x**e_a}, e_b: {a_val**2 * x**e_b}, e_c: {x**e_c}")
         return x**3 + a_val * x**e_a + a_val**2 * x**e_b + F(1) * x**e_c
 
     pairs = (
@@ -661,8 +660,7 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
 
         sage: from cryptographicFunctionsLibrary import family_12
         sage: F.<a> = GF(2^10)
-        sage: e, b, c = a^8 + a^5 + a^4 + a^3 + a^2, a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a
-        sage: family_12(10, 1, 5, e, b, c)
+        sage: family_12(10, 1, 5, a^8 + a^5 + a^4 + a^3 + a^2, a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
         (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3
         
         sage: family_12(10, 1, 5, a^9 + a^8 + a^7 + a^5 + a^3 + a^2 + 1)
