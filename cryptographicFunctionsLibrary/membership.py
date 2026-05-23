@@ -648,24 +648,24 @@ def membership_family_12(n, poly):
             if i_val == s_val:
                 if c1 == F(0) and c2 == F(0):
                     continue
-                for a in F:
-                    if a == F(0) or a in Q or a + a**q == F(0):
+                for a_val in F:
+                    if a_val == F(0) or a_val in Q or a_val + a_val**q == F(0):
                         continue
                     # c^q = (c2 + c1^q * a^(1-q)) / (a^(2-q) + a^q)
-                    denom = a**(2 - q) + a**q
+                    denom = a_val**(2 - q) + a_val**q
                     if denom == F(0):
                         continue
-                    cq = (c2 + c1**q * a**(1 - q)) / denom
+                    cq = (c2 + c1**q * a_val**(1 - q)) / denom
                     if cq== F(0):
                         continue
                     # c = (c^q)^q since (c^q)^q = c^(q^2) = c
                     c_val = cq**q
-                    b_val = (c1 + a**q * c_val) / a
+                    b_val = (c1 + a_val**q * c_val) / a_val
                     if b_val == F(0):
                         continue
 
-                    if _terms_match(i_val, s_val, a, b_val, c_val):
-                        return True, {'i': i_val, 's': s_val, 'a': a, 'b': b_val, 'c': c_val}
+                    if _terms_match(i_val, s_val, a_val, b_val, c_val):
+                        return True, {'i': i_val, 's': s_val, 'a': a_val, 'b': b_val, 'c': c_val}
         
             # Two-term case: i and s exponents are distinct
             else:
