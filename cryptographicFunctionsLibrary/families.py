@@ -54,7 +54,7 @@ def family_1(n, s=None, u=None):
     Return the Budaghyan-Carlet-Leander construction from 2008 for `p = 3`.
     Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -104,7 +104,7 @@ def family_2(n, s=None, u=None):
     Return the Budaghyan-Carlet-Leander construction from 2008 for `p = 4`.
     Defined by `f(x) = x^(2^s + 1) + u^(2^k - 1) * x^(2^(ik) + 2^(mk + s))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -159,7 +159,7 @@ def family_3(n, i=None, s=None, c=None):
     Return the Budaghyan-Carlet construction from 2008.
     Defined by `f(x) = sx^(q + 1) + x^(2^i + 1) + x^(q * (2^i + 1)) + cx^(2^i * q + 1) + c^q * x^(2^i + q))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -264,7 +264,7 @@ def family_4(n, a=None):
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr_n(a^3 * x^9)`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -319,7 +319,7 @@ def family_5(n, a=None):
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^3 * x^9 + a^6 * x^18)`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -378,7 +378,7 @@ def family_6(n, a=None):
     Return the Budaghyan-Carlet-Leander construction from 2009.
     Defined by `f(x) = x^3 + a^-1 * Tr^n_3(a^6 * x^18 + a^12 * x^36)`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -437,7 +437,7 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
     Return the Bracken-Byrne-Markin-McGuire construction from 2011.
     Defined by `f(x) = ux^(2^s + 1) + u^(2^k) * x^(2^-k + 2^(k + s)) + vx^(2^-k + 1) + wu^(2^k + 1) * x^(2^s + 2^(k + s))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -542,7 +542,7 @@ def family_11(n, k=None, i=None, a=None):
     Return the Budaghyan-Helleseth-Kaleyski construction from 2020.
     Defined by `f(x) = x^3 + a(x^2^i + 1) + bx^(3 * 2^m) + c(x^(2^(i + m) + 2^m))^2^k`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -645,7 +645,7 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
     Return the Zheng-Kan-Li-Peng-Tang construction from 2022.
     Defined by `f(x) = a * Tr^n_m(bx^(2^i + 1)) + a^q * Tr^n_m(cx^(2^s + 1))`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
@@ -766,7 +766,7 @@ def family_13(n, s=None, v=None, mu=None):
     Return the Li-Zhou-Li-Qu construction from 2022.
     Defined by `f(x) = L(z)^(2^m + 1) + cz^(2^m + 1)`.
 
-    NOTE: When all optional parameters are given, returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
+    NOTE: When all optional parameters are given, it returns a single polynomial. When one or more are None, returns a dict mapping each valid polynomial found to a list of parameter sets that yield that polynomial.
 
     INPUT:
 
