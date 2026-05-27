@@ -6,7 +6,7 @@ The library aims to make research workflows involving APN families, representati
 
 
 ## Features
-- Conversion between major representations of APN functions, univariate polynomial to / from  
+- Conversion between principal representations of vectorial Boolean functions, univariate polynomial to / from
     - Truth table
     - Quadratic Matrix
     - Sequence
@@ -18,38 +18,48 @@ The library aims to make research workflows involving APN families, representati
 
 ## Requirements
 - SageMath 10.8 +
-- Python 3.x
+- Python 3.9 +
 
 
 ## Installation
-In sage terminal write
+### From PyPI (recommended)
+
+In a Sage terminal write
 ```
-pip install git+https://github.com/hoeeg/SageMath-library-for-cryptographic-functions.git
+pip install sagemath-cryptographic-functions-library
 ```
 
+Or from a regular terminal write
+```
+sage --pip install sagemath-cryptographic-functions-library
+```
+
+### From GitHub
+In a Sage terminal write
+```
+pip install git+https://github.com/hoeeg/SageMath_library_for_cryptographic_functions.git
+```
 Or in regular terminal write
 ```
-sage --pip install git+https://github.com/hoeeg/SageMath-library-for-cryptographic-functions.git
+sage --pip install git+https://github.com/hoeeg/SageMath_library_for_cryptographic_functions.git
 ```
 
 
-## How to run
+## Usage
+```
+from sagemath_cryptographic_functions_library import convert, families, membership
+```
 
 
 ## Don't have Sage?
-Those who are impatient may use prebuilt Sage available online from any of
+You can try Sage online without installing anything locally from any of
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sagemath/sage-binder-env/master
 ) &nbsp; [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/sagemath/sage/tree/master
 ) &nbsp; [![Open in GitHub Codespaces](https://img.shields.io/badge/Open_in_GitHub_Codespaces-black?logo=github)](https://codespaces.new/sagemath/sage/tree/master)
 
-without local installation. Otherwise read on.
 
-The [Sage Installation Guide](https://doc.sagemath.org/html/en/installation/index.html)
-provides a decision tree that guides you to the type of installation
-that will work best for you. This includes building from source,
-obtaining Sage from a package manager, using a container image, or using
-Sage in the cloud.
+For a local install, the [Sage Installation Guide](https://doc.sagemath.org/html/en/installation/index.html) walks through the available options.
 
 More about Sage or how to download it, can be found in its [Documentation](https://doc.sagemath.org/html/en/index.html).
 
