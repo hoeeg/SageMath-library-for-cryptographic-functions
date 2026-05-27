@@ -45,12 +45,6 @@ sage --pip install git+https://github.com/hoeeg/SageMath_library_for_cryptograph
 ```
 
 
-## Usage
-```
-from sagemath_cryptographic_functions_library import convert, families, membership
-```
-
-
 ## Don't have Sage?
 You can try Sage online without installing anything locally from any of
 
