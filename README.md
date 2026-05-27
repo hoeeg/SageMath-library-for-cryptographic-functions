@@ -1,4 +1,4 @@
-# SageMath Library for APN Cryptographic Functions
+# SageMath Library for Cryptographic Functions
 
 This project provides a SageMath library for working with cryptographic functions, with a particular focus on quadratic APN (Almost Perfect Nonlinear) functions.
 
@@ -10,6 +10,8 @@ The library aims to make research workflows involving APN families, representati
     - Truth table
     - Quadratic Matrix
     - Sequence
+    - Bivariate
+    - Trivariate
 - Implementations of known infinite families of quadratic APN functions in univariate form
 - Membership testing for identifying whether a function belongs to a known family
 
