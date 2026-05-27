@@ -14,7 +14,7 @@ def univariate_to_truth_table(n, polynomial):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import univariate_to_truth_table
+        sage: from sagemath_cryptographic_functions_library import univariate_to_truth_table
         sage: F.<a> = GF(2^3)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = x^3
@@ -48,8 +48,8 @@ def truth_table_to_univariate(n, tt):
     - ``tt`` -- a truth table (look up table) represented as a list of integers
 
     EXAMPLES::
-    
-        sage: from cryptographicFunctionsLibrary import truth_table_to_univariate
+
+        sage: from sagemath_cryptographic_functions_library import truth_table_to_univariate
         sage: tt = [0, 1, 3, 4, 5, 6, 7, 2]
         sage: polynomial = truth_table_to_univariate(3, tt); polynomial
         x^3
@@ -80,7 +80,7 @@ def univariate_to_matrix(n, polynomial, basis=None, output_format='univariate'):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import univariate_to_matrix
+        sage: from sagemath_cryptographic_functions_library import univariate_to_matrix
         sage: F.<a> = GF(2^4)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = x^3
@@ -146,7 +146,7 @@ def matrix_to_univariate(n, M, basis=None):
     
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import matrix_to_univariate
+        sage: from sagemath_cryptographic_functions_library import matrix_to_univariate
         sage: F.<a> = GF(2^4)
         sage: M = Matrix(F, [[0, a^3 + a^2 + a, a^2 + a + 1, a^3 + a^2 + 1], [a^3 + a^2 + a, 0, a^3 + a + 1, a^2 + a], [ a^2 + a + 1, a^3 + a + 1, 0, a^3 + 1], [a^3 + a^2 + 1, a^2 + a, a^3 + 1, 0]])
         sage: polynomial = matrix_to_univariate(4, M); polynomial
@@ -192,7 +192,7 @@ def univariate_to_sequence(n, polynomial, basis=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import univariate_to_sequence
+        sage: from sagemath_cryptographic_functions_library import univariate_to_sequence
         sage: F.<a> = GF(2^4)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = x^3
@@ -233,7 +233,7 @@ def sequence_to_univariate(n, sequence, basis=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import sequence_to_univariate
+        sage: from sagemath_cryptographic_functions_library import sequence_to_univariate
         sage: sequence = [14, 7, 13, 11, 6, 9]
         sage: polynomial = sequence_to_univariate(4, sequence); polynomial
         x^3
@@ -273,7 +273,7 @@ def univariate_to_bivariate(n, polynomial):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import univariate_to_bivariate
+        sage: from sagemath_cryptographic_functions_library import univariate_to_bivariate
         sage: F.<a> = GF(2^6)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^4 + a^3 + 1)*x^17 + (a + 1)*x^8 + (a^4 + a^3)*x^3 + x
@@ -345,7 +345,7 @@ def bivariate_to_univariate(m, f, g):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import bivariate_to_univariate
+        sage: from sagemath_cryptographic_functions_library import bivariate_to_univariate
         sage: F.<b> = GF(2^3)
         sage: R.<x, y> = PolynomialRing(F)
         sage: f = x^3 + x*y^2
@@ -392,7 +392,7 @@ def univariate_to_trivariate(n, polynomial):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import univariate_to_trivariate
+        sage: from sagemath_cryptographic_functions_library import univariate_to_trivariate
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^192 + (a^8 + a^7 + a^6 + a^3 + a)*x^136 + (a^7 + a^6 + a^3 + a^2 + a)*x^129 + (a^6 + a^4 + a^3 + 1)*x^80 + (a^5 + a + 1)*x^66 + (a^8 + a^6 + a^4 + a^2 + a)*x^24 + (a^7 + a^5 + a^3 + a^2)*x^17 + (a^5 + a^3 + a^2 + a + 1)*x^10 + (a^8 + a^6 + a^2)*x^3        sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
@@ -473,7 +473,7 @@ def trivariate_to_univariate(m, f, g, h):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import trivariate_to_univariate
+        sage: from sagemath_cryptographic_functions_library import trivariate_to_univariate
         sage: F.<b> = GF(2^3)
         sage: R.<x, y, z> = PolynomialRing(F)
         sage: f = x^3 + x^2*z + y*z^2

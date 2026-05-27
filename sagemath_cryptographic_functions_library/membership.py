@@ -75,7 +75,7 @@ def membership_family_1(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import membership_family_1
+        sage: from sagemath_cryptographic_functions_library import membership_family_1
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33
@@ -125,7 +125,7 @@ def membership_family_2(n, poly):
 
     EXAMPLES::
     
-        sage: from cryptographicFunctionsLibrary import membership_family_2
+        sage: from sagemath_cryptographic_functions_library import membership_family_2
         sage: F.<a> = GF(2^16)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^9 + a^8 + a^7 + a^3 + a^2 + a)*x^3
@@ -167,7 +167,7 @@ def membership_family_3(n, poly):
 
     EXAMPLES::
     
-        sage: from cryptographicFunctionsLibrary import membership_family_3
+        sage: from sagemath_cryptographic_functions_library import membership_family_3
         sage: F.<a> = GF(2^6)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
@@ -236,7 +236,7 @@ def membership_family_4(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import membership_family_4
+        sage: from sagemath_cryptographic_functions_library import membership_family_4
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^8 + a^3 + a)*x^288 + (a^8 + a^6 + a^5 + a^4 + a)*x^260 + (a^7 + a^4 + a^3 + a^2 + a)*x^144 + (a^8 + a^6 + a^2 + a)*x^130 + (a^6 + a^5 + a^4)*x^72 + (a^7 + a^6 + a^4 + a^3)*x^65 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^36 + (a^8 + a^4 + a^2 + 1)*x^18 + (a^5 + a^3 + a)*x^9 + x^3
@@ -293,7 +293,7 @@ def membership_family_5(n, poly):
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
 
     EXAMPLES::
-        sage: from cryptographicFunctionsLibrary import membership_family_5
+        sage: from sagemath_cryptographic_functions_library import membership_family_5
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^8 + a^4 + a)*x^144 + (a^8 + a^5 + a^4 + a^3 + a^2 + 1)*x^130 + (a^6 + a^4 + a^3 + a^2 + a + 1)*x^72 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^2 + a + 1)*x^65 + (a^7 + a^3 + a^2)*x^18 + (a^8 + a^7 + a^6 + a^5 + a^4 + a^3)*x^9 + x^3
@@ -357,7 +357,7 @@ def membership_family_6(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import membership_family_6
+        sage: from sagemath_cryptographic_functions_library import membership_family_6
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^7 + a^5 + a^3)*x^288 + (a^8 + a^4 + a^3)*x^260 + (a^6 + a^5 + a^3 + a^2)*x^144 + (a^7 + a^2 + 1)*x^130 + (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^36 + (a^8 + a^4 + a^3 + a^2 + 1)*x^18 + x^3
@@ -430,7 +430,7 @@ def membership_family_7_9(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import membership_family_7_9
+        sage: from sagemath_cryptographic_functions_library import membership_family_7_9
         sage: F.<a> = GF(2^12)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^10 + a^6 + a^5 + a^3 + a)*x^768 + (a^9 + a^8 + a^6 + a^5 + a^2)*x^544 + (a^10 + a^9 + a^6 + a^5 + a^3 + 1)*x^257 + (a^7 + a^5 + a^3 + a^2 + 1)*x^33
@@ -505,7 +505,7 @@ def membership_family_11(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import membership_family_11
+        sage: from sagemath_cryptographic_functions_library import membership_family_11
         sage: F.<a> = GF(2^10)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial =  (a^5 + a^3 + a)*x^576 + (a^5 + a^3 + a + 1)*x^96 + x^18 + x^3
@@ -591,7 +591,7 @@ def membership_family_12(n, poly):
     
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import membership_family_12
+        sage: from sagemath_cryptographic_functions_library import membership_family_12
         sage: F.<a> = GF(2^10)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^8 + a^6 + a^4 + a^3 + 1)*x^96 + (a^9 + a^7 + a^6 + a^4)*x^33 + (a^8 + a^6 + a^5 + a^3)*x^3
@@ -714,7 +714,7 @@ def membership_family_13(n, poly):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import membership_family_13
+        sage: from sagemath_cryptographic_functions_library import membership_family_13
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = x^144 + (a^8 + a^7 + a^3 + a^2 + a)*x^130 + x^129 + (a^8 + a^2)*x^32 + x^24 + (a^7 + a^6 + a^4 + a^3 + a)*x^18 + (a^8 + a^2)*x^17 + (a^8 + a^7 + a^3 + a^2 + a)*x^10 + (a^4 + a^3 + a^2 + 1)*x^9
@@ -822,7 +822,7 @@ def membership_all(n, polynomial):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import membership_all
+        sage: from sagemath_cryptographic_functions_library import membership_all
         sage: F.<a> = GF(2^16)
         sage: R.<x> = PolynomialRing(F)
         sage: polynomial = (a^14 + a^12 + a^11 + a^9 + a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + 1)*x^2049

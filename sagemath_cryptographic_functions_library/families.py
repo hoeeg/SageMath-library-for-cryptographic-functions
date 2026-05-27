@@ -64,7 +64,7 @@ def family_1(n, s=None, u=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_1
+        sage: from sagemath_cryptographic_functions_library import family_1
         sage: F.<a> = GF(2^12)
         sage: family_1(12, 5, a^2)
         (a^11 + a^9 + a^7 + a^6 + a^2)*x^768 + x^33
@@ -114,7 +114,7 @@ def family_2(n, s=None, u=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_2
+        sage: from sagemath_cryptographic_functions_library import family_2
         sage: F.<a> = GF(2^16)
         sage: family_2(16, 5, a^15 + a^14 + a^13 + a^11 + a^3 + a^2 + a)
         (a^15 + a^14 + a^13 + a^12 + a^10 + a^9 + a^8 + a^4 + a^2 + a + 1)*x^33
@@ -170,7 +170,7 @@ def family_3(n, i=None, s=None, c=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_3
+        sage: from sagemath_cryptographic_functions_library import family_3
         sage: F.<a> = GF(2^6)
         sage: family_3(6, 1, a, a)
         x^24 + a*x^17 + (a^5 + a^4 + a^2 + a + 1)*x^10 + a*x^9 + x^3
@@ -273,7 +273,7 @@ def family_4(n, a=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_4
+        sage: from sagemath_cryptographic_functions_library import family_4
         sage: F.<a> = GF(2^9)
         sage: family_4(9, a^5 + 1)
         (a^2 + a)*x^288 + (a^7 + a^2)*x^260 + (a^7 + a^3 + a^2 + 1)*x^144 + a*x^130 + (a^8 + a^3 + a^2)*x^72 + (a^7 + a^2 + 1)*x^65 + (a^8 + a^6 + a)*x^36 + (a^7 + a^6 + a^5 + a^2 + 1)*x^18 + (a^5 + a + 1)*x^9 + x^3
@@ -328,7 +328,7 @@ def family_5(n, a=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_5
+        sage: from sagemath_cryptographic_functions_library import family_5
         sage: F.<a> = GF(2^9)
         sage: family_5(9, a^6 + a^5)
         (a^3 + a^2 + 1)*x^144 + (a^8 + a^5 + a^3 + a^2)*x^130 + (a^4 + a^3 + a + 1)*x^72 + (a^3 + a + 1)*x^65 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a + 1)*x^18 + (a^7 + a^5 + a^3 + a)*x^9 + x^3
@@ -387,7 +387,7 @@ def family_6(n, a=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_6
+        sage: from sagemath_cryptographic_functions_library import family_6
         sage: F.<a> = GF(2^9)
         sage: family_6(9, a^8 + a^5 + a^3 + 1)
         (a^7 + a^6 + 1)*x^288 + (a^8 + a^7 + a^6 + a^4 + a^3 + a^2 + a)*x^260 + (a^5 + a^4)*x^144 + (a^7 + a^5 + a^4 + a^3 + a^2)*x^130 + (a^8 + a^6 + a^4 + a^2 + a)*x^36 + (a^7 + a^6 + a^2 + 1)*x^18 + x^3
@@ -449,7 +449,7 @@ def family_7_9(n, s=None, u=None, v=None, w=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_7_9
+        sage: from sagemath_cryptographic_functions_library import family_7_9
         sage: F.<a> = GF(2^12)
         sage: K = F.subfield(4)
         sage: family_7_9(12, 5, a, K(1), K(0))
@@ -553,7 +553,7 @@ def family_11(n, k=None, i=None, a=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_11
+        sage: from sagemath_cryptographic_functions_library import family_11
         sage: F.<a> = GF(2^10)
         sage: family_11(10, 2, 3, a^5 + a^3 + a)
         x^129 + (a^5 + a^3 + a + 1)*x^96 + (a^5 + a^3 + a)*x^36 + x^3
@@ -658,7 +658,7 @@ def family_12(n, i=None, s=None, a=None, b=None, c=None):
 
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_12
+        sage: from sagemath_cryptographic_functions_library import family_12
         sage: F.<a> = GF(2^10)
         sage: family_12(10, 1, 5, a^8 + a^5 + a^4 + a^3 + a^2, a^9 + a^8 + a^7 + a^3 + a^2 + a, a^8 + a^7 + a^6 + a^2 + a)
         (a^7 + a^6 + a^5 + a^4 + a^3 + a)*x^96 + (a^7 + a^2 + a)*x^33 + (a^7 + a^6 + a^5 + a^4 + a^3 + a^2)*x^3
@@ -777,7 +777,7 @@ def family_13(n, s=None, v=None, mu=None):
     
     EXAMPLES::
 
-        sage: from cryptographicFunctionsLibrary import family_13
+        sage: from sagemath_cryptographic_functions_library import family_13
         sage: F.<a> = GF(2^9)
         sage: M = F.subfield(3)
         sage: family_13(9, 1, M(1), a^7 + a^5 + a^3 + a + 1)
