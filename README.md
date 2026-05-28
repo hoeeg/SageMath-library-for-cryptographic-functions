@@ -60,12 +60,13 @@ More about Sage or how to download it, can be found in its [Documentation](https
 
 ## Layout
 ```
-├── library/
-│   ├── convert.py        Representation conversions
+├── sagemath_cryptographic_functions_library/
+│   ├── __init__.py
+│   ├── conversions.py    Representation conversions
 │   ├── families.py       Known APN family constructions
 │   ├── helpers.py        Finite field utility functions
 │   └── membership.py     Family identification algorithms
 ├── README.md             This file
-├── setup.py              Top-level configure script
+├── pyproject.toml        Build configuration
 └── LICENCE               Copyright information
 ```
