@@ -261,15 +261,16 @@ def sequence_to_univariate(n, sequence, basis=None):
     return matrix_to_univariate(n, M, basis)
 
 
-def univariate_to_bivariate(n, polynomial):
+def univariate_to_bivariate(n, polynomial, basis=None):
     r"""
-    Convert a polynomial from its univariate representation over GF(2^n) to its bivariate representation over GF(2^m).
+    Convert a polynomial from its univariate representation over GF(2^(2m)) to its bivariate representation over GF(2^m).
     Defined by `F(x, y) = (f(x, y), g(x, y))`.
 
     INPUT:
 
-    - ``n`` -- the degree of the finite field extension GF(2^n); must be even
-    - ``polynomial`` -- a univariate polynomial over GF(2^n)
+    - ``n`` -- the degree of the finite field extension GF(2^(2m)); must be even
+    - ``polynomial`` -- a univariate polynomial over GF(2^(2m))
+    - ``basis`` -- (optional) basis (b0, b1) of GF(2^(2m)) over GF(2^m); if None, a canonical basis (1, a) is used, where a is the generator of GF(2^(2m))
 
     EXAMPLES::
 
@@ -295,8 +296,12 @@ def univariate_to_bivariate(n, polynomial):
     F_sub, hom = F.subfield(m, 'b', map=True)
     hom_inv = hom.section()
 
+    if basis is None:
+        basis = [F(1), a]
+    b0, b1 = basis[0], basis[1]
+
     univariate_tt = univariate_to_truth_table(n, polynomial)
-    delta = a + a**q
+    delta = b0**q * b1 + b0 * b1**q
 
     # Build the two bivariate truth tables, indexed by integer codes of (x, y)
     f_tt = [[0] * q for _ in range(q)]
@@ -305,11 +310,11 @@ def univariate_to_bivariate(n, polynomial):
         FX = hom(F_sub.from_integer(i))
         for j in range(q):
             FY = hom(F_sub.from_integer(j))
-            X = FX + a * FY
+            X = b0 * FX + b1 * FY
             c = F.from_integer(univariate_tt[X.to_integer()])
             # Solve the system of equations
-            c1 = (c + c**q) / delta
-            c0 = c + a * c1
+            c1 = (b0**q * c + b0 * c**q) / delta
+            c0 = (c + c1 * b1) / b0
             f_tt[i][j] = hom_inv(c0).to_integer()
             g_tt[i][j] = hom_inv(c1).to_integer()
 
@@ -321,27 +326,28 @@ def univariate_to_bivariate(n, polynomial):
         layer_y = [interpolate_truth_table(F_sub, 'y', tt[i]) for i in range(q)]
 
         result = R(0)
-        for j in range(q):
-            coeff_tt = [layer_y[i][j].to_integer() for i in range(q)]
+        for dy in range(q):
+            coeff_tt = [layer_y[i][dy].to_integer() for i in range(q)]
             poly_in_x = interpolate_truth_table(F_sub, 'x', coeff_tt)
-            for e, c in enumerate(poly_in_x.list()):
+            for dx, c in enumerate(poly_in_x.list()):
                 if c != 0:
-                    result += c * x**e * y**j
+                    result += c * x**dx * y**dy
         return result
 
     return interpolate(f_tt), interpolate(g_tt)
 
 
-def bivariate_to_univariate(m, f, g):
+def bivariate_to_univariate(m, f, g, basis=None):
     r"""
-    Convert a pair of polynomials from their bivariate representation over GF(2^m) to their univariate representation over GF(2^n).
-    Defined by `F(x) = f(x) + a*g(x)`, where `a` is a generator of GF(2^n) and `f(x), g(x)` are the bivariate polynomials evaluated at the coordinates of `x` under the isomorphism between GF(2^n) and GF(2^m)^2.
+    Convert a pair of polynomials from their bivariate representation over GF(2^m) to their univariate representation over GF(2^(2m)).
+    Defined by `F(X) = b0 * f(x) + b1*g(x)`, where `b0, b1` are elements of the basis of GF(2^(2m)) over GF(2^m) and `f(x), g(x)` are the bivariate polynomials evaluated at the coordinates of `x` under the isomorphism between GF(2^(2m)) and GF(2^m)^2.
 
     INPUT:
 
     - ``m`` -- the degree of the finite field extension GF(2^m)
     - ``f`` -- a bivariate polynomial over GF(2^m)
     - ``g`` -- a bivariate polynomial over GF(2^m)
+    - ``basis`` -- (optional) basis (b0, b1) of GF(2^(2m)) over GF(2^m); if None, a canonical basis (1, a) is used, where a is the generator of GF(2^(2m))
 
     EXAMPLES::
 
@@ -364,6 +370,10 @@ def bivariate_to_univariate(m, f, g):
     F = GF(2**n, 'a')
     a = F.gen()
     F_sub, hom = F.subfield(m, 'b', map=True)
+
+    if basis is None:
+        basis = [F(1), a]
+    b0, b1 = basis[0], basis[1]
     
     # Iterate over all pairs (x, y) in the small field, evaluate f, g, and fill in the univariate truth table via the isomorphism hom
     univariate_tt = [0] * (q ** 2)
@@ -371,31 +381,33 @@ def bivariate_to_univariate(m, f, g):
         x_sub = F_sub.from_integer(i)
         for j in range(q):
             y_sub = F_sub.from_integer(j)
-            X = hom(x_sub) + a * hom(y_sub)
+            X = b0 * hom(x_sub) + b1 * hom(y_sub)
             f_val = hom(f(x_sub, y_sub))
             g_val = hom(g(x_sub, y_sub))
-            FX = f_val + a * g_val
+            FX = b0 * f_val + b1 * g_val
             univariate_tt[X.to_integer()] = FX.to_integer()
     
     return interpolate_truth_table(F, 'x', univariate_tt)
 
 
-def univariate_to_trivariate(n, polynomial):
+def univariate_to_trivariate(n, polynomial, basis=None):
     r"""
-    Convert a polynomial from its univariate representation over GF(2^n) to its trivariate representation over GF(2^m).
+    Convert a polynomial from its univariate representation over GF(2^(3m)) to its trivariate representation over GF(2^m).
     Defined by `F(x, y, z) = (f(x, y, z), g(x, y, z), h(x, y, z))`.
     
     INPUT:
 
     - ``n`` -- the degree of the finite field extension GF(2^n); must be divisible by 3
     - ``polynomial`` -- a univariate polynomial over GF(2^n)
+    - ``basis`` -- (optional) basis (b0, b1, b2) of GF(2^(3m)) over GF(2^m); if None, a canonical basis (1, a, a^2) is used, where a is the generator of GF(2^(3m))
 
     EXAMPLES::
 
         sage: from sagemath_cryptographic_functions_library import univariate_to_trivariate
         sage: F.<a> = GF(2^9)
         sage: R.<x> = PolynomialRing(F)
-        sage: polynomial = (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^192 + (a^8 + a^7 + a^6 + a^3 + a)*x^136 + (a^7 + a^6 + a^3 + a^2 + a)*x^129 + (a^6 + a^4 + a^3 + 1)*x^80 + (a^5 + a + 1)*x^66 + (a^8 + a^6 + a^4 + a^2 + a)*x^24 + (a^7 + a^5 + a^3 + a^2)*x^17 + (a^5 + a^3 + a^2 + a + 1)*x^10 + (a^8 + a^6 + a^2)*x^3        sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
+        sage: polynomial = (a^8 + a^7 + a^6 + a^5 + a^3 + a^2 + a)*x^192 + (a^8 + a^7 + a^6 + a^3 + a)*x^136 + (a^7 + a^6 + a^3 + a^2 + a)*x^129 + (a^6 + a^4 + a^3 + 1)*x^80 + (a^5 + a + 1)*x^66 + (a^8 + a^6 + a^4 + a^2 + a)*x^24 + (a^7 + a^5 + a^3 + a^2)*x^17 + (a^5 + a^3 + a^2 + a + 1)*x^10 + (a^8 + a^6 + a^2)*x^3
+        sage: f, g, h = univariate_to_trivariate(9, polynomial); f, g, h
         (x^3 + x^2*z + y*z^2, y^3 + x^2*z, x*y^2 + y^2*z + z^3)
 
         sage: polynomial = (a^7 + a^5 + a^3 + 1)*x^192 + (a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^136 + (a^7 + a^3 + 1)*x^129 + (a^6 + a^4 + 1)*x^80 + (a^8 + a^5 + a^3 + a)*x^66 + (a^8 + a^6 + a^5 + a + 1)*x^24 + (a^8 + a^6 + a^5 + a^2 + a + 1)*x^17 + (a^6 + a^5 + 1)*x^10 + (a^8 + a^7 + a^6 + a^5 + a)*x^3
@@ -413,10 +425,14 @@ def univariate_to_trivariate(n, polynomial):
     F_sub, hom = F.subfield(m, 'b', map=True)
     hom_inv = hom.section()
 
+    if basis is None:
+        basis = [F(1), a, a**2]
+    b0, b1, b2 = basis[0], basis[1], basis[2]
+
     univariate_tt = univariate_to_truth_table(n, polynomial)
-    a1, a2 = a + a**q, a**q + a**(q**2)
-    b1, b2 = a**2 + a**(2*q), a**(2*q) + a**(2*q**2)
-    delta = a1 * b2 + a2 * b1
+    M_inv = Matrix(F, [[b0,         b1,         b2        ],
+                       [b0**q,      b1**q,      b2**q     ],
+                       [b0**(q**2), b1**(q**2), b2**(q**2)]]).inverse()
 
     # Build the three trivariate truth tables, indexed by integer codes of (x, y, z)
     f_tt = [[[0]*q for _ in range(q)] for _ in range(q)]
@@ -428,12 +444,10 @@ def univariate_to_trivariate(n, polynomial):
             FY = hom(F_sub.from_integer(j))
             for k in range(q):
                 FZ = hom(F_sub.from_integer(k))
-                X = FX + a * FY + a**2 * FZ
+                X = b0 * FX + b1 * FY + b2 * FZ
                 c = F.from_integer(univariate_tt[X.to_integer()])
                 # Solve the system of equations
-                c2 = (a2 * (c + c**q) + a1 * (c**q + c**(q**2))) / delta
-                c1 = ((c + c**q) + c2 * b1) / a1
-                c0 = c + a * c1 + a**2 * c2
+                c0, c1, c2 = M_inv * vector(F, [c, c**q, c**(q**2)])
                 f_tt[i][j][k] = hom_inv(c0).to_integer()
                 g_tt[i][j][k] = hom_inv(c1).to_integer()
                 h_tt[i][j][k] = hom_inv(c2).to_integer()
@@ -459,10 +473,10 @@ def univariate_to_trivariate(n, polynomial):
     return interpolate(f_tt), interpolate(g_tt), interpolate(h_tt)
 
     
-def trivariate_to_univariate(m, f, g, h):
+def trivariate_to_univariate(m, f, g, h, basis=None):
     r"""
     Convert a triplet of polynomials from their trivariate representation over GF(2^m) to their univariate representation over GF(2^n).
-    Defined by `F(x) = f(x) + a*g(x) + a^2*h(x)`, where `a` is a generator of GF(2^n) and `f(x), g(x), h(x)` are the trivariate polynomials evaluated at the coordinates of `x` under the isomorphism between GF(2^n) and GF(2^m)^3.
+    Defined by `F(X) = b0*f(x) + b1*g(x) + b2*h(x)`, where `b0, b1, b2` are elements of the basis of GF(2^n) over GF(2^m) and `f(x), g(x), h(x)` are the trivariate polynomials evaluated at the coordinates of `x` under the isomorphism between GF(2^n) and GF(2^m)^3.
 
     INPUT:
 
@@ -470,6 +484,7 @@ def trivariate_to_univariate(m, f, g, h):
     - ``f`` -- a trivariate polynomial over GF(2^m)
     - ``g`` -- a trivariate polynomial over GF(2^m)
     - ``h`` -- a trivariate polynomial over GF(2^m)
+    - ``basis`` -- (optional) basis (b0, b1, b2) of GF(2^(3m)) over GF(2^m); if None, a canonical basis (1, a, a^2) is used, where a is the generator of GF(2^(3m))
 
     EXAMPLES::
 
@@ -494,6 +509,10 @@ def trivariate_to_univariate(m, f, g, h):
     F = GF(2**n, 'a')
     a = F.gen()
     F_sub, hom = F.subfield(m, 'b', map=True)
+
+    if basis is None:
+        basis = [F(1), a, a**2]
+    b0, b1, b2 = basis[0], basis[1], basis[2]
     
     # Iterate over all triples (x, y, z) in the small field, evaluate f, g, h, and fill in the univariate truth table via the isomorphism hom.
     univariate_tt = [0] * (q ** 3)
@@ -503,11 +522,11 @@ def trivariate_to_univariate(m, f, g, h):
             y_sub = F_sub.from_integer(j)
             for k in range(q):
                 z_sub = F_sub.from_integer(k)
-                X = hom(x_sub) + a * hom(y_sub) + a**2 * hom(z_sub)
+                X = b0 * hom(x_sub) + b1 * hom(y_sub) + b2 * hom(z_sub)
                 f_val = hom(f(x_sub, y_sub, z_sub))
                 g_val = hom(g(x_sub, y_sub, z_sub))
                 h_val = hom(h(x_sub, y_sub, z_sub))
-                FX = f_val + a * g_val + a**2 * h_val
+                FX = b0 * f_val + b1 * g_val + b2 * h_val
                 univariate_tt[X.to_integer()] = FX.to_integer()
     
     return interpolate_truth_table(F, 'x', univariate_tt)
