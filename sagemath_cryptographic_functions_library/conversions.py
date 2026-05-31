@@ -213,6 +213,7 @@ def univariate_to_sequence(n, polynomial, basis=None):
         [1, 6, 204, 20, 142, 72, 85, 204, 202, 154, 20, 85, 29, 8, 48, 30, 160, 61, 30, 46, 157, 160, 34, 39, 209, 209, 246, 175]
     """
     F = GF(2**n, 'a')
+
     if basis is None:
         basis = [(F.gen()**3)**(2**i) for i in range(n)]
 
@@ -249,6 +250,7 @@ def sequence_to_univariate(n, sequence, basis=None):
         (a^6 + a^5 + a^4 + a^3 + a^2 + a + 1)*x^192 + (a^6 + a^5 + a^2 + 1)*x^160 + (a^7 + a^6 + a^4 + 1)*x^144 + (a^6 + a^4 + a^3 + 1)*x^136 + (a^7 + a^5 + a + 1)*x^132 + (a^7 + a^6 + a^4 + a^3 + a^2 + a)*x^130 + (a^6 + a^4 + a^2 + a + 1)*x^129 + (a^7 + a^6 + a^4 + a^2)*x^96 + (a^5 + a^3 + a + 1)*x^80 + (a^6 + a^2)*x^72 + (a^7 + a^5 + a)*x^68 + a^7*x^66 + (a^7 + a^6 + a^5 + a^2 + a)*x^65 + (a^7 + a^4 + a^3 + a^2 + a + 1)*x^48 + (a^7 + a^3 + a^2 + a)*x^40 + (a^3 + 1)*x^36 + (a^7 + a^6 + a^5)*x^34 + (a^6 + a)*x^33 + (a^6 + a^4 + a)*x^24 + (a^7 + a^6 + a^4 + a^3 + a^2 + 1)*x^20 + (a^7 + a^6 + a^5 + a^3 + a + 1)*x^18 + (a^7 + a^4 + a + 1)*x^17 + (a^7 + a^5 + a^2 + 1)*x^12 + (a^6 + a^5 + a^4 + a^3 + a + 1)*x^10 + (a^4 + a^2 + a)*x^9 + a*x^6 + (a^6 + a^5 + a^4 + a^3 + a^2 + a)*x^5 + (a^7 + a^4 + a^3)*x^3
     """
     F = GF(2**n, 'a')
+    
     if basis is None:
         basis = [(F.gen()**3)**(2**i) for i in range(n)]
     

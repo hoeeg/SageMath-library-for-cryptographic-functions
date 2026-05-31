@@ -541,6 +541,10 @@ def membership_family_11(n, poly):
         return False, {}
     
     def _valid_i(k_val):
+        """
+        If is k even: i in {m-2, m, n-1, (m-2)^(-1) mod n}, where (m-2)^(-1) exists if gcd(m-2, n) = 1
+        If is k odd: i in {m+2, m, (m+2)^(-1) mod n}, where (m+2)^(-1) exists if gcd(m+2, n) = 1
+        """
         p = (m - 2) if k_val % 2 == 0 else (m + 2)
         base = {m - 2, m, n - 1} if k_val % 2 == 0 else {m + 2, m}
         inv_set = {pow(p, -1, n)} if gcd(p, n) == 1 else set()
@@ -556,8 +560,9 @@ def membership_family_11(n, poly):
         if not set(terms).issubset({3, e1, e2, e3}):
             continue
         
-        # Single-term case: a and c exponents coincide
+        # Single-term case: a and c exponents collide 
         if e1 == e3:
+            # Combined coefficient equals a + c = a + 1
             a_val = terms.get(e1, F(0)) + F(1)
             c_val = F(1)
         # Two-term case: exponents are distinct
@@ -566,7 +571,7 @@ def membership_family_11(n, poly):
             c_val = terms.get(e3, F(0))
         
         b_val = terms.get(e2, F(0))
-        # Require b = a^2 and c = 1
+        # Requires (a, b, c) = (beta, beta^2, 1) with beta primitive in GF(4)
         if b_val != a_val**2 or c_val != F(1):
             continue
     
@@ -618,11 +623,14 @@ def membership_family_12(n, poly):
         return False, {}
     
     def _terms_match(i_val, s_val, a_val, b_val, c_val):
-        # Build the expected coefficient dict and compare with terms
+        """
+        
+        """
         e1 = (2**i_val + 1)
         e2 = (q * e1) % (2**n - 1)
         e3 = (2**s_val + 1)
         e4 = (q * e3) % (2**n - 1)
+
         expected = {}
         for e, coeff in [(e1, a_val*b_val), (e2, a_val*b_val**q), (e3, a_val**q*c_val), (e4, a_val**q*c_val**q)]:
             expected[e] = expected.get(e, F(0)) + coeff
@@ -644,21 +652,22 @@ def membership_family_12(n, poly):
             c1 = terms.get(e1, F(0))
             c2 = terms.get(e2, F(0))
 
-            # Single-term case: i and s exponents coincide
+            # Single-term case: i and s exponents collide
             if i_val == s_val:
                 if c1 == F(0) and c2 == F(0):
                     continue
                 for a_val in F:
                     if a_val == F(0) or a_val in Q or a_val + a_val**q == F(0):
                         continue
+                    # Recover c^q from the merged coefficient using 
                     # c^q = (c2 + c1^q * a^(1-q)) / (a^(2-q) + a^q)
-                    denom = a_val**(2 - q) + a_val**q
-                    if denom == F(0):
+                    denominator = a_val**(2 - q) + a_val**q
+                    if denominator == F(0):
                         continue
-                    cq = (c2 + c1**q * a_val**(1 - q)) / denom
+                    cq = (c2 + c1**q * a_val**(1 - q)) / denominator
                     if cq== F(0):
                         continue
-                    # c = (c^q)^q since (c^q)^q = c^(q^2) = c
+                    # Recover c from c^q using c = (c^q)^q since q^2 = 1 mod (2^n - 1)
                     c_val = cq**q
                     b_val = (c1 + a_val**q * c_val) / a_val
                     if b_val == F(0):
@@ -672,6 +681,7 @@ def membership_family_12(n, poly):
                 if c1 == F(0) or c2 == F(0):
                     continue
                 c3 = terms.get(e3, F(0))
+                # a^(q-1) = c1^q / c2, recover a via (q-1)-th roots
                 try:
                     all_roots = (c1**q / c2).nth_root(q - 1, all=True)
                 except ValueError:
@@ -748,18 +758,25 @@ def membership_family_13(n, poly):
     for s_val in range(1, m + 1):
         if gcd(s_val, m) != 1:
             continue
+        
+        # L(x) = x^(2^(m+s)) + mu*x^(2^s) + x
+        # P = 2^(2m+s),  Q = 2^(m+s),  Rp = 2^m,  B = 2^s
+        P = 2**(2*m + s_val)
+        Q = 2**(m + s_val)
+        Rp = 2**m
+        B = 2**s_val
 
-        P, Q, Rp, B = 2**(2*m + s_val), 2**(m + s_val), 2**m, 2**s_val
-
-        ePQ = (P + Q) % (2**n - 1)
-        ePB = (P + B) % (2**n - 1)
-        eP1 = (P + 1) % (2**n - 1)
-        e2Q = (2 * Q) % (2**n - 1)
-        eQB = (Q + B) % (2**n - 1)
-        eQ1 = (Q + 1) % (2**n - 1)
-        eRQ = (Rp + Q) % (2**n - 1)
-        eRB = (Rp + B) % (2**n - 1)
-        eR1 = (Rp + 1) % (2**n - 1)
+        # The nine exponents of the expanded f, reduced modulo 2^n - 1
+        # L(x)^(2^m) = x^P + mu^(2^m)*x^Q + x^Rp, L(x) = x^Q + mu*x^B + x
+        ePQ = (P + Q) % (2**n - 1)      # x^P * x^Q
+        ePB = (P + B) % (2**n - 1)      # x^P * mu*x^B
+        eP1 = (P + 1) % (2**n - 1)      # x^P * x
+        e2Q = (2 * Q) % (2**n - 1)      # mu^q*x^Q * x^Q
+        eQB = (Q + B) % (2**n - 1)      # x^Q * mu*x^B
+        eQ1 = (Q + 1) % (2**n - 1)      # mu^q*x^Q * x
+        eRQ = (Rp + Q) % (2**n - 1)     # x^Rp * x^Q
+        eRB = (Rp + B) % (2**n - 1)     # x^Rp * mu*x^B
+        eR1 = (Rp + 1) % (2**n - 1)     # x^Rp * x + v*x^(Rp + 1)
 
         expected = {ePQ, ePB, eP1, e2Q, eQB, eQ1, eRQ, eRB, eR1}
         if not set(terms).issubset(expected):
@@ -774,6 +791,7 @@ def membership_family_13(n, poly):
             continue
         if terms.get(eRB, F(0)) != mu_val:
             continue
+
         mu_q = mu_val**(2**m)
         if terms.get(e2Q, F(0)) != mu_q or terms.get(eQ1, F(0)) != mu_q:
             continue
@@ -788,7 +806,7 @@ def membership_family_13(n, poly):
         if mu_val**(2**(2*m) + 2**m + 1) == F(1):
             continue
 
-        # L permutes F
+        # A linearized polynomial L permutes GF(2^n) if it has no nonzero roots, equivalently if gcd(L(x), x^(2^n) - x) = x in the polynomial ring.
         L = x**(2**(m + s_val)) + mu_val*x**(2**s_val) + x
         if L.gcd(x**(2**n) - x) != x:
             continue
@@ -805,7 +823,7 @@ FAMILIES = {
     "Family 4": membership_family_4,
     "Family 5": membership_family_5,
     "Family 6": membership_family_6,
-    "Family 7-9": membership_family_7_9,
+    "Families 7-9": membership_family_7_9,
     "Family 11": membership_family_11,
     "Family 12": membership_family_12,
     "Family 13": membership_family_13

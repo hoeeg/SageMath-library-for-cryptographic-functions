@@ -67,6 +67,7 @@ def family12_s_candidates(F, i_val, b_val, c_val):
     if term**q == term:
         s.append(n - i_val)
     
+    # All remaining cases requires that b is not a cube
     if is_cube(F, b_val):
         return list(set(s))
 
